@@ -745,6 +745,32 @@ protected:
             );
 
         }
+        if(IsAula()) {
+            std::vector<NamedValue> displayClrPreset = {
+                NamedValue("Do Not Override", AulaDisplayColorMode_DoNotOverride),
+                NamedValue("Basic", AulaDisplayColorMode_Basic),
+                NamedValue("Saturated", AulaDisplayColorMode_Saturated),
+                NamedValue("Washed", AulaDisplayColorMode_Washed),
+                NamedValue("Natural", AulaDisplayColorMode_Natural),
+                NamedValue("Vivid", AulaDisplayColorMode_Vivid),
+                NamedValue("Washed", AulaDisplayColorMode_Night0, "Night"),
+                NamedValue("Basic", AulaDisplayColorMode_Night1, "Night"),
+                NamedValue("Natural", AulaDisplayColorMode_Night2, "Night"),
+                NamedValue("Vivid", AulaDisplayColorMode_Night3, "Night"),
+            };
+
+            addConfigButton(
+                HocClkConfigValue_AulaDisplayColorPreset,
+                "Display Color Preset",
+                ValueRange(0, 1, 1, "", 0),
+                "Display Color Preset",
+                &thresholdsDisabled,
+                {},
+                displayClrPreset,
+                false,
+                false
+            );
+        }
     }
 };
 
@@ -836,32 +862,6 @@ protected:
                 {},
                 false
             );
-        } else {
-            std::vector<NamedValue> displayClrPreset = {
-                NamedValue("Базовый", AulaDisplayColorMode_Basic),
-                NamedValue("Перенасыщенный", AulaDisplayColorMode_Saturated),
-                NamedValue("Приглушённый", AulaDisplayColorMode_Washed),
-                NamedValue("Естественный", AulaDisplayColorMode_Natural),
-                NamedValue("Яркий", AulaDisplayColorMode_Vivid),
-                NamedValue("Приглушённый", AulaDisplayColorMode_Night0, "Ночь"),
-                NamedValue("Базовый", AulaDisplayColorMode_Night1, "Ночь"),
-                NamedValue("Естественный", AulaDisplayColorMode_Night2, "Ночь"),
-                NamedValue("Яркий", AulaDisplayColorMode_Night3, "Ночь"),
-            };
-
-            addConfigButton(
-                HocClkConfigValue_AulaDisplayColorPreset,
-                "Цветовой режим OLED",
-                ValueRange(0, 1, 1, "", 0),
-                "Цветовой режим OLED",
-                &thresholdsDisabled,
-                {},
-                displayClrPreset,
-                false,
-                false
-            );
-
-            
         }
     }
 };
