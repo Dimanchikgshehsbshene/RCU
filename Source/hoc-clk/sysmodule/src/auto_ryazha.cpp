@@ -1,3 +1,4 @@
+#include "board/board_sensor.hpp"
 /*
  * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
  *
