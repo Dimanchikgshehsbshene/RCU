@@ -1,62 +1,58 @@
-# Makefile for hocclk sysmodule
+# Makefile for sysmodule
 
-TITLE_ID   := 00FF0000636C6BFF
-TARGET     := hocclk
-BUILD      := build
-SOURCES    := src/auto_ryazha.cpp src/i2c/i2cDrv.cpp src/main.cpp src/i2c/i2c.c
-INCLUDES   := -Isrc -Isrc/common
-CXXFLAGS   := $(INCLUDES) -Wall -Wno-psabi
-CFLAGS     := $(INCLUDES) -Wall -Wno-psabi
+# Compiler settings
+CXX = g++
+CC = gcc
+AS = as
+LD = ld
 
-#------------------------------------------------------------------------------
-# Library name
-#------------------------------------------------------------------------------
-LIBNAME    := libhocclk.a
+# Target info
+TARGET = sysmodule
+TITLE_ID = 00FF0000636C6BFF
 
-#------------------------------------------------------------------------------
-# Object files
-#------------------------------------------------------------------------------
-OBJS       := $(SOURCES:.cpp=.o) $(SOURCES:.c=.o)
+# Directories
+SRC_DIR = src
+BUILD_DIR = build
+DIST_DIR = $(ROOT_DIR)/dist
 
-#------------------------------------------------------------------------------
-# Flags for libnx sysmodules
-#------------------------------------------------------------------------------
-CXXFLAGS   += -D__switch__ -march=armv8-a+simd -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=initial-exec
-CFLAGS     += -D__switch__ -march=armv8-a+simd -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=initial-exec
+# Include paths - critical for finding headers
+INCLUDES = -I$(SRC_DIR) \
+           -I$(SRC_DIR)/i2c \
+           -I$(SRC_DIR)/board \
+           -I$(ROOT_DIR)/common \
+           -I$(ROOT_DIR)/lib/hocclk/include \
+           -I$(DEVKITPRO)/libnx/include \
+           -I$(DEVKITPRO)/libnx/include/nintendo\
 
-#------------------------------------------------------------------------------
 # Libraries
-#------------------------------------------------------------------------------
-LIBS       := -lnx
+LIBS = -lnx
 
-#------------------------------------------------------------------------------
-# Build rules
-#------------------------------------------------------------------------------
+# Source files
+CPP_SRCS = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/i2c/*.cpp)
+C_SRCS = $(wildcard $(SRC_DIR)/i2c/*.c)
+
+# Object files
+CPP_OBJS = $(CPP_SRCS:$(SRC_DIR)/%=%.o)
+C_OBJS = $(C_SRCS:$(SRC_DIR)/%=%.o)
+OBJS = $(CPP_OBJS) $(C_OBJS)
+
+# Compiler flags
+CXXFLAGS = -O2 -Wall -Werror -std=c++17 $(INCLUDES)
+CFLAGS = -O2 -Wall -Werror $(INCLUDES)
+LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs $(LIBS)
+
 .PHONY: all clean
 
-all: $(BUILD)/$(TARGET).nsp
+all: $(TARGET)
 
-$(BUILD)/$(TARGET).nsp: $(BUILD)/$(LIBNAME)
-	@echo "Creating NSP..."
-	@mkdir -p $(BUILD)/romfs
-	@cp $(BUILD)/$(LIBNAME) $(BUILD)/romfs/lib/
-	@nxrofs $(BUILD)/romfs $(BUILD)/
-	@nacptool -c "$(TITLE_ID)" -t "$(TARGET)" -A "RCU" -v 1 -o $(BUILD)/control.nacp
-	@nelfstool -v2 -z -o $(BUILD)/$(TARGET).nso -e $(BUILD)/$(LIBNAME) -C $(BUILD)/control.nacp
-	@nstool -c $(BUILD)/$(TARGET).nsp -n $(TARGET) -A "$(TARGET)" -h 0 -v 0 -p $(BUILD)/$(TARGET).nso $(BUILD)/control.nacp
-
-$(BUILD)/$(LIBNAME): $(OBJS)
-	@echo "Linking library..."
-	@$(AR) rcs $@ $(OBJS)
+$(TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^
 
 %.o: %.cpp
-	@echo "Compiling C++: $<"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o: %.c
-	@echo "Compiling C: $<"
-	@$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	@echo "Cleaning..."
-	@rm -rf $(BUILD) $(OBJS)
+	rm -f $(OBJS) $(TARGET)
