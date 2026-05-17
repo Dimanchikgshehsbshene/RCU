@@ -2,26 +2,32 @@
 
 #include <cstdint>
 #include <string>
-
-#include "../common/include/common.hpp"
+#include "common/common.hpp"
 
 namespace board {
 
 class BoardSensor {
 public:
-    BoardSensor() = default;
-    ~BoardSensor() = default;
+    BoardSensor();
+    ~BoardSensor();
 
-    bool Initialize();
-    float GetTemperature() const;
-    float GetVoltage() const;
-    float GetCurrent() const;
+    bool initialize();
+    void shutdown();
+
+    float getTemperature() const;
+    float getVoltage() const;
+    float getCurrent() const;
+
+    std::string getBoardName() const;
+    std::string getBoardVersion() const;
 
 private:
-    bool initialized_ = false;
-    float temperature_ = 0.0f;
-    float voltage_ = 0.0f;
-    float current_ = 0.0f;
+    bool initialized_;
+    float temperature_;
+    float voltage_;
+    float current_;
+    std::string board_name_;
+    std::string board_version_;
 };
 
 } // namespace board
