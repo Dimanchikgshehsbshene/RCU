@@ -11,11 +11,29 @@ REPO = os.getenv("GITHUB_REPOSITORY")
 RUN_ID = os.getenv("FAILED_RUN_ID")
 REF = os.getenv("GITHUB_REF_NAME")
 
-# List of models to try in order (Fallback mechanism)
+# Comprehensive list of models to try in order (Fallback mechanism)
+# Mix of state-of-the-art paid models and reliable free models
 MODELS = [
+    # --- Top Tier (Paid/Premium) ---
+    "anthropic/claude-3.5-sonnet",
+    "openai/gpt-4o",
+    "meta-llama/llama-3.1-405b-instruct",
+    "google/gemini-pro-1.5",
+    "deepseek/deepseek-chat",
+    
+    # --- High Performance (Fast & Smart) ---
+    "anthropic/claude-3-haiku",
+    "openai/gpt-4o-mini",
+    "google/gemini-flash-1.5",
+    
+    # --- Reliable Free Models ---
     "google/gemini-2.0-flash-exp:free",
     "mistralai/mistral-7b-instruct:free",
     "google/gemma-7b-it:free",
+    "qwen/qwen-2-72b-instruct:free",
+    "meta-llama/llama-3.1-70b-instruct:free",
+    
+    # --- Final Fallback ---
     "openrouter/auto"
 ]
 
@@ -66,7 +84,8 @@ def ask_ai(model, prompt, system_prompt):
         data = response.json()
         
         if "choices" not in data:
-            print(f"⚠️ Model {model} failed. API Error Response: {json.dumps(data, indent=2)}")
+            error_msg = data.get("error", {}).get("message", "Unknown error")
+            print(f"⚠️ Model {model} failed. Error: {error_msg}")
             return None
             
         return data["choices"][0]["message"]["content"]
