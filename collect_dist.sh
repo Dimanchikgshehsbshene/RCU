@@ -22,6 +22,7 @@ rm -rf "$DIST_ROOT"
 mkdir -p "$DIST_ROOT/atmosphere/kips"
 mkdir -p "$DIST_ROOT/atmosphere/contents"
 mkdir -p "$DIST_ROOT/switch/.overlays"
+mkdir -p "$DIST_ROOT/switch/overlays"
 mkdir -p "$DIST_ROOT/config/ryazha-clk"
 
 # 2. Сборка лоадера (rcu.kip)
@@ -55,6 +56,7 @@ echo -e "${YELLOW}--- Сборка ryazha-clk overlay ---${NC}"
 pushd Source/ryazha-clk/overlay > /dev/null
 make clean && make -j$(nproc)
 cp out/ryazha-clk.ovl "$DIST_ROOT/switch/.overlays/ryazha-clk.ovl"
+cp out/ryazha-clk.ovl "$DIST_ROOT/switch/overlays/ryazha-clk.ovl"
 popd > /dev/null
 echo -e "${GREEN}Оверлей ryazha-clk собран.${NC}"
 

@@ -1,12 +1,22 @@
-Horizon OC Zeus Compilation Instructions
+# Сборка RCU (под текущую структуру репозитория)
 
-1. Install devkitpro (https://devkitpro.org/wiki/Getting_Started) with switch-dev
-2. Set up a development enviorment for compiling Atmosphere (https://github.com/Atmosphere-NX/Atmosphere/blob/master/docs/building.md)
-3. Install GNU make and ENSURE THAT YOUR ENVIORMENT HAS A PYTHON3 COMMAND AVAILABLE!
-4. Git clone atmosphere (git clone https://github.com/Atmosphere-NX/Atmosphere.git)
-5. Clone the Horizon OC develop branch (git clone -b develop --single-branch https://github.com/Horizon-OC/Horizon-OC.git)
-6. Create a new folder named "build" in the horizon oc repo
-7. Copy atmosphere files into that build folder
-8. Copy Source/Atmosphere/stratosphere/loader/source/ldr_process_creation.cpp to build/stratosphere/loader/source/ldr_process_creation.cpp, replacing any files if prompted
-9. Grab a copy of libultrahand (https://github.com/ppkantorski/libultrahand) and place it into Source/sys-clk/overlay/lib/libultrahand
-10. Run ./build.sh in the root directory
+## Рекомендуемый способ (как в CI)
+1. Установите devkitPro (devkitA64/devkitARM), `make`, `python3`, `hactool`.
+2. Клонируйте репозиторий и инициализируйте сабмодули:
+   - `git clone --recursive <repo-url>`
+3. Запустите GitHub Actions workflow `.github/workflows/build.yml` **или** повторите его шаги локально.
+
+## Локальная сборка через скрипт
+- Основной скрипт: `./collect_dist.sh`
+- Результат: `dist/`
+
+Скрипт собирает:
+- `rcu.kip` в `dist/atmosphere/kips/`
+- `ryazha-clk` sysmodule в `dist/atmosphere/contents/<TITLE_ID>/`
+- overlay в:
+  - `dist/switch/.overlays/ryazha-clk.ovl`
+  - `dist/switch/overlays/ryazha-clk.ovl` (для интеграций, где hidden-пути фильтруются)
+
+## Важно
+- Для сборки лоадера нужна подготовленная папка `build/stratosphere/loader`.
+- Версия Atmosphere берётся из `ams_ver.txt` в CI-конвейере.

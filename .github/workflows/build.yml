@@ -57,6 +57,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/dist/atmosphere/kips"
           mkdir -p "$GITHUB_WORKSPACE/dist/atmosphere/contents"
           mkdir -p "$GITHUB_WORKSPACE/dist/switch/.overlays"
+          mkdir -p "$GITHUB_WORKSPACE/dist/switch/overlays"
           mkdir -p "$GITHUB_WORKSPACE/dist/config/ryazha-clk"
           echo $SHORT_SHA > "$GITHUB_WORKSPACE/dist/.commit"
           echo $GITHUB_SHA >> "$GITHUB_WORKSPACE/dist/.commit"
@@ -143,10 +144,15 @@ jobs:
           popd
 
           mkdir -p "$DIST_DIR/switch/.overlays"
+          mkdir -p "$DIST_DIR/switch/overlays"
 
           cp -vf \
             "$ROOT_DIR/overlay/out/ryazha-clk.ovl" \
             "$DIST_DIR/switch/.overlays/ryazha-clk.ovl"
+
+          cp -vf \
+            "$ROOT_DIR/overlay/out/ryazha-clk.ovl" \
+            "$DIST_DIR/switch/overlays/ryazha-clk.ovl"
 
           echo "*** assets ***"
 
@@ -206,3 +212,4 @@ jobs:
           name: ryazha-clk-dist
           path: dist/
           compression-level: 3
+          include-hidden-files: true
