@@ -140,7 +140,7 @@ volatile CustomizeTable C = {
 
 .commonGpuVoltOffset = 0,
 
-/* Speedo is automatically set by hoc-clk on first boot */
+/* Speedo is automatically set by ryazha-clk on first boot */
 .gpuSpeedo = 1450,
 
 /* Setting DEACTIVATED_GPU_FREQ on any freq will disable it and all freqs greater than it. (the latter is a bug :/) */

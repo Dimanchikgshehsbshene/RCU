@@ -152,8 +152,8 @@ Refer to COMPILATION.md
 ## Credits
 * **Lightos's Cat** - Cat
 
-* **Souldbminer** - hoc-clk and loader development
-* **Lightos** - Loader patches development, hoc-clk development, guides
+* **Souldbminer** - ryazha-clk and loader development
+* **Lightos** - Loader patches development, ryazha-clk development, guides
 * **TDRR** - HOC Logo Design
 * **SciresM** - Atmosphere CFW
 * **CTCaer** - L4T, Hekate, proper RAM timings

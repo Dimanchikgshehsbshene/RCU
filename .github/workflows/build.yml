@@ -15,7 +15,7 @@ jobs:
       image: devkitpro/devkita64:20251231
 
     steps:
-      - name: Checkout repository and submodules # needed for hoc-clk
+      - name: Checkout repository and submodules # needed for ryazha-clk
         uses: actions/checkout@v6.0.2
         with:
           submodules: recursive
@@ -94,13 +94,13 @@ jobs:
           make -j$(($(nproc) * 4)) install CXX="ccache aarch64-none-elf-g++" CC="ccache aarch64-none-elf-gcc"
           popd
 
-      - name: Build hoc-clk sysmodule and overlay
+      - name: Build ryazha-clk sysmodule and overlay
         shell: bash
         run: |
           export CC="ccache aarch64-none-elf-gcc"
           export CXX="ccache aarch64-none-elf-g++"
 
-          ROOT_DIR="$GITHUB_WORKSPACE/Source/hoc-clk"
+          ROOT_DIR="$GITHUB_WORKSPACE/Source/ryazha-clk"
           DIST_DIR="$ROOT_DIR/dist"
           
           mkdir -p "$DIST_DIR"
@@ -120,7 +120,7 @@ jobs:
           mkdir -p "$DIST_DIR/atmosphere/contents/$TITLE_ID/flags"
 
           cp -vf \
-            "$ROOT_DIR/sysmodule/out/hoc-clk.nsp" \
+            "$ROOT_DIR/sysmodule/out/ryazha-clk.nsp" \
             "$DIST_DIR/atmosphere/contents/$TITLE_ID/exefs.nsp"
 
           : >"$DIST_DIR/atmosphere/contents/$TITLE_ID/flags/boot2.flag"
@@ -143,11 +143,11 @@ jobs:
 
           echo "*** assets ***"
 
-          mkdir -p "$DIST_DIR/config/ryazha-clk"
+          mkdir -p "$DIST_DIR/config/ryazhahand"
 
           cp -vf \
             "$ROOT_DIR/config.ini.template" \
-            "$DIST_DIR/config/ryazha-clk/config.ini.template"
+            "$DIST_DIR/config/ryazhahand/config.ini.template"
 
           cp -vf \
             "$ROOT_DIR/README.md" \
@@ -171,6 +171,6 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
-          name: horizon-oc-zeus-dist
+          name: ryazha-clk-dist
           path: dist/
           compression-level: 3
