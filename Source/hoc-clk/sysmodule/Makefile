@@ -1,136 +1,62 @@
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-endif
+# Makefile for hocclk sysmodule
 
-TOPDIR ?= $(CURDIR)
-include $(DEVKITPRO)/libnx/switch_rules
+TITLE_ID   := 00FF0000636C6BFF
+TARGET     := hocclk
+BUILD      := build
+SOURCES    := src/auto_ryazha.cpp src/i2c/i2cDrv.cpp src/main.cpp src/i2c/i2c.c
+INCLUDES   := -Isrc -Isrc/common
+CXXFLAGS   := $(INCLUDES) -Wall -Wno-psabi
+CFLAGS     := $(INCLUDES) -Wall -Wno-psabi
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-# ROMFS is the directory containing RomFS data (Optional)
-#---------------------------------------------------------------------------------
-TARGET		:=	$(notdir $(CURDIR))
-BUILD		:=	build
-SOURCES		:=	src src/i2c src/hid src/usb
-DATA		:=	data
-INCLUDES	:=	include src src/i2c src/hid src/usb
-ROMFS		:=	romfs
+#------------------------------------------------------------------------------
+# Library name
+#------------------------------------------------------------------------------
+LIBNAME    := libhocclk.a
 
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-ARCH		:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+#------------------------------------------------------------------------------
+# Object files
+#------------------------------------------------------------------------------
+OBJS       := $(SOURCES:.cpp=.o) $(SOURCES:.c=.o)
 
-CFLAGS		:=	-g -Wall -O2 -ffunction-sections \
-				$(ARCH)
+#------------------------------------------------------------------------------
+# Flags for libnx sysmodules
+#------------------------------------------------------------------------------
+CXXFLAGS   += -D__switch__ -march=armv8-a+simd -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=initial-exec
+CFLAGS     += -D__switch__ -march=armv8-a+simd -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=initial-exec
 
-CFLAGS		+=	$(INCLUDE) -D__SWITCH__ -D__RTLD_6XX__
+#------------------------------------------------------------------------------
+# Libraries
+#------------------------------------------------------------------------------
+LIBS       := -lnx
 
-CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++20
+#------------------------------------------------------------------------------
+# Build rules
+#------------------------------------------------------------------------------
+.PHONY: all clean
 
-ASFLAGS		:=	-g $(ARCH)
-LDFLAGS		= 	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+all: $(BUILD)/$(TARGET).nsp
 
-LIBS		:= 	-lnx
+$(BUILD)/$(TARGET).nsp: $(BUILD)/$(LIBNAME)
+	@echo "Creating NSP..."
+	@mkdir -p $(BUILD)/romfs
+	@cp $(BUILD)/$(LIBNAME) $(BUILD)/romfs/lib/
+	@nxrofs $(BUILD)/romfs $(BUILD)/
+	@nacptool -c "$(TITLE_ID)" -t "$(TARGET)" -A "RCU" -v 1 -o $(BUILD)/control.nacp
+	@nelfstool -v2 -z -o $(BUILD)/$(TARGET).nso -e $(BUILD)/$(LIBNAME) -C $(BUILD)/control.nacp
+	@nstool -c $(BUILD)/$(TARGET).nsp -n $(TARGET) -A "$(TARGET)" -h 0 -v 0 -p $(BUILD)/$(TARGET).nso $(BUILD)/control.nacp
 
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:= $(LIBNX)
+$(BUILD)/$(LIBNAME): $(OBJS)
+	@echo "Linking library..."
+	@$(AR) rcs $@ $(OBJS)
 
-#---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#---------------------------------------------------------------------------------
-ifneq ($(BUILD),$(notdir $(CURDIR)))
+%.o: %.cpp
+	@echo "Compiling C++: $<"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
-#---------------------------------------------------------------------------------
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
-export TOPDIR	:=	$(CURDIR)
+%.o: %.c
+	@echo "Compiling C: $<"
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-				$(foreach dir,$(DATA),$(CURDIR)/$(dir))
-
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
-
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
-
-export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
-export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-export OFILES		:=	$(OFILES_BIN) $(OFILES_SRC)
-export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
-
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-				$(foreach dir,$(LIBDIRS),-I$(dir)/include)
-
-export LIBPATHS	:= $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-.PHONY: $(BUILD) clean all
-
-#---------------------------------------------------------------------------------
-$(BUILD):
-#---------------------------------------------------------------------------------
-	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-
-#---------------------------------------------------------------------------------
-all: $(BUILD)
-#---------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------
 clean:
-#---------------------------------------------------------------------------------
-	@rm -fr $(BUILD) $(TARGET).nso $(TARGET).npdm $(TARGET).elf
-
-#---------------------------------------------------------------------------------
-else
-.PHONY: all
-
-DEPENDS	:= $(OFILES:.o=.d)
-
-#---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-all: $(OUTPUT).nso $(OUTPUT).npdm
-
-$(OUTPUT).nso: $(OUTPUT).elf $(OUTPUT).npdm
-
-$(OUTPUT).elf: $(OFILES)
-
-$(OFILES_SRC): $(HFILES_BIN)
-
-#---------------------------------------------------------------------------------
-# you need a rule like this for each extension you use as binary data
-#---------------------------------------------------------------------------------
-%.bin.o %_bin.h : %.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@$(bin2o)
-
--include $(DEPENDS)
-
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
+	@echo "Cleaning..."
+	@rm -rf $(BUILD) $(OBJS)
