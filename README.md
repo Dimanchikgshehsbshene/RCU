@@ -1,173 +1,90 @@
+# RCU (Ryazha Clock Utility)
 
-<div align="center">
+RCU is an open-source overclocking tool for Nintendo Switch consoles running Atmosphere custom firmware. It enables advanced CPU, GPU, and RAM tuning with integrated configuration tools.
 
-<img src="assets/logo.png" alt="logo" width="768"/>
-
----
-
-![License: GPL-2.0](https://img.shields.io/badge/GPL--2.0-red?style=for-the-badge)
-![Nintendo Switch](https://img.shields.io/badge/Nintendo_Switch-E60012?style=for-the-badge\&logo=nintendo-switch\&logoColor=white)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge\&logo=discord\&logoColor=white)](https://dsc.gg/horizonoc)
-![VSCode](https://img.shields.io/badge/VSCode-0078D4?style=for-the-badge\&logo=visual%20studio%20code\&logoColor=white)
-![Made with Notepad++](assets/np++.png?raw=true)
-![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge\&logo=c%2B%2B\&logoColor=white)
-![Downloads](https://img.shields.io/github/downloads/souldbminersmwc/Horizon-OC/total.svg?style=for-the-badge)
-
----
-
-</div>
-
-## ⚠️ Disclaimer
-
+## Disclaimer
 > **THIS TOOL CAN BE DANGEROUS IF MISUSED. PROCEED WITH CAUTION.**
-> Due to the design of Horizon OS, **overclocking RAM can cause NAND OR SD CORRUPTION.**
-> Ensure you have a **full NAND, PROINFO, EMUMMC and SD backup** before proceeding.
-
----
+> Due to the design of Horizon OS, overclocking RAM can cause NAND or SD corruption.
+> Ensure you have a full NAND, PROINFO, EMUMMC, and SD backup before proceeding.
 
 ## About
+RCU provides a comprehensive suite for performance tuning on the Nintendo Switch. It is designed to work seamlessly with Atmosphere and offers granular control over system clocks and voltages.
 
-**Horizon OC** is an open-source overclocking tool for Nintendo Switch consoles running **Atmosphere custom firmware**.
-It enables advanced CPU, GPU, and RAM tuning with user-friendly configuration tools.
-
----
-
-## Default clocks
-
+## Default Clocks
 * **CPU:** Up to 1963MHz (Mariko) / 1785MHz (Erista)
 * **GPU:** Up to 1075MHz (Mariko) / 921MHz (Erista)
 * **RAM:** Up to 1866/2133MHz (Mariko) / 1600MHz (Erista)
-* Over/undervolting support
+* Overvolting and undervolting support
 * Built-in configurator
-* Compatible with most homebrew
-
-> It is recommended to read the [guide](https://rentry.co/howtoget60fps) before proceeding, as this can help you get a *significant* performance boost over the default settings, often times with less power draw and heat output
-
----
+* Compatible with most homebrew applications
 
 ## Installation
-
-1. Ensure you have the latest versions of
-
-   * [Atmosphere](https://github.com/Atmosphere-NX/Atmosphere)
-   * [Ultrahand Overlay](https://github.com/ppkantorski/Ultrahand-Overlay)
-2. Download and extract the **Horizon OC Package** to the root of your SD card.
-3. If using **Hekate**, edit `hekate_ipl.ini` to include:
-
+1. Ensure you have the latest versions of Atmosphere and Ultrahand Overlay.
+2. Download and extract the RCU package to the root of your SD card.
+3. If using Hekate, edit `hekate_ipl.ini` to include:
    ```
    kip1=atmosphere/kips/rcu.kip
    ```
-
-   *(No changes needed if using fusee.)*
-
----
+   No changes are needed if using fusee.
 
 ## Configuration
-
-1. Open the Horizon OC Overlay
-2. Open the settings menu
-3. Adjust your overclocking settings as desired. A helpful guide can be found [here.](https://rentry.co/mariko#oc-settings-for-horizon-oc)
-4. Click **Save KIP Settings** to apply your configuration.
-
----
+1. Open the RCU Overlay.
+2. Navigate to the settings menu.
+3. Adjust your overclocking settings as desired.
+4. Select "Save KIP Settings" to apply your configuration.
 
 ## Building from Source
+Refer to COMPILING.md for detailed build instructions.
 
-Refer to COMPILATION.md
+## Clock Table
 
----
-## Clock table
+### MEM Clocks (MHz)
+* 3200: Max on Mariko, JEDEC.
+* 2933: JEDEC.
+* 2666: JEDEC.
+* 2400: Max on Erista, JEDEC.
+* 2133: Mariko JEDEC standard max (4266 Modules).
+* 1996: JEDEC standard.
+* 1866: Mariko JEDEC standard max (3733 Modules).
+* 1600: Official docked, boost mode, Erista safe max, JEDEC.
+* 1331: Official handheld, JEDEC.
+* 1065, 800, 665.
 
-### MEM clocks (mhz)
-* 3200 → max on mariko, JEDEC.
-* 2933 → JEDEC.
-* 2666 → JEDEC.
-* 2400 → max on erista, JEDEC.
-* 2133 → Mariko JEDEC standard max (4266 Modules)
-* 1996 → JEDEC standard
-* 1866 → Mariko JEDEC standard max (3733 Modules)
-* 1600 → official docked, boost mode, erista safe max, JEDEC.
-* 1331 → official handheld, JEDEC.
-* 1065
-* 800
-* 665
+### CPU Clocks (MHz)
+* 2703: Mariko absolute max (dangerous).
+* 2601: Unsafe.
+* 2499, 2397, 2295, 2193, 2091.
+* 1963: Mariko no UV max clock.
+* 1887.
+* 1785: Erista no UV max clock, boost mode.
+* 1683, 1581, 1428, 1326, 1224, 1122.
+* 1020: Official docked and handheld.
+* 918, 816, 714, 612.
 
-### CPU clocks (mhz)
-* 2703 → mariko absolute max, dangerous
-* 2601 → unsafe
-* 2499
-* 2397 → mariko safe max with UV (low speedo)
-* 2295
-* 2193
-* 2091
-* 1963 → mariko no UV max clock
-* 1887
-* 1785 → erista no UV max clock, boost mode
-* 1683
-* 1581
-* 1428
-* 1326
-* 1224 → sdev oc
-* 1122
-* 1020 → official docked & handheld
-* 918
-* 816
-* 714
-* 612 → sleep mode
-
-### GPU clocks (mhz)
-* 1536 → absolute max clock on mariko. very dangerous
-* 1459
-* 1382
-* 1305
-* 1267 → NVIDIA T214(mariko) rating
-* 1228 → mariko HiOPT safe clock
-* 1152 → mariko SLT max clock
-* 1075 → mariko no UV max clock. absolute max clock on erista. very dangerous
-* 998 → NVIDIA T210 (erista) rating
-* 960 (erista only) → erista slt/hiopt safe max clock
-* 921 → erista no UV max clock
-* 844
-* 768 → official docked
-* 691
-* 614
-* 537
-* 460 → max handheld
-* 384 → official handheld
-* 307 → official handheld
-* 230
-* 153
-* 76 → boost mode
-
-**Notes:**
-1. On Erista, CPU in handheld is capped to 1581MHz
-2. GPU overclock is capped at 460MHz on erista in handheld
-3. On Mariko, cap with No uv is 614MHz, with SLT it is 691MHz and with HiOPT it's 768MHz
-4. Clocks higher than 768MHz on erista need the official charger is plugged in.
-5. On Mariko, cap with No uv is 844MHz, with SLT it is 921MHz and with HiOPT it's 998MHz
-
-
----
+### GPU Clocks (MHz)
+* 1536: Absolute max clock on Mariko (very dangerous).
+* 1459, 1382, 1305.
+* 1267: NVIDIA T214 (Mariko) rating.
+* 1228: Mariko HiOPT safe clock.
+* 1152: Mariko SLT max clock.
+* 1075: Mariko no UV max clock; absolute max on Erista (very dangerous).
+* 998: NVIDIA T210 (Erista) rating.
+* 960: Erista SLT/HiOPT safe max clock.
+* 921: Erista no UV max clock.
+* 844, 768, 691, 614, 537, 460, 384, 307, 230, 153, 76.
 
 ## Credits
-* **Lightos's Cat** - Cat
-
 * **Souldbminer** - ryazha-clk and loader development
 * **Lightos** - Loader patches development, ryazha-clk development, guides
-* **TDRR** - HOC Logo Design
 * **SciresM** - Atmosphere CFW
 * **CTCaer** - L4T, Hekate, proper RAM timings
 * **KazushiMe** - Switch OC Suite
 * **Hanai3bi (Meha)** - Switch OC Suite, EOS, sys-clk-eos
 * **NaGaa95** - L4T-OC kernel, Status Monitor fork
 * **B3711 (halop)** - EOS
-* **sys-clk team (m4xw, p-sam, natinusala)** - sys-clk
+* **sys-clk team** - sys-clk
 * **Dominatorul** - Soctherm driver, guides, general help
-* **ppkantorski** - Ultrahand sys-clk & Status Monitor fork
+* **ppkantorski** - Ultrahand sys-clk and Status Monitor fork
 * **MasaGratoR and ZachyCatGames** - General help
-* **MasaGratoR** - Status Monitor & Display Refresh Rate driver
-* **Dominatorul, Samybigio, Arcdelta, Miki, Happy, tetetete-ctrl, Winnerboi77, Blaise, Alvise, TDRR, agjeococh, frost, letum00, and Xenshen** - Testing
-* **Samybigio2011, Miki** - Italian translations
-* **angelblaster** - Korean translations
-* **q1332348216-glitch** - Chinese translations
-* **Nvidia** - [Tegra X1 Technical Reference Manual](https://developer.nvidia.com/embedded/dlc/tegra-x1-technical-reference-manual), soctherm driver, L4T
+* **MasaGratoR** - Status Monitor and Display Refresh Rate driver
+* **Nvidia** - Tegra X1 Technical Reference Manual, soctherm driver, L4T
