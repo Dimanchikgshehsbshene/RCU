@@ -2,88 +2,34 @@
 #include <string.h>
 #include <stdio.h>
 
-// Service manager handle
-static Service g_serv;
-static Handle g_hdl;
+// Service implementation for the sysmodule
+static Service g_hocClkSrv;
+static Handle g_hocClkEvent = INVALID_HANDLE;
 
-// Forward declarations
-static Result serviceInit(void);
-static void serviceExit(void);
-static Result serviceDispatch(void);
+// Example command handler
+static Result HocClk_Cmd(IpcParsedCommand* r) {
+    // Handle commands here
+    return 0;
+}
 
-int main(int argc, char **argv)
-{
-    Result rc;
-    
-    // Initialize services
-    rc = serviceInit();
-    if (R_FAILED(rc)) {
-        // Failed to initialize, but we still need to return
-        // so the process doesn't crash
-        return 0;
-    }
-    
-    // Main service loop
+void __appInit(void) {
+    // Initialize services here
+    smInitialize();
+    // Add other service initialization as needed
+}
+
+void __appExit(void) {
+    // Cleanup services here
+    smExit();
+}
+
+// Main entry point for the sysmodule
+int main(int argc, char* argv[]) {
+    // Main loop for the sysmodule
     while (true) {
-        rc = serviceDispatch();
-        if (R_FAILED(rc)) {
-            break;
-        }
-    }
-    
-    // Cleanup
-    serviceExit();
-    
-    return 0;
-}
-
-static Result serviceInit(void)
-{
-    Result rc = 0;
-    
-    // Initialize the service
-    rc = smGetService(&g_serv, "clk");
-    if (R_FAILED(rc)) {
-        // Try to register the service
-        rc = smRegisterService(&g_hdl, "clk", false, 1);
-        if (R_FAILED(rc)) {
-            return rc;
-        }
+        // Handle events and requests
+        svcSleepThread(1000000000ULL); // Sleep for 1 second
     }
     
     return 0;
-}
-
-static void serviceExit(void)
-{
-    serviceClose(&g_serv);
-    if (g_hdl != INVALID_HANDLE) {
-        smUnregisterService(g_hdl);
-        svcCloseHandle(g_hdl);
-        g_hdl = INVALID_HANDLE;
-    }
-}
-
-static Result serviceDispatch(void)
-{
-    Result rc = 0;
-    u32 *cmdbuf = armGetThreadCommandBuffer();
-    
-    // Handle IPC commands
-    u32 cmd_id = cmdbuf[0] >> 16;
-    
-    switch (cmd_id) {
-        case 0:
-            // Example command handler
-            cmdbuf[0] = MAKERESULT(RL_SUCCESS, RS_SUCCESS, 0, 0);
-            cmdbuf[1] = 0;
-            break;
-            
-        default:
-            cmdbuf[0] = MAKERESULT(RL_SUCCESS, RS_SUCCESS, 0, 0);
-            cmdbuf[1] = 0;
-            break;
-    }
-    
-    return rc;
 }
