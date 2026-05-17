@@ -370,6 +370,7 @@ void ApplyVrr(const HocClkLadderConfig& cfg, bool fpsKnown, u8 fps) {
 
     u8 lo = cfg.vrrMinHz ? cfg.vrrMinHz : 40;
     u8 hi = cfg.vrrMaxHz ? cfg.vrrMaxHz : 60;
+    hi = std::min<u8>(hi, PanelMaxHz());
     // OLED panel behaves poorly below 43 Hz in practice; hard-clamp VRR floor.
     if (board::GetConsoleType() == HocClkConsoleType_Aula) {
         lo = std::max<u8>(lo, 43);

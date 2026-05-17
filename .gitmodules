@@ -1,3 +1,7 @@
 [submodule "Source/SaltyNX"]
 	path = Source/SaltyNX
 	url = https://github.com/masagrator/SaltyNX.git
+
+[submodule "Source/Ryazha-Status-Monitor"]
+	path = Source/Ryazha-Status-Monitor
+	url = https://github.com/Dimasick-git/Ryazha-Status-Monitor.git

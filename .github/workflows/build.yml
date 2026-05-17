@@ -148,6 +148,7 @@ jobs:
             "$ROOT_DIR/overlay/out/ryazha-clk.ovl" \
             "$DIST_DIR/switch/.overlays/ryazha-clk.ovl"
 
+
           echo "*** assets ***"
 
           mkdir -p "$DIST_DIR/config/ryazha-clk"
@@ -173,6 +174,25 @@ jobs:
             cp -rvf sdcard_out/. "$DIST_DIR/"
           fi
           popd
+
+
+      - name: Build Ryazha-Status-Monitor
+        shell: bash
+        run: |
+          export CC="ccache aarch64-none-elf-gcc"
+          export CXX="ccache aarch64-none-elf-g++"
+          DIST_DIR="$GITHUB_WORKSPACE/dist"
+          if [ -d "Source/Ryazha-Status-Monitor" ]; then
+            pushd Source/Ryazha-Status-Monitor
+            if [ -f Makefile ]; then
+              make -j$(($(nproc) * 2))
+            fi
+            if [ -f Ryazha-Status-Monitor.ovl ]; then
+              mkdir -p "$DIST_DIR/switch/.overlays"
+              cp -vf Ryazha-Status-Monitor.ovl "$DIST_DIR/switch/.overlays/Ryazha-Status-Monitor.ovl"
+            fi
+            popd
+          fi
 
       - name: Build kip
         working-directory: build/stratosphere/loader
@@ -206,3 +226,4 @@ jobs:
           name: ryazha-clk-dist
           path: dist/
           compression-level: 3
+          include-hidden-files: true

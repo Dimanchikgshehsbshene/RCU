@@ -21,6 +21,7 @@ RCU предоставляет полный набор инструментов 
 ## Установка
 1. Убедитесь, что у вас установлены последние версии Atmosphere и Ultrahand Overlay.
 2. Скачайте и распакуйте пакет RCU в корень вашей SD-карты.
+   Overlay после сборки находится в `switch/.overlays/ryazha-clk.ovl`.
 3. Если вы используете Hekate, отредактируйте `hekate_ipl.ini`, добавив строку:
    ```
    kip1=atmosphere/kips/rcu.kip
