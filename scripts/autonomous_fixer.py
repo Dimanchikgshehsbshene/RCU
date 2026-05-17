@@ -92,6 +92,29 @@ def ask_ai(model, prompt, system_prompt):
         print(f"❌ Request failed for {model}: {str(e)}")
         return None
 
+
+
+def trigger_build():
+    if not REPO or not REF or not GITHUB_TOKEN:
+        print("⚠️ Skipping build trigger: missing REPO/REF/GITHUB_TOKEN.")
+        return
+
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+    url = f"https://api.github.com/repos/{REPO}/actions/workflows/build.yml/dispatches"
+    payload = {"ref": REF}
+
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        if response.status_code == 204:
+            print(f"✅ Build workflow started for branch: {REF}")
+        else:
+            print(f"⚠️ Failed to start build workflow ({response.status_code}): {response.text}")
+    except Exception as e:
+        print(f"⚠️ Error while starting build workflow: {str(e)}")
+
 def sanitize_path(path):
     """
     Sanitizes the path provided by AI to prevent PermissionError and ensure it stays within the repo.
@@ -165,7 +188,7 @@ def main():
                 
             run_command(f'git config --global user.name "AI Autonomous Fixer"')
             run_command(f'git config --global user.email "ai-fixer@manus.im"')
-            run_command(f"git add {target_file}")
+            run_command(f"git add \"{target_file}\"")
             run_command(f'git commit -m "AI Autonomous Fix: {explanation}"')
             
             remote_url = f"https://x-access-token:{GITHUB_TOKEN}@github.com/{REPO}.git"
@@ -174,6 +197,7 @@ def main():
             
             if code == 0:
                 print("✅ Successfully pushed fix to branch!")
+                trigger_build()
             else:
                 print(f"❌ Failed to push: {stderr}")
         except Exception as e:
