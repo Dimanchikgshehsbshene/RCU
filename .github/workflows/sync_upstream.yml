@@ -1,0 +1,68 @@
+name: Sync with Upstream (Filtered)
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Запуск каждый день в полночь
+  workflow_dispatch: # Возможность ручного запуска
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout RCU
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream
+        run: |
+          git remote add upstream https://github.com/Horizon-OC/Horizon-OC.git
+          git fetch upstream main
+
+      - name: Sync and Filter Commits
+        run: |
+          # Получаем список новых коммитов из upstream/main, которых нет в локальной ветке main
+          NEW_COMMITS=$(git log main..upstream/main --oneline --format="%H" --reverse)
+          if [ -z "$NEW_COMMITS" ]; then
+            echo "No new commits to sync."
+            exit 0
+          fi
+          
+          for commit in $NEW_COMMITS; do
+            COMMIT_MSG=$(git log -1 --format="%s" $commit)
+            
+            # 1. Проверяем сообщение коммита на запрещенные слова
+            if echo "$COMMIT_MSG" | grep -qiE "ryazha-авто|vrr"; then
+              echo "Skipping commit $commit: $COMMIT_MSG (matches exclusion filter)"
+              continue
+            fi
+            
+            # 2. Проверяем изменения в файлах
+            FILES_CHANGED=$(git show --name-only --format="" $commit)
+            
+            # Исключаем если затронуты файлы с vrr, ryazha-авто или папка Source/Horizon-OC-Monitor
+            if echo "$FILES_CHANGED" | grep -qiE "vrr|ryazha-авто|Source/Horizon-OC-Monitor"; then
+              echo "Skipping commit $commit: $COMMIT_MSG (contains excluded files or paths)"
+              continue
+            fi
+            
+            echo "Applying commit $commit: $COMMIT_MSG"
+            # Используем cherry-pick для переноса коммита
+            if ! git cherry-pick $commit; then
+              echo "Conflict detected for $commit. Skipping..."
+              git cherry-pick --abort
+            fi
+          done
+
+      - name: Push Changes
+        run: |
+          git push origin main
