@@ -72,15 +72,12 @@ jobs:
 
       - name: Commit submodule update
         if: steps.saltynx_info.outputs.up_to_date == 'false'
+        env:
+          COMMIT_LOG: ${{ steps.commits.outputs.commit_log }}
         run: |
           OLD_SHORT=$(echo "${{ steps.saltynx_info.outputs.current_sha }}" | cut -c1-7)
           NEW_SHORT=$(echo "${{ steps.saltynx_info.outputs.latest_sha }}" | cut -c1-7)
-          git commit -m "chore(saltynx): update submodule ${OLD_SHORT}..${NEW_SHORT}
-
-Upstream commits from masagrator/SaltyNX:
-${{ steps.commits.outputs.commit_log }}
-
-Source: https://github.com/masagrator/SaltyNX/compare/${OLD_SHORT}...${NEW_SHORT}"
+          git commit -m "chore(saltynx): update submodule ${OLD_SHORT}..${NEW_SHORT}" -m "Upstream commits from masagrator/SaltyNX: ${COMMIT_LOG} | Source: https://github.com/masagrator/SaltyNX/compare/${OLD_SHORT}...${NEW_SHORT}"
 
       - name: Push changes
         if: steps.saltynx_info.outputs.up_to_date == 'false'
