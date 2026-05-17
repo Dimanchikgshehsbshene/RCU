@@ -85,9 +85,17 @@ void MainGui::listUI()
     });
     this->listElement->addItem(globalOverrideItem);
 
-    // Пункт Ryazha-Авто специально скрыт из списка — открывается только кнопкой X (см. handleInput).
+    tsl::elm::ListItem* ryazhaItem = new tsl::elm::ListItem("Ryazha-Авто");
+    ryazhaItem->setClickListener([this](u64 keys) {
+        if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
+        {
+            tsl::changeTo<LivingLadderGui>();
+            return true;
+        }
 
-    //this->listElement->addItem(new tsl::elm::CategoryHeader("Misc"));
+        return false;
+    });
+    this->listElement->addItem(ryazhaItem);
 
     tsl::elm::ListItem* miscItem = new tsl::elm::ListItem("Настройки");
     miscItem->setClickListener([this](u64 keys) {
