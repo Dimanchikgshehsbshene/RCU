@@ -1,58 +1,159 @@
-TARGET := sysmodule
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+endif
 
-# Directories
-SOURCE_DIR := source
-BUILD_DIR := build
-LIBTRANSISTOR_DIR := lib/libtransistor
+TOPDIR ?= $(CURDIR)
+include $(DEVKITPRO)/libnx/switch_rules
 
-# Toolchain
-TRIPLE := aarch64-none-elf
-CC := $(TRIPLE)-gcc
-CXX := $(TRIPLE)-g++
-LD := $(TRIPLE)-gcc
-AS := $(TRIPLE)-as
-OBJCOPY := $(TRIPLE)-objcopy
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+# ROMFS is the directory containing RomFS data (Optional)
+#---------------------------------------------------------------------------------
+TARGET		:=	$(notdir $(CURDIR))
+BUILD		:=
+build
+SOURCES		:=	source
+DATA		:=	data
+INCLUDES	:=	include
 
-# Flags
-CFLAGS := -O2 -g -Wall -Wextra -std=c11 -I$(SOURCE_DIR) -I$(LIBTRANSISTOR_DIR)/include -D__SWITCH__
-CXXFLAGS := -O2 -g -Wall -Wextra -std=c++17 -I$(SOURCE_DIR) -I$(LIBTRANSISTOR_DIR)/include -D__SWITCH__
-LDFLAGS := -nostdlib -L$(LIBTRANSISTOR_DIR)/build -ltr -lgcc
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+ARCH		:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-# Source files
-C_SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
-CXX_SOURCES := $(wildcard $(SOURCE_DIR)/*.cpp)
+CFLAGS		:=	-g -Wall -O2 -ffunction-sections $(ARCH) $(DEFINES)
 
-# Object files
-C_OBJECTS := $(patsubst $(SOURCE_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
-CXX_OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(CXX_SOURCES))
-OBJECTS := $(C_OBJECTS) $(CXX_OBJECTS)
+CFLAGS		+=	$(INCLUDE) -D__SWITCH__
 
-# Output
-ELF_OUTPUT := $(BUILD_DIR)/$(TARGET).elf
-NRO_OUTPUT := $(BUILD_DIR)/$(TARGET).nro
-NSP_OUTPUT := out/hoc-clk.nsp
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 
-.PHONY: all clean
+ASFLAGS		:=	-g $(ARCH)
+LDFLAGS		= -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-all: $(NSP_OUTPUT)
+LIBS		:= -lnx
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:= $(LIBNX)
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
+ifneq ($(BUILD),$(notdir $(CURDIR)))
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+export OUTPUT	:= $(CURDIR)/$(TARGET)
+export TOPDIR	:= $(CURDIR)
 
-$(ELF_OUTPUT): $(OBJECTS)
-	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
+export VPATH	:= $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+				 $(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
-$(NSP_OUTPUT): $(ELF_OUTPUT)
-	mkdir -p out
-	$(OBJCOPY) -O binary $(ELF_OUTPUT) $(BUILD_DIR)/$(TARGET).bin
-	# Package into NSP (simplified - adjust as needed for your build system)
-	touch $(NSP_OUTPUT)
+export DEPSDIR	:= $(CURDIR)/$(BUILD)
 
+CFILES		:= $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:= $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+SFILES		:= $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+BINFILES	:= $(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
+
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+	export LD := $(CC)
+else
+	export LD := $(CXX)
+endif
+#---------------------------------------------------------------------------------
+
+export OFILES_BIN := $(addsuffix .o,$(BINFILES))
+export OFILES_SRC := $(OFILES_BIN) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES := $(OFILES_SRC)
+export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
+
+export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+				-I$(CURDIR)/$(BUILD)
+
+export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+.PHONY: $(BUILD) clean all
+
+#---------------------------------------------------------------------------------
+all: $(BUILD)
+
+$(BUILD):
+	@mkdir -p $@
+
+#---------------------------------------------------------------------------------
 clean:
-	rm -rf $(BUILD_DIR) out
+	@echo clean ...
+	@rm -fr $(BUILD) $(TARGET).nso $(TARGET).nro $(TARGET).elf
+
+#---------------------------------------------------------------------------------
+else
+.PHONY: all
+
+DEPENDS	:= $(OFILES:.o=.d)
+
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+all : $(OUTPUT).elf $(OUTPUT).nso $(OUTPUT).nro
+
+$(OUTPUT).elf: $(OFILES)
+
+$(OUTPUT).nso: $(OUTPUT).elf
+
+$(OUTPUT).nro: $(OUTPUT).nso
+
+$(OFILES_SRC): $(HFILES)
+
+#---------------------------------------------------------------------------------
+# you need a rule like this for each extension you use as binary data
+#---------------------------------------------------------------------------------
+%.bin.o %_bin.h : %.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+-include $(DEPENDS)
+
+#---------------------------------------------------------------------------------
+%.o: %.c
+	@echo $(notdir $<)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(PIPEERR)
+
+#---------------------------------------------------------------------------------
+%.o: %.cpp
+	@echo $(notdir $<)
+	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(PIPEERR)
+
+#---------------------------------------------------------------------------------
+%.o: %.s
+	@echo $(notdir $<)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(ASFLAGS) -c $< -o $@
+
+#---------------------------------------------------------------------------------
+$(OUTPUT).elf : $(OFILES)
+	@echo linking $(notdir $@)
+	@$(LD) $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+
+#---------------------------------------------------------------------------------
+$(OUTPUT).nso : $(OUTPUT).elf
+	@echo built ... $(notdir $@)
+	@elf2nso $< $@
+
+#---------------------------------------------------------------------------------
+$(OUTPUT).nro : $(OUTPUT).nso
+	@echo built ... $(notdir $@)
+	@elf2nro $< $@ $(APP_TITLE) $(APP_AUTHOR) $(APP_VERSION) --icon=$(APP_ICON) --nacp=$*.nacp
+
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
