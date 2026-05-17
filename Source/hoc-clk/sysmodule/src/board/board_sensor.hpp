@@ -1,12 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <cstring>
-#include <functional>
 #include <string>
-#include <vector>
 
-#include "common.hpp"
+#include "../common/include/common.hpp"
 
 namespace board {
 
@@ -16,15 +13,15 @@ public:
     ~BoardSensor() = default;
 
     bool Initialize();
-    void Update();
-    void Shutdown();
-
-    float GetTemperature() const { return m_temperature; }
-    float GetFanSpeed() const { return m_fan_speed; }
+    float GetTemperature() const;
+    float GetVoltage() const;
+    float GetCurrent() const;
 
 private:
-    float m_temperature{0.0f};
-    float m_fan_speed{0.0f};
+    bool initialized_ = false;
+    float temperature_ = 0.0f;
+    float voltage_ = 0.0f;
+    float current_ = 0.0f;
 };
 
 } // namespace board
