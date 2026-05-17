@@ -11,20 +11,26 @@ REPO = os.getenv("GITHUB_REPOSITORY")
 RUN_ID = os.getenv("FAILED_RUN_ID")
 REF = os.getenv("GITHUB_REF_NAME")
 
-# 2026 CUTTING EDGE FREE MODELS LIST
-# Focused on high-intelligence, large context, and coding capabilities.
+# REORDERED MODELS: From Smartest/Heavy to Most Guaranteed/Stable
 MODELS = [
-    "openrouter/owl-alpha",                   # High-performance agentic model (free)
-    "nvidia/nemotron-3-super-120b-a12b:free", # Massive 120B MoE model (free)
-    "poolside/laguna-m.1:free",               # Specialized coding agent model (free)
-    "openai/gpt-oss-120b:free",               # OpenAI's open-weight reasoning model (free)
-    "z-ai/glm-4.5-air:free",                  # GLM 4.5 Air variant (free)
-    "deepseek/deepseek-v4-flash:free",        # DeepSeek's latest fast & smart model (free)
-    "meta-llama/llama-3.3-70b-instruct:free", # The latest Llama 3.3 (free)
-    "google/gemini-2.0-flash-exp:free",       # Gemini 2.0 Flash (free)
-    "qwen/qwen-2.5-72b-instruct:free",        # Qwen 2.5 72B (free)
-    "google/gemma-2-27b-it:free",             # Gemma 2 27B (free)
-    "openrouter/free"                         # Global fallback to any free model
+    # --- The Intellectual Giants (Smartest) ---
+    "meta-llama/llama-3.3-70b-instruct:free", # Top tier reasoning
+    "qwen/qwen-2.5-72b-instruct:free",        # Coding beast
+    "nvidia/nemotron-3-super-120b-a12b:free", # Massive MoE intelligence
+    "openai/gpt-oss-120b:free",               # High-reasoning open weights
+    "z-ai/glm-4.5-air:free",                  # Strong general intelligence
+    
+    # --- High-Performance Fast Models ---
+    "google/gemini-2.0-flash-exp:free",       # Fast & very capable
+    "deepseek/deepseek-v4-flash:free",        # Latest DeepSeek speed & smarts
+    "google/gemma-2-27b-it:free",             # Google's high-efficiency model
+    
+    # --- Specialized Coding & Agentic Models ---
+    "poolside/laguna-m.1:free",               # Specialized for coding
+    
+    # --- Most Guaranteed / Final Fallbacks ---
+    "openrouter/owl-alpha",                   # Reliable agentic fallback
+    "openrouter/free"                         # Ultimate fallback
 ]
 
 def run_command(command, cwd=None):
