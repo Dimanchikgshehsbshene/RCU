@@ -17,6 +17,6 @@ hactool -t kip1 out/nintendo_nx_arm64_armv8a/release/loader.kip --uncompress=rcu
 cd ../../../ # exit
 cp build/stratosphere/loader/rcu.kip dist/atmosphere/kips/rcu.kip
 
-# Сборка ryazha-clk и подготовка dist
+# Полная сборка всех компонентов из исходников
 ./collect_dist.sh
 
