@@ -11,12 +11,10 @@ include $(DEVKITPRO)/libnx/switch_rules
 # SOURCES is a list of directories containing source code
 # DATA is a list of directories containing data files
 # INCLUDES is a list of directories containing header files
-# ROMFS is the directory containing RomFS data (Optional)
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
-BUILD		:=
-build
-SOURCES		:=	source
+BUILD		:=	src
+SOURCES		:=	src
 DATA		:=	data
 INCLUDES	:=	include
 
@@ -25,11 +23,11 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH		:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS		:=	-g -Wall -O2 -ffunction-sections $(ARCH) $(DEFINES)
+CFLAGS		:=	-g -Wall -O2 -ffunction-sections $(ARCH) $(DEFINES) $(INCLUDE)
 
-CFLAGS		+=	$(INCLUDE) -D__SWITCH__
+CFLAGS		+=	$(INCLUDE) -D__SWITCH__ -D__RTLD_SHARED__ -D__NX__
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
+CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++20
 
 ASFLAGS		:=	-g $(ARCH)
 LDFLAGS		= -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
@@ -48,111 +46,74 @@ LIBDIRS	:= $(LIBNX)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 
+#---------------------------------------------------------------------------------
 export OUTPUT	:= $(CURDIR)/$(TARGET)
 export TOPDIR	:= $(CURDIR)
 
 export VPATH	:= $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-				 $(foreach dir,$(DATA),$(CURDIR)/$(dir))
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR	:= $(CURDIR)/$(BUILD)
 
-CFILES		:= $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:= $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:= $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:= $(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.bin)))
+CFILES		:= $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.c))
+CPPFILES	:= $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.cpp))
+SFILES		:= $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.s))
+BINFILES	:= $(foreach dir,$(DATA), $(wildcard $(dir)/*.bin))
 
 #---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
+# use CXX linking if there are C++ files, otherwise use CC
 #---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-	export LD := $(CC)
-else
+ifneq ($(strip $(CPPFILES)),)
 	export LD := $(CXX)
+else
+	export LD := $(CC)
 endif
-#---------------------------------------------------------------------------------
 
-export OFILES_BIN := $(addsuffix .o,$(BINFILES))
-export OFILES_SRC := $(OFILES_BIN) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-export OFILES := $(OFILES_SRC)
-export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
+export OFILES_BIN	:= $(addsuffix .o,$(BINFILES))
+export OFILES_SRC	:= $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES		:= $(OFILES_BIN) $(OFILES_SRC)
+export HFILES_BIN	:= $(addsuffix .h,$(BINFILES))
 
-export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-				-I$(CURDIR)/$(BUILD)
+export INCLUDE	:= $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD)
 
-export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+export LIBPATHS	:= $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
+$(BUILD):
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+
+clean:
+	@rm -fr $(BUILD) $(TARGET).nso $(TARGET).nsp $(TARGET).elf
+
 all: $(BUILD)
 
-$(BUILD):
-	@mkdir -p $@
-
-#---------------------------------------------------------------------------------
-clean:
-	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).nso $(TARGET).nro $(TARGET).elf
-
-#---------------------------------------------------------------------------------
 else
-.PHONY: all
 
 DEPENDS	:= $(OFILES:.o=.d)
 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all : $(OUTPUT).elf $(OUTPUT).nso $(OUTPUT).nro
+$(TARGET).nsp: $(TARGET).nso
 
-$(OUTPUT).elf: $(OFILES)
+$(TARGET).nso: $(TARGET).elf
 
-$(OUTPUT).nso: $(OUTPUT).elf
-
-$(OUTPUT).nro: $(OUTPUT).nso
-
-$(OFILES_SRC): $(HFILES)
+$(TARGET).elf: $(OFILES)
 
 #---------------------------------------------------------------------------------
-# you need a rule like this for each extension you use as binary data
+# you need a rule like this for each extension used as binary data
 #---------------------------------------------------------------------------------
-%.bin.o %_bin.h : %.bin
+%.bin.o %_bin.h: %.bin
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
 
 -include $(DEPENDS)
-
-#---------------------------------------------------------------------------------
-%.o: %.c
-	@echo $(notdir $<)
-	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(PIPEERR)
-
-#---------------------------------------------------------------------------------
-%.o: %.cpp
-	@echo $(notdir $<)
-	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(PIPEERR)
-
-#---------------------------------------------------------------------------------
-%.o: %.s
-	@echo $(notdir $<)
-	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(ASFLAGS) -c $< -o $@
-
-#---------------------------------------------------------------------------------
-$(OUTPUT).elf : $(OFILES)
-	@echo linking $(notdir $@)
-	@$(LD) $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
-
-#---------------------------------------------------------------------------------
-$(OUTPUT).nso : $(OUTPUT).elf
-	@echo built ... $(notdir $@)
-	@elf2nso $< $@
-
-#---------------------------------------------------------------------------------
-$(OUTPUT).nro : $(OUTPUT).nso
-	@echo built ... $(notdir $@)
-	@elf2nro $< $@ $(APP_TITLE) $(APP_AUTHOR) $(APP_VERSION) --icon=$(APP_ICON) --nacp=$*.nacp
 
 #---------------------------------------------------------------------------------
 endif
