@@ -1,0 +1,89 @@
+name: Sync SaltyNX from Upstream
+
+on:
+  schedule:
+    # Каждый день в 03:00 UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout RCU
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get current and latest SaltyNX commit
+        id: saltynx_info
+        run: |
+          cd Source/SaltyNX
+          CURRENT_SHA=$(git rev-parse HEAD)
+          git fetch origin master
+          LATEST_SHA=$(git rev-parse origin/master)
+          echo "current_sha=$CURRENT_SHA" >> $GITHUB_OUTPUT
+          echo "latest_sha=$LATEST_SHA" >> $GITHUB_OUTPUT
+          if [ "$CURRENT_SHA" = "$LATEST_SHA" ]; then
+            echo "up_to_date=true" >> $GITHUB_OUTPUT
+          else
+            echo "up_to_date=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip if already up to date
+        if: steps.saltynx_info.outputs.up_to_date == 'true'
+        run: |
+          echo "SaltyNX submodule is already up to date ($(echo ${{ steps.saltynx_info.outputs.current_sha }} | cut -c1-7)). Nothing to do."
+
+      - name: Collect new upstream commits
+        if: steps.saltynx_info.outputs.up_to_date == 'false'
+        id: commits
+        run: |
+          cd Source/SaltyNX
+          # Список новых коммитов от текущего до последнего
+          COMMIT_LOG=$(git log ${{ steps.saltynx_info.outputs.current_sha }}..${{ steps.saltynx_info.outputs.latest_sha }} \
+            --oneline --no-decorate --reverse)
+          echo "New commits from masagrator/SaltyNX:"
+          echo "$COMMIT_LOG"
+          # Сохраняем для тела коммита
+          {
+            echo 'commit_log<<SALTYNX_EOF'
+            echo "$COMMIT_LOG"
+            echo 'SALTYNX_EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Update SaltyNX submodule to latest
+        if: steps.saltynx_info.outputs.up_to_date == 'false'
+        run: |
+          cd Source/SaltyNX
+          git checkout origin/master
+          cd ../..
+          git add Source/SaltyNX
+
+      - name: Commit submodule update
+        if: steps.saltynx_info.outputs.up_to_date == 'false'
+        env:
+          COMMIT_LOG: ${{ steps.commits.outputs.commit_log }}
+          OLD_SHA: ${{ steps.saltynx_info.outputs.current_sha }}
+          NEW_SHA: ${{ steps.saltynx_info.outputs.latest_sha }}
+        run: |
+          OLD_SHORT=$(echo "$OLD_SHA" | cut -c1-7)
+          NEW_SHORT=$(echo "$NEW_SHA" | cut -c1-7)
+          MESSAGE="chore(saltynx): update submodule ${OLD_SHORT}..${NEW_SHORT}"
+          BODY="Upstream commits from masagrator/SaltyNX: ${COMMIT_LOG} | Source: https://github.com/masagrator/SaltyNX/compare/${OLD_SHORT}...${NEW_SHORT}"
+          git commit -m "$MESSAGE" -m "$BODY"
+
+      - name: Push changes
+        if: steps.saltynx_info.outputs.up_to_date == 'false'
+        run: |
+          git push origin HEAD

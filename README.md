@@ -1,215 +1,93 @@
+# RCU (Ryazha Clock Utility)
 
-<div align="center">
+RCU — это инструмент с открытым исходным кодом для разгона консолей Nintendo Switch под управлением кастомной прошивки Atmosphere. Он позволяет выполнять продвинутую настройку CPU, GPU и RAM с помощью интегрированных инструментов конфигурации.
 
-<img src="assets/logo.png" alt="logo" width="768"/>
+## Дисклеймер
+> **ЭТОТ ИНСТРУМЕНТ МОЖЕТ БЫТЬ ОПАСЕН ПРИ НЕПРАВИЛЬНОМ ИСПОЛЬЗОВАНИИ. ДЕЙСТВУЙТЕ С ОСТОРОЖНОСТЬЮ.**
+> Из-за особенностей дизайна Horizon OS, разгон оперативной памяти может привести к повреждению данных на NAND или SD-карте.
+> Перед началом работы убедитесь, что у вас есть полные резервные копии (бэкапы) NAND, PROINFO, EMUMMC и SD-карты.
 
----
+## О проекте
+RCU предоставляет комплексный набор функций для настройки производительности Nintendo Switch. Он разработан для бесшовной работы с Atmosphere и предлагает детальный контроль над частотами и напряжениями системы.
 
-![License: GPL-2.0](https://img.shields.io/badge/GPL--2.0-red?style=for-the-badge)
-![Nintendo Switch](https://img.shields.io/badge/Nintendo_Switch-E60012?style=for-the-badge\&logo=nintendo-switch\&logoColor=white)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge\&logo=discord\&logoColor=white)](https://dsc.gg/horizonoc)
-![VSCode](https://img.shields.io/badge/VSCode-0078D4?style=for-the-badge\&logo=visual%20studio%20code\&logoColor=white)
-![Made with Notepad++](assets/np++.png?raw=true)
-![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge\&logo=c%2B%2B\&logoColor=white)
-![Downloads](https://img.shields.io/github/downloads/Horizon-OC/Horizon-OC/total.svg?style=for-the-badge)
+## Стандартные частоты
+* **CPU:** До 1963 МГц (Mariko) / 1785 МГц (Erista)
+* **GPU:** До 1075 МГц (Mariko) / 921 МГц (Erista)
+* **RAM:** До 1866/2133 МГц (Mariko) / 1600 МГц (Erista)
+* Поддержка повышения (overvolting) и понижения (undervolting) напряжения
+* Встроенный конфигуратор
+* Совместимость с большинством homebrew-приложений
 
----
-
-</div>
-
-## ⚠️ Disclaimer
-
-> **THIS TOOL CAN BE DANGEROUS IF MISUSED. PROCEED WITH CAUTION.**
-> Due to the design of Horizon OS, **overclocking RAM can cause NAND OR SD CORRUPTION.**
-> Ensure you have a **full NAND, PROINFO, EMUMMC and SD backup** before proceeding.
-
----
-
-## About
-
-**Horizon OC** is an open-source overclocking tool for Nintendo Switch consoles running **Atmosphere custom firmware**.
-It enables advanced CPU, GPU, and RAM tuning with user-friendly configuration tools.
-
----
-
-## Default clocks
-
-* **CPU:** Up to 1963MHz (Mariko) / 1785MHz (Erista)
-* **GPU:** Up to 1075MHz (Mariko) / 921MHz (Erista)
-* **RAM:** Up to 1866/2133MHz (Mariko) / 1600MHz (Erista)
-* Over/undervolting support
-* Built-in configurator
-* Compatible with most homebrew
-
-> It is recommended to read the [guide](https://rentry.co/howtoget60fps) before proceeding, as this can help you get a *significant* performance boost over the default settings, often times with less power draw and heat output
-
----
-
-## Installation
-
-1. Ensure you have the latest versions of
-
-   * [Atmosphere](https://github.com/Atmosphere-NX/Atmosphere)
-   * [Ultrahand Overlay](https://github.com/ppkantorski/Ultrahand-Overlay)
-2. Download and extract the **Horizon OC Package** to the root of your SD card.
-3. If using **Hekate**, edit `hekate_ipl.ini` to include:
-
+## Установка
+1. Убедитесь, что у вас установлены последние версии Atmosphere и Ultrahand Overlay.
+2. Скачайте и распакуйте пакет RCU в корень вашей SD-карты.
+   В сборке overlay дублируется в `switch/.overlays/ryazha-clk.ovl` и `switch/overlays/ryazha-clk.ovl` для совместимости с разными лаунчерами/интеграциями.
+3. Если вы используете Hekate, отредактируйте `hekate_ipl.ini`, добавив строку:
    ```
    kip1=atmosphere/kips/rcu.kip
    ```
+   При использовании fusee никаких изменений не требуется.
 
-   *(No changes needed if using fusee.)*
+## Конфигурация
+1. Откройте оверлей RCU.
+2. Перейдите в меню настроек.
+3. Отрегулируйте параметры разгона по вашему желанию.
+4. Выберите "Save KIP Settings", чтобы применить конфигурацию.
 
----
+## Сборка из исходного кода
+Подробные инструкции по сборке приведены в файле `COMPILING.md`.
 
-## Configuration
+Также актуальный CI-конвейер находится в `.github/workflows/build.yml`.
 
-1. Open the Horizon OC Overlay
-2. Open the settings menu
-3. Adjust your overclocking settings as desired. A helpful guide can be found [here.](https://rentry.co/mariko#oc-settings-for-horizon-oc)
-4. Click **Save KIP Settings** to apply your configuration.
+## Таблица частот
 
----
+### Частоты оперативной памяти (MEM Clocks, МГц)
+* 3200: Максимум на Mariko, JEDEC.
+* 2933: JEDEC.
+* 2666: JEDEC.
+* 2400: Максимум на Erista, JEDEC.
+* 2133: Стандартный максимум Mariko JEDEC (модули 4266).
+* 1996: Стандарт JEDEC.
+* 1866: Стандартный максимум Mariko JEDEC (модули 3733).
+* 1600: Официальный режим док-станции, boost mode, безопасный максимум Erista, JEDEC.
+* 1331: Официальный портативный режим, JEDEC.
+* 1065, 800, 665.
 
-## Building from Source
+### Частоты процессора (CPU Clocks, МГц)
+* 2703: Абсолютный максимум Mariko (опасно).
+* 2601: Небезопасно.
+* 2499, 2397, 2295, 2193, 2091.
+* 1963: Максимальная частота Mariko без понижения напряжения (UV).
+* 1887.
+* 1785: Максимальная частота Erista без понижения напряжения (UV), boost mode.
+* 1683, 1581, 1428, 1326, 1224, 1122.
+* 1020: Официальный режим в доке и портативе.
+* 918, 816, 714, 612.
 
-Refer to COMPILATION.md
+### Частоты графического ядра (GPU Clocks, МГц)
+* 1536: Абсолютный максимум на Mariko (очень опасно).
+* 1459, 1382, 1305.
+* 1267: Номинал NVIDIA T214 (Mariko).
+* 1228: Безопасная частота Mariko HiOPT.
+* 1152: Максимальная частота Mariko SLT.
+* 1075: Максимальная частота Mariko без UV; абсолютный максимум на Erista (очень опасно).
+* 998: Номинал NVIDIA T210 (Erista).
+* 960: Безопасный максимум Erista SLT/HiOPT.
+* 921: Максимальная частота Erista без UV.
+* 844, 768, 691, 614, 537, 460, 384, 307, 230, 153, 76.
 
----
-## Clock table
-
-### MEM clocks (mhz)
-
-* 3200 → max on mariko, JEDEC.
-* 3166
-* 3133
-* 3100
-* 3066
-* 3033
-* 3000
-* 2966
-* 2933 → JEDEC.
-* 2900
-* 2866
-* 2833
-* 2800
-* 2766
-* 2733
-* 2700
-* 2666 → JEDEC.
-* 2633
-* 2600
-* 2566
-* 2533
-* 2500
-* 2466
-* 2433
-* 2400 → max on erista, JEDEC.
-* 2366
-* 2333
-* 2300
-* 2266
-* 2233
-* 2200
-* 2166
-* 2133 → Mariko JEDEC standard max (4266 Modules)
-* 2100
-* 2066
-* 2033
-* 2000
-* 1996 → JEDEC standard
-* 1966
-* 1933
-* 1900
-* 1866 → Mariko JEDEC standard max (3733 Modules)
-* 1833
-* 1800
-* 1766
-* 1733
-* 1700
-* 1666
-* 1633
-* 1600 → official docked, boost mode, Erista JEDEC standard max (3200 Modules), JEDEC.
-* 1331 → official handheld, JEDEC.
-* 1065
-* 800
-* 665
-
-### CPU clocks (mhz)
-* 2703 → mariko absolute max, dangerous
-* 2601 → unsafe
-* 2499
-* 2397 → mariko safe max with UV (low speedo)
-* 2295
-* 2193
-* 2091
-* 1963 → mariko no UV max clock
-* 1887
-* 1785 → erista no UV max clock, boost mode
-* 1683
-* 1581
-* 1428
-* 1326
-* 1224 → sdev oc
-* 1122
-* 1020 → official docked & handheld
-* 918
-* 816
-* 714
-* 612 → sleep mode
-
-### GPU clocks (mhz)
-* 1536 → absolute max clock on mariko. very dangerous
-* 1459
-* 1382
-* 1305
-* 1267 → NVIDIA T214(mariko) rating
-* 1228 → mariko High UV safe clock
-* 1152 → mariko hiOpt-15mV max clock
-* 1075 → mariko hiOpt max clock. absolute max clock on erista. very dangerous
-* 998 → NVIDIA T210 (erista) rating
-* 960 (erista only) → erista high uv/hiOpt-15mV safe max clock
-* 921 → erista no UV max clock
-* 844
-* 768 → official docked
-* 691
-* 614
-* 537
-* 460 → max handheld
-* 384 → official handheld
-* 307 → official handheld
-* 230
-* 153
-* 76 → boost mode
-
-**Notes:**
-1. On Erista, CPU in handheld is capped to 1581MHz
-2. GPU overclock is capped at 460MHz on erista in handheld
-3. On Mariko, cap with hiOpt is 614MHz, with hiOpt-15mV it is 691MHz and with High UV it's 768MHz
-4. Clocks higher than 768MHz on erista need the official charger is plugged in.
-
----
-
-## Credits
-* **Lightos's Cat** - Cat
-* **Souldbminer** - hoc-clk and loader development
-* **Lightos** - Loader patches development, hoc-clk development, guides
-* **TDRR** - HOC Logo Design
-* **tetetete-ctrl** - Website design
-* **SciresM** - Atmosphere CFW
-* **CTCaer** - L4T, Hekate, proper RAM timings
-* **KazushiMe** - Switch OC Suite
-* **Hanai3bi (Meha)** - Switch OC Suite, EOS, sys-clk-eos
-* **NaGaa95** - L4T-OC kernel, Status Monitor fork
-* **B3711 (halop)** - EOS, contributions
-* **sys-clk team (m4xw, p-sam, natinusala)** - sys-clk
-* **Dominatorul** - Soctherm driver, guides, general help
-* **ppkantorski** - Ultrahand sys-clk & Status Monitor fork
-* **MasaGratoR and ZachyCatGames** - General help
-* **MasaGratoR** - Status Monitor & Display Refresh Rate driver
-* **Dominatorul, Samybigio, Arcdelta, Miki, Happy, Winnerboi77, Blaise, Alvise, agjeococh, frost, letum00, and Xenshen** - Testing
-* **Samybigio2011, Miki** - Italian translations
-* **angelblaster** - Korean translations
-* **q1332348216-glitch** - Chinese translations
-* **th3-ne0undr5c0r** - French translations
-* **Nvidia** - [Tegra X1 Technical Reference Manual](https://developer.nvidia.com/embedded/dlc/tegra-x1-technical-reference-manual), soctherm driver, L4T
+## Авторы и благодарности
+* **Souldbminer** — разработка hoc-clk и loader
+* **Lightos** — разработка патчей лоадера, разработка ryazha-clk, руководства
+* **SciresM** — Atmosphere CFW
+* **CTCaer** — L4T, Hekate, правильные тайминги оперативной памяти
+* **KazushiMe** — Switch OC Suite
+* **Hanai3bi (Meha)** — Switch OC Suite, EOS, sys-clk-eos
+* **NaGaa95** — ядро L4T-OC, форк Status Monitor
+* **B3711 (halop)** — EOS
+* **sys-clk team** — sys-clk
+* **Dominatorul** — драйвер Soctherm, руководства, общая помощь
+* **ppkantorski** — Ultrahand sys-clk и форк Status Monitor
+* **MasaGratoR and ZachyCatGames** — общая помощь
+* **MasaGratoR** — Status Monitor и драйвер Display Refresh Rate
+* **Nvidia** — Tegra X1 Technical Reference Manual, драйвер soctherm, L4T

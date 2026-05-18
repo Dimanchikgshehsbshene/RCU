@@ -1,0 +1,40 @@
+name: Fully Autonomous AI Fixer
+
+on:
+  workflow_run:
+    workflows: ["Build Horizon OC Zeus"]
+    types:
+      - completed
+
+jobs:
+  autonomous-fix:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_branch }}
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run Autonomous AI Fixer
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          FAILED_RUN_ID: ${{ github.event.workflow_run.id }}
+          GITHUB_REF_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: python scripts/autonomous_fixer.py

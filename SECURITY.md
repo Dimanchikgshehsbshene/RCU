@@ -1,13 +1,6 @@
-# Security Policy
+# Политика безопасности
 
-## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 2.x.x     | :white_check_mark: |
-| 1.x.x     | Not supported |
-| 0.x.x     | Not supported |
-
-## Reporting a Vulnerability
-
-Contact Souldbminer or Lightos_ on discord (souldbminer, lightos_)
+## Как сообщить об уязвимости
+- Не публикуйте 0-day в открытом issue.
+- Отправьте приватное сообщение мейнтейнерам проекта (Dimasick-git).
+- Приложите шаги воспроизведения, версию, логи и оценку влияния.

@@ -1,5 +1,13 @@
-Thank you for wanting to contribute to Horizon OC<br>
-Rules: <br>
-Obey GPLv2 and other relevant licenses<br>
-No piracy<br>
-No adding dangerous code or tables to the project without prior consent<br>
+# CONTRIBUTING
+
+Спасибо за вклад в RCU.
+
+## Базовые правила
+- Соблюдайте GPLv2 и лицензии зависимостей.
+- Не добавляйте пиратский/вредоносный функционал.
+- Для крупных изменений сначала создавайте issue с описанием мотивации.
+
+## PR-чеклист
+- Изменения компилируются локально или в CI.
+- Обновлена документация, если менялся процесс сборки/дистрибуции.
+- Нет лишних файлов и мусорных артефактов в коммите.

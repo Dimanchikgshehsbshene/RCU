@@ -15,10 +15,11 @@ jobs:
       image: devkitpro/devkita64:20251231
 
     steps:
-      - name: Checkout repository and submodules # needed for hoc-clk
+      - name: Checkout repository and submodules # needed for ryazha-clk
         uses: actions/checkout@v6.0.2
         with:
           submodules: recursive
+          fetch-depth: 0
 
 
       # -------------------------------------------------
@@ -45,20 +46,29 @@ jobs:
         shell: bash
 
       # -------------------------------------------------
-      # Get short commit SHA
+      # Get short commit SHA & prepare root dist/
       # -------------------------------------------------
       - name: Set commit SHA & dist
         id: vars
+        shell: bash
         run: |
-          echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-          echo $SHORT_SHA > dist/.commit
-          echo $GITHUB_SHA >> dist/.commit
+          SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+          echo "DIST_DIR=$GITHUB_WORKSPACE/dist" >> $GITHUB_ENV
+          mkdir -p "$GITHUB_WORKSPACE/dist/atmosphere/kips"
+          mkdir -p "$GITHUB_WORKSPACE/dist/atmosphere/contents"
+          mkdir -p "$GITHUB_WORKSPACE/dist/switch/.overlays"
+          mkdir -p "$GITHUB_WORKSPACE/dist/switch/overlays"
+          mkdir -p "$GITHUB_WORKSPACE/dist/config/ryazha-clk"
+          echo $SHORT_SHA > "$GITHUB_WORKSPACE/dist/.commit"
+          echo $GITHUB_SHA >> "$GITHUB_WORKSPACE/dist/.commit"
 
       - name: Clone Libnx
         run: git clone https://github.com/switchbrew/libnx.git
 
       - name: Clone Atmosphere
-        run: git clone --depth=1 --single-branch https://github.com/Atmosphere-NX/Atmosphere.git atmosphere -b $(cat ams_ver.txt)
+        shell: bash
+        run: git clone --depth=1 --single-branch https://github.com/Atmosphere-NX/Atmosphere.git atmosphere -b $(cat ams_ver.txt | tr -d '\r\n')
 
       - name: Prepare build folder
         run: |
@@ -94,16 +104,15 @@ jobs:
           make -j$(($(nproc) * 4)) install CXX="ccache aarch64-none-elf-g++" CC="ccache aarch64-none-elf-gcc"
           popd
 
-      - name: Build hoc-clk sysmodule and overlay
+      - name: Build ryazha-clk sysmodule and overlay
         shell: bash
         run: |
           export CC="ccache aarch64-none-elf-gcc"
           export CXX="ccache aarch64-none-elf-g++"
 
-          ROOT_DIR="$GITHUB_WORKSPACE/Source/hoc-clk"
-          DIST_DIR="$ROOT_DIR/dist"
-          
-          mkdir -p "$DIST_DIR"
+          ROOT_DIR="$GITHUB_WORKSPACE/Source/ryazha-clk"
+          # Все файлы идут прямо в корневую папку dist/
+          DIST_DIR="$GITHUB_WORKSPACE/dist"
 
           echo "*** sysmodule ***"
 
@@ -120,7 +129,7 @@ jobs:
           mkdir -p "$DIST_DIR/atmosphere/contents/$TITLE_ID/flags"
 
           cp -vf \
-            "$ROOT_DIR/sysmodule/out/hoc-clk.nsp" \
+            "$ROOT_DIR/sysmodule/out/ryazha-clk.nsp" \
             "$DIST_DIR/atmosphere/contents/$TITLE_ID/exefs.nsp"
 
           : >"$DIST_DIR/atmosphere/contents/$TITLE_ID/flags/boot2.flag"
@@ -153,24 +162,90 @@ jobs:
             "$ROOT_DIR/README.md" \
             "$DIST_DIR/README.md"
 
+      - name: Build SaltyNX
+        shell: bash
+        run: |
+          export CC="ccache aarch64-none-elf-gcc"
+          export CXX="ccache aarch64-none-elf-g++"
+          DIST_DIR="$GITHUB_WORKSPACE/dist"
+          pushd Source/SaltyNX
+          make -j$(($(nproc) * 2))
+          # Копируем всё из sdcard_out/ прямо в dist/
+          if [ -d sdcard_out ]; then
+            cp -rvf sdcard_out/. "$DIST_DIR/"
+          fi
+          popd
+
+
+      - name: Build Ryazha-Status-Monitor
+        shell: bash
+        run: |
+          export CC="ccache aarch64-none-elf-gcc"
+          export CXX="ccache aarch64-none-elf-g++"
+          DIST_DIR="$GITHUB_WORKSPACE/dist"
+          if [ -d "Source/Ryazha-Status-Monitor" ]; then
+            pushd Source/Ryazha-Status-Monitor
+            make -j$(($(nproc) * 2))
+            if [ -d out ]; then
+              cp -rvf out/. "$DIST_DIR/"
+            fi
+            popd
+          fi
+
       - name: Build kip
         working-directory: build/stratosphere/loader
+        shell: bash
         run: |
           export CC="ccache aarch64-none-elf-gcc"
           export CXX="ccache aarch64-none-elf-g++"
           make -j$(($(nproc) * 4)) CXX="ccache aarch64-none-elf-g++" CC="ccache aarch64-none-elf-gcc"
           hactool -t kip1 out/nintendo_nx_arm64_armv8a/release/loader.kip --uncompress=rcu.kip
-          cp rcu.kip ../../../dist/atmosphere/kips/rcu.kip
-          
+          mkdir -p "$GITHUB_WORKSPACE/dist/atmosphere/kips"
+          cp rcu.kip "$GITHUB_WORKSPACE/dist/atmosphere/kips/rcu.kip"
+
       - name: ccache stats
         run: ccache --show-stats
+
+      # -------------------------------------------------
+      # Показать содержимое dist/ для отладки
+      # -------------------------------------------------
+      - name: Show dist tree
+        shell: bash
+        run: |
+          echo "=== dist/ contents ==="
+          find dist/ -type f | sort
 
       # -------------------------------------------------
       # Upload ZIP artifact
       # -------------------------------------------------
       - name: Upload build artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: horizon-oc-zeus-dist
+          name: ryazha-clk-dist
           path: dist/
           compression-level: 3
+          include-hidden-files: true
+
+      # -------------------------------------------------
+      # Update dist folder in repository
+      # -------------------------------------------------
+      - name: Commit and Push dist
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          # Удаляем старое содержимое dist в репозитории, если оно есть
+          rm -rf dist_repo
+          git clone --depth 1 --branch ${{ github.ref_name }} https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} dist_repo
+          cd dist_repo
+          rm -rf dist/*
+          mkdir -p dist
+          cp -rvf ../dist/* dist/
+          git add dist/
+          if git diff --staged --quiet; then
+            echo "No changes in dist"
+          else
+            git commit -m "Update dist files from build [skip ci]"
+            git push origin ${{ github.ref_name }}
+          fi
