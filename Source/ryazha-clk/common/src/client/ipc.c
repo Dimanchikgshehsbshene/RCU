@@ -36,15 +36,16 @@ static atomic_size_t g_refCnt;
 
 bool hocclkIpcRunning()
 {
-    Handle handle;
-    bool running = R_FAILED(smRegisterService(&handle, smEncodeName(HOCCLK_IPC_SERVICE_NAME), false, 1));
+    Service srv;
+    Result rc = smGetService(&srv, HOCCLK_IPC_SERVICE_NAME);
 
-    if (!running)
+    if (R_SUCCEEDED(rc))
     {
-        smUnregisterService(smEncodeName(HOCCLK_IPC_SERVICE_NAME));
+        serviceClose(&srv);
+        return true;
     }
 
-  return running;
+    return false;
 }
 
 Result hocclkIpcInitialize(void)

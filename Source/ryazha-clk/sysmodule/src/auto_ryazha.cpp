@@ -370,8 +370,15 @@ void ApplyVrr(const HocClkLadderConfig& cfg, bool fpsKnown, u8 fps) {
 
     u8 lo = cfg.vrrMinHz ? cfg.vrrMinHz : 40;
     u8 hi = cfg.vrrMaxHz ? cfg.vrrMaxHz : 60;
-    hi = std::min<u8>(hi, PanelMaxHz());
+    const u64 hocCap = config::GetConfigValue(HocClkConfigValue_MaxDisplayClockH);
+    if (hocCap > 0) {
+        hi = std::min<u8>(hi, (u8)std::min<u64>(hocCap, 0xFF));
+    }
+    // Do not clamp to PanelMaxHz here: Ryazha-Auto may intentionally raise
+    // MaxDisplayClockH before applying the VRR override, and hard-clamping the
+    // runtime value silently disables user-selected high-refresh VRR caps.
     // OLED panel behaves poorly below 43 Hz in practice; hard-clamp VRR floor.
+
     if (board::GetConsoleType() == HocClkConsoleType_Aula) {
         lo = std::max<u8>(lo, 43);
     }

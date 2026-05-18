@@ -32,7 +32,7 @@
 #include "clock_manager.h"
 
 #define HOCCLK_IPC_API_VERSION 2
-#define HOCCLK_IPC_SERVICE_NAME "hoc:clk"
+#define HOCCLK_IPC_SERVICE_NAME "ryazha:c"
 
 enum HocClkIpcCmd
 {
