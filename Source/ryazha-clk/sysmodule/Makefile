@@ -37,7 +37,7 @@ TARGET_VERSION	:= $(APP_VERSION)
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-DEFINES	:=	-DDISABLE_IPC -DTARGET="\"$(TARGET)\"" -DTARGET_VERSION="\"$(TARGET_VERSION)\"" -DCONFIG_DIR="\"$(CONFIG_DIR)\""
+DEFINES	:=	-DTARGET="\"$(TARGET)\"" -DTARGET_VERSION="\"$(TARGET_VERSION)\"" -DCONFIG_DIR="\"$(CONFIG_DIR)\""
 
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
