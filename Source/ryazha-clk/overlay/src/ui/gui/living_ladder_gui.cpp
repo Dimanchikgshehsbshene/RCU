@@ -1,3 +1,4 @@
+#include "../../i18n.hpp"
 /*
  * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
  *
@@ -125,16 +126,16 @@ void LivingLadderGui::listUI()
     loadFreqNamed(RClkModule_GPU, s_gpuFreqNamed, s_gpuFreqMaxHz);
 
     // === Ryazha-ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â²ÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¾ ========================================================
-    this->listElement->addItem(new tsl::elm::CategoryHeader("Ryazha-Авто"));
+    this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Ryazha-Авто")));
 
-    this->enabledToggle = new tsl::elm::ToggleListItem("Включено", cfg.enabled);
+    this->enabledToggle = new tsl::elm::ToggleListItem(i18n::t("Включено"), cfg.enabled);
     this->enabledToggle->setStateChangedListener([](bool state) {
         livingLadder().config().enabled = state ? 1 : 0;
         saveAndAck();
     });
     this->listElement->addItem(this->enabledToggle);
 
-    this->targetFpsItem = new tsl::elm::ListItem("Целевой FPS");
+    this->targetFpsItem = new tsl::elm::ListItem(i18n::t("Целевой FPS"));
     this->targetFpsItem->setClickListener([this, isAula, maxFps, vrrMinCap, vrrMaxCap](u64 keys) {
         if ((keys & HidNpadButton_A) == 0) return false;
         auto& c = livingLadder().config();
@@ -182,7 +183,7 @@ void LivingLadderGui::listUI()
     });
     this->listElement->addItem(this->targetFpsItem);
 
-    this->algoItem = new tsl::elm::ListItem("Алгоритм");
+    this->algoItem = new tsl::elm::ListItem(i18n::t("Алгоритм"));
     this->algoItem->setClickListener([this](u64 keys) {
         if ((keys & HidNpadButton_A) == 0) return false;
         auto& c = livingLadder().config();
@@ -194,7 +195,7 @@ void LivingLadderGui::listUI()
     this->listElement->addItem(this->algoItem);
 
     // === ÃƒÆ’Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂºÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¼ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ =============================================================
-    this->listElement->addItem(new tsl::elm::CategoryHeader("Лимиты"));
+    this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Лимиты")));
 
     auto makeTempItem = [](const char* title, u32& storeMillideg, const char* cat) {
         auto* item = new tsl::elm::ListItem(title);
@@ -239,7 +240,7 @@ void LivingLadderGui::listUI()
     this->listElement->addItem(this->tdpCapItem);
 
     // === ÃƒÆ’Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â½ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ CPU / GPU ==================================================
-    this->listElement->addItem(new tsl::elm::CategoryHeader("Пределы ЦП / ГП"));
+    this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Пределы ЦП / ГП")));
 
     auto makeFreqItem = [](const char* title,
                            u32& storeHz,
@@ -274,7 +275,7 @@ void LivingLadderGui::listUI()
     this->listElement->addItem(this->userGpuMaxItem);
 
     // === VRR ================================================================
-    this->listElement->addItem(new tsl::elm::CategoryHeader("VRR (частота дисплея)"));
+    this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("VRR (частота дисплея)")));
 
     // ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂµÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¶ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¼ VRR ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂºÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â»ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Âº ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¼ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂµÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â½ÃƒÆ’Ã¢â‚¬ËœÃƒâ€šÃ‚ÂÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂµÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¿ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¾ ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂºÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã¢â‚¬ËœÃƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â³ÃƒÆ’Ã¢â‚¬ËœÃƒâ€ Ã¢â‚¬â„¢.
     this->vrrModeItem = new tsl::elm::NamedStepTrackBar(
@@ -310,14 +311,14 @@ void LivingLadderGui::listUI()
     this->vrrMaxItem = makeHzItem("Макс. Гц", cfg.vrrMaxHz, vrrMinCap, vrrMaxCap, "Макс. Гц");
     this->listElement->addItem(this->vrrMaxItem);
 
-    this->predictorToggle = new tsl::elm::ToggleListItem("Предиктор", cfg.predictorEnable);
+    this->predictorToggle = new tsl::elm::ToggleListItem(i18n::t("Предиктор"), cfg.predictorEnable);
     this->predictorToggle->setStateChangedListener([](bool state) {
         livingLadder().config().predictorEnable = state ? 1 : 0;
         saveAndAck();
     });
     this->listElement->addItem(this->predictorToggle);
 
-    this->predictorWindowItem = new tsl::elm::ListItem("Окно предиктора");
+    this->predictorWindowItem = new tsl::elm::ListItem(i18n::t("Окно предиктора"));
     this->predictorWindowItem->setClickListener([](u64 keys) {
         if ((keys & HidNpadButton_A) == 0) return false;
         auto& c = livingLadder().config();
@@ -344,7 +345,7 @@ void LivingLadderGui::listUI()
     });
     this->listElement->addItem(this->predictorAggrItem);
 
-    this->predictorSpikeItem = new tsl::elm::ListItem("Порог скачка");
+    this->predictorSpikeItem = new tsl::elm::ListItem(i18n::t("Порог скачка"));
     this->predictorSpikeItem->setClickListener([](u64 keys) {
         if ((keys & HidNpadButton_A) == 0) return false;
         auto& c = livingLadder().config();
@@ -364,8 +365,8 @@ void LivingLadderGui::listUI()
 
     // === OLED ===============================================================
     if (isAula) {
-        this->listElement->addItem(new tsl::elm::CategoryHeader("OLED"));
-        this->oledGammaToggle = new tsl::elm::ToggleListItem("Авто гамма (46-55 FPS)", cfg.oledAutoGamma);
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("OLED")));
+        this->oledGammaToggle = new tsl::elm::ToggleListItem(i18n::t("Авто гамма (46-55 FPS)"), cfg.oledAutoGamma);
         this->oledGammaToggle->setStateChangedListener([](bool state) {
             livingLadder().config().oledAutoGamma = state ? 1 : 0;
             saveAndAck();

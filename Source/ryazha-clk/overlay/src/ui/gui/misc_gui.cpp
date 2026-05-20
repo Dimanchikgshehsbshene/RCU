@@ -1,3 +1,4 @@
+#include "../../i18n.hpp"
 /*
  *
  * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
@@ -548,7 +549,7 @@ void MiscGui::listUI()
     ValueThresholds thresholdsDisabled(0, 0);
     std::vector<NamedValue> noNamedValues = {};
 
-    this->listElement->addItem(new tsl::elm::CategoryHeader("Settings"));
+    this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Settings")));
 
     tsl::elm::CustomDrawer* rebootSetWarning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
         renderer->drawString("\uE150 Settings marked in blue", false, x + 20, y + 30, 18, tsl::style::color::ColorText);
@@ -560,7 +561,7 @@ void MiscGui::listUI()
     rebootSetWarning->setBoundaries(0, 0, tsl::cfg::FramebufferWidth, 110);
     this->listElement->addItem(rebootSetWarning);
 
-    tsl::elm::ListItem* sysmoduleSettingsSubMenu = new tsl::elm::ListItem("General Settings");
+    tsl::elm::ListItem* sysmoduleSettingsSubMenu = new tsl::elm::ListItem(i18n::t("General Settings"));
     sysmoduleSettingsSubMenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<GeneralSettingsSubMenuGui>();
@@ -571,7 +572,7 @@ void MiscGui::listUI()
     sysmoduleSettingsSubMenu->setValue(R_ARROW);
     this->listElement->addItem(sysmoduleSettingsSubMenu);
 
-    tsl::elm::ListItem* governorSettingsSubMenu = new tsl::elm::ListItem("Governor Settings");
+    tsl::elm::ListItem* governorSettingsSubMenu = new tsl::elm::ListItem(i18n::t("Governor Settings"));
     governorSettingsSubMenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<GovernorSettingsSubMenuGui>();
@@ -582,7 +583,7 @@ void MiscGui::listUI()
     governorSettingsSubMenu->setValue(R_ARROW);
     this->listElement->addItem(governorSettingsSubMenu);
 
-    tsl::elm::ListItem* safetySubmenu = new tsl::elm::ListItem("Safety Settings");
+    tsl::elm::ListItem* safetySubmenu = new tsl::elm::ListItem(i18n::t("Safety Settings"));
     safetySubmenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<SafetySubMenuGui>();
@@ -593,7 +594,7 @@ void MiscGui::listUI()
     safetySubmenu->setValue(R_ARROW);
     this->listElement->addItem(safetySubmenu);
 
-    tsl::elm::ListItem* ramSubmenu = new tsl::elm::ListItem("RAM Settings");
+    tsl::elm::ListItem* ramSubmenu = new tsl::elm::ListItem(i18n::t("RAM Settings"));
     ramSubmenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<RamSubmenuGui>();
@@ -604,7 +605,7 @@ void MiscGui::listUI()
     ramSubmenu->setValue(R_ARROW);
     this->listElement->addItem(ramSubmenu);
 
-    tsl::elm::ListItem* cpuSubmenu = new tsl::elm::ListItem("CPU Settings");
+    tsl::elm::ListItem* cpuSubmenu = new tsl::elm::ListItem(i18n::t("CPU Settings"));
     cpuSubmenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<CpuSubmenuGui>();
@@ -615,7 +616,7 @@ void MiscGui::listUI()
     cpuSubmenu->setValue(R_ARROW);
     this->listElement->addItem(cpuSubmenu);
 
-    tsl::elm::ListItem* gpuSubmenu = new tsl::elm::ListItem("GPU Settings");
+    tsl::elm::ListItem* gpuSubmenu = new tsl::elm::ListItem(i18n::t("GPU Settings"));
     gpuSubmenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<GpuSubmenuGui>();
@@ -626,7 +627,7 @@ void MiscGui::listUI()
     gpuSubmenu->setValue(R_ARROW);
     this->listElement->addItem(gpuSubmenu);
 
-    tsl::elm::ListItem* displaySubMenu = new tsl::elm::ListItem("Display Settings");
+    tsl::elm::ListItem* displaySubMenu = new tsl::elm::ListItem(i18n::t("Display Settings"));
     displaySubMenu->setClickListener([](u64 keys) {
         if (keys & HidNpadButton_A) {
             tsl::changeTo<DisplaySubMenuGui>();
@@ -638,7 +639,7 @@ void MiscGui::listUI()
     this->listElement->addItem(displaySubMenu);
 
     if(this->configList->values[RClkConfigValue_EnableExperimentalSettings]) {
-        tsl::elm::ListItem* experimentalSubMenu = new tsl::elm::ListItem("Experimental Settings");
+        tsl::elm::ListItem* experimentalSubMenu = new tsl::elm::ListItem(i18n::t("Experimental Settings"));
         experimentalSubMenu->setClickListener([](u64 keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<ExperimentalSettingsSubMenuGui>();
@@ -660,7 +661,7 @@ protected:
     void listUI() override {
         Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("General Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("General Settings")));
 
         ValueThresholds thresholdsDisabled(0, 0);
         std::vector<NamedValue> ramVoltDispModes = {
@@ -720,7 +721,7 @@ protected:
     void listUI() override {
         Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Experimental Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Experimental Settings")));
         ValueThresholds thresholdsDisabled(0, 0);
         if(IsMariko()) {
             addConfigToggle(RClkConfigValue_MarikoMiddleFreqs, nullptr, true);
@@ -856,7 +857,7 @@ protected:
     void listUI() override {
         Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Governor Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Governor Settings")));
         ValueThresholds thresholdsDisabled(0, 0);
 
         std::vector<NamedValue> GovernorMinHz = {
@@ -897,7 +898,7 @@ protected:
         if(!this->context)
             return;
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Display Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Display Settings")));
         addConfigToggle(RClkConfigValue_OverwriteRefreshRate, nullptr);
         if(!this->context->isUsingRetroSuper) {
             tsl::elm::CustomDrawer* warningText = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
@@ -944,7 +945,7 @@ protected:
     void listUI() override {
         Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Safety Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Safety Settings")));
         addConfigToggle(RClkConfigValue_UncappedClocks, nullptr);
         addConfigToggle(RClkConfigValue_ThermalThrottle, nullptr);
         addConfigToggle(RClkConfigValue_HandheldTDP, nullptr);
@@ -1004,7 +1005,7 @@ protected:
 
 
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("RAM Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("RAM Settings")));
         
         addMappedConfigTrackbar(KipConfigValue_emcDvbShift, "DVB Shift",
             {0xFFFFFFFCu, 0xFFFFFFFDu, 0xFFFFFFFEu, 0xFFFFFFFFu, 0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u},
@@ -1098,7 +1099,7 @@ protected:
         }
 
         if (IsErista()) {
-            tsl::elm::ListItem* freqSubmenu = new tsl::elm::ListItem("RAM Frequency Editor");
+            tsl::elm::ListItem* freqSubmenu = new tsl::elm::ListItem(i18n::t("RAM Frequency Editor"));
             freqSubmenu->setClickListener([](u64 keys) {
                 if (keys & HidNpadButton_A) {
                     tsl::changeTo<RamTableEditor>();
@@ -1178,7 +1179,7 @@ protected:
         }
 
 
-        tsl::elm::ListItem* latenciesSubmenu = new tsl::elm::ListItem("RAM Latency Editor");
+        tsl::elm::ListItem* latenciesSubmenu = new tsl::elm::ListItem(i18n::t("RAM Latency Editor"));
         latenciesSubmenu->setClickListener([](u64 keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<RamLatenciesSubmenuGui>();
@@ -1189,7 +1190,7 @@ protected:
         latenciesSubmenu->setValue(R_ARROW);
         this->listElement->addItem(latenciesSubmenu);
 
-        tsl::elm::ListItem* timingsSubmenu = new tsl::elm::ListItem("RAM Timing Reductions");
+        tsl::elm::ListItem* timingsSubmenu = new tsl::elm::ListItem(i18n::t("RAM Timing Reductions"));
         timingsSubmenu->setClickListener([](u64 keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<RamTimingsSubmenuGui>();
@@ -1211,7 +1212,7 @@ protected:
     void listUI() override {
         Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Memory Timings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Memory Timings")));
 
         addConfigTrackbar(KipConfigValue_t1_tRCD,  "t1 tRCD",  ValueRange(0, 7,  1));
         addConfigTrackbar(KipConfigValue_t2_tRP,   "t2 tRP",   ValueRange(0, 7,  1));
@@ -1292,7 +1293,7 @@ protected:
         }
 
         ValueThresholds thresholdsDisabled(0, 0);
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Advanced"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Advanced")));
         addConfigButton(KipConfigValue_timingEmcTbreak, "RAM-Timing tBreak", ValueRange(0, 1, 1, "", 1), "tBreak", &thresholdsDisabled, {}, timingTbreakFreqs, false, true);
         addConfigTrackbar(KipConfigValue_low_t6_tRTW, "Low t6 tRTW",      ValueRange(0,  9, 1));
         addConfigTrackbar(KipConfigValue_low_t7_tWTR, "Low t7 tWTR",      ValueRange(0,  9, 1));
@@ -1554,11 +1555,11 @@ protected:
             this->configNamedValues[thisKey] = buildNamedValues(tierIdx);
         };
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Read Latency"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Read Latency")));
         for (int i = 0; i < 4; i++)
             addLatencyRow(kTierLabels[i], i, kLatencyRKeys);
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Write Latency"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Write Latency")));
         for (int i = 0; i < 4; i++)
             addLatencyRow(kTierLabels[i], i, kLatencyWKeys);
     }
@@ -1582,7 +1583,7 @@ protected:
         ValueThresholds eCpuClockThresholds(1785000, 2091000);
         ValueThresholds eCpuClockThresholdsUV(2091000, 2193000);
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("CPU Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("CPU Settings")));
         if(IsMariko()) {
             addConfigTrackbar(KipConfigValue_marikoCpuUVLow, "CPU Low UV", ValueRange(0, 8, 1));
             addConfigTrackbar(KipConfigValue_marikoCpuUVHigh, "CPU High UV", ValueRange(0, 12, 1));
@@ -1774,7 +1775,7 @@ protected:
     void listUI() override {
         Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("RAM Frequency Editor"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("RAM Frequency Editor")));
 
         ValueThresholds thresholdsDisabled(0, 0);
         // 1600000, 1331200, 1065600, 800000, 665600, 408000, 204000
@@ -1849,7 +1850,7 @@ protected:
         ValueThresholds thresholdsDisabled(0, 0);
         std::vector<NamedValue> noNamedValues = {};
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("GPU Settings"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("GPU Settings")));
 
         std::vector<NamedValue> gpuUvConf = {
             NamedValue("HiOPT", 0),
@@ -1918,7 +1919,7 @@ protected:
                 true
             );
 
-            // tsl::elm::ListItem* vminCalcBtn = new tsl::elm::ListItem("Calculate GPU Vmin");
+            // tsl::elm::ListItem* vminCalcBtn = new tsl::elm::ListItem(i18n::t("Calculate GPU Vmin"));
             // vminCalcBtn->setClickListener([this](u64 keys) {
             //     if (keys & HidNpadButton_A) {
             //         Result rc = hocClkIpcCalculateGpuVmin();
@@ -2033,7 +2034,7 @@ protected:
             addConfigButton(RClkConfigValue_DVFSOffset, "GPU DVFS Offset", ValueRange(0, 12, 1, "", 0), "GPU DVFS Offset", &thresholdsDisabled, {}, dvfsOffset, false);
         }
 
-        tsl::elm::ListItem* customTableSubmenu = new tsl::elm::ListItem("GPU Voltage Table");
+        tsl::elm::ListItem* customTableSubmenu = new tsl::elm::ListItem(i18n::t("GPU Voltage Table"));
         customTableSubmenu->setClickListener([](u64 keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<GpuCustomTableSubmenuGui>();
@@ -2059,7 +2060,7 @@ protected:
             return;
         }
 
-        this->listElement->addItem(new tsl::elm::CategoryHeader("GPU Custom Table (mV)"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("GPU Custom Table (mV)")));
 
         ValueThresholds MgpuVmaxThresholds(800, 850);
         ValueThresholds EgpuVmaxThresholds(950, 975);

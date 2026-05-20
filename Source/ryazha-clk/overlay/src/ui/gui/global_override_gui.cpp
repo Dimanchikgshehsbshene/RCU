@@ -1,3 +1,4 @@
+#include "../../i18n.hpp"
 /*
  *
  * Copyright (c) Souldbminer and Horizon OC Contributors
@@ -321,7 +322,7 @@ public:
             FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Говернер"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Говернер")));
 
         static constexpr struct { const char* label; int shift; } kAll[] = {
             {"ЦП", 0}, {"ГП", 8}, {"VRR", 16}
@@ -387,7 +388,7 @@ public:
 };
 
 void GlobalOverrideGui::addGovernorSection() {
-    auto* item = new tsl::elm::ListItem("Говернер");
+    auto* item = new tsl::elm::ListItem(i18n::t("Говернер"));
     item->setValue("\u2192"); // right arrow
     item->setClickListener([this](u64 keys) {
         if (keys & HidNpadButton_A) {

@@ -152,10 +152,17 @@ jobs:
           echo "*** assets ***"
 
           mkdir -p "$DIST_DIR/config/ryazha-clk"
+          mkdir -p "$DIST_DIR/config/ryazha-clk/lang"
 
           cp -vf \
             "$ROOT_DIR/config.ini.template" \
             "$DIST_DIR/config/ryazha-clk/config.ini.template"
+
+          # Bundle overlay language files so i18n::Initialize() finds them
+          if [ -d "$ROOT_DIR/overlay/lang" ]; then
+            cp -vf "$ROOT_DIR/overlay/lang/"*.json \
+              "$DIST_DIR/config/ryazha-clk/lang/"
+          fi
 
           cp -vf \
             "$ROOT_DIR/README.md" \

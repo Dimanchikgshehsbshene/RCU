@@ -1,3 +1,4 @@
+#include "../../i18n.hpp"
 /*
  * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
  *
@@ -334,7 +335,7 @@ public:
             FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Говернер"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Говернер")));
 
         static constexpr struct { const char* label; int shift; } kAll[] = {
             {"ЦП", 0}, {"ГП", 8}, {"VRR", 16}
@@ -394,7 +395,7 @@ public:
 };
 
 void AppProfileGui::addGovernorSection(RClkProfile profile) {
-    auto* item = new tsl::elm::ListItem("Говернер");
+    auto* item = new tsl::elm::ListItem(i18n::t("Говернер"));
     item->setValue("\u2192"); // Right arrow
     item->setClickListener([this, profile](u64 keys) {
         if (keys & HidNpadButton_A) {
@@ -421,7 +422,7 @@ void AppProfileGui::addProfileUI(RClkProfile profile)
     if (profile == RClkProfile_Docked && IsHoag()) {
         /* Lite: док-режима нет — показываем заголовок и пояснение вместо полного молчаливого пропуска. */
         this->listElement->addItem(new tsl::elm::CategoryHeader(profileNameRu(profile) + std::string(" ") + ult::DIVIDER_SYMBOL));
-        auto* liteInfo = new tsl::elm::ListItem("Профиль дока на Switch Lite не используется");
+        auto* liteInfo = new tsl::elm::ListItem(i18n::t("Профиль дока на Switch Lite не используется"));
         liteInfo->setValue("\u2014");
         this->listElement->addItem(liteInfo);
         return;

@@ -20,7 +20,7 @@
 
 namespace notification {
     void writeNotification(const std::string& message) {
-        static const char* flagPath = "sdmc:/config/ultrahand/flags/NOTIFICATIONS.flag";
+        static const char* flagPath = "sdmc:/config/ryazhahand/flags/NOTIFICATIONS.flag";
 
         FILE* flagFile = fopen(flagPath, "r");
         if (!flagFile) {
@@ -28,8 +28,8 @@ namespace notification {
         }
         fclose(flagFile);
 
-        std::string filename = "Horizon OC -" + std::to_string(std::time(nullptr)) + ".notify";
-        std::string fullPath = "sdmc:/config/ultrahand/notifications/" + filename;
+        std::string filename = "Ryazha-CLK -" + std::to_string(std::time(nullptr)) + ".notify";
+        std::string fullPath = "sdmc:/config/ryazhahand/notifications/" + filename;
 
         FILE* file = fopen(fullPath.c_str(), "w");
         if (file) {

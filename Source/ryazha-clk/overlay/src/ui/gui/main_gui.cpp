@@ -1,3 +1,4 @@
+#include "../../i18n.hpp"
 /*
  * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
  *
@@ -35,7 +36,7 @@
 
 void MainGui::listUI()
 {
-    // this->enabledToggle = new tsl::elm::ToggleListItem("Enable", false);
+    // this->enabledToggle = new tsl::elm::ToggleListItem(i18n::t("Enable"), false);
     // enabledToggle->setStateChangedListener([this](bool state) {
     //     Result rc = rclkIpcSetEnabled(state);
     //     if(R_FAILED(rc))
@@ -48,7 +49,7 @@ void MainGui::listUI()
     // });
     // this->listElement->addItem(this->enabledToggle);
 
-    tsl::elm::ListItem* appProfileItem = new tsl::elm::ListItem("Профиль приложения");
+    tsl::elm::ListItem* appProfileItem = new tsl::elm::ListItem(i18n::t("Профиль приложения"));
     appProfileItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -61,7 +62,7 @@ void MainGui::listUI()
     this->listElement->addItem(appProfileItem);
 
 
-    tsl::elm::ListItem* globalProfileItem = new tsl::elm::ListItem("Глобальный профиль");
+    tsl::elm::ListItem* globalProfileItem = new tsl::elm::ListItem(i18n::t("Глобальный профиль"));
     globalProfileItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -73,7 +74,7 @@ void MainGui::listUI()
     });
     this->listElement->addItem(globalProfileItem);
 
-    tsl::elm::ListItem* globalOverrideItem = new tsl::elm::ListItem("Временный профиль");
+    tsl::elm::ListItem* globalOverrideItem = new tsl::elm::ListItem(i18n::t("Временный профиль"));
     globalOverrideItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -87,9 +88,9 @@ void MainGui::listUI()
 
     // Пункт Ryazha-Авто специально скрыт из списка — открывается только кнопкой X (см. handleInput).
 
-    //this->listElement->addItem(new tsl::elm::CategoryHeader("Misc"));
+    //this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Misc")));
 
-    tsl::elm::ListItem* miscItem = new tsl::elm::ListItem("Настройки");
+    tsl::elm::ListItem* miscItem = new tsl::elm::ListItem(i18n::t("Настройки"));
     miscItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {

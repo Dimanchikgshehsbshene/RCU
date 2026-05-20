@@ -1,3 +1,4 @@
+#include "../../i18n.hpp"
 /*
  * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
  *
@@ -64,121 +65,121 @@ void AboutGui::listUI()
         return;
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Voltages")
+        new tsl::elm::CategoryHeader(i18n::t("Voltages"))
     );
 
     ramVoltItem =
-        new tsl::elm::ListItem("RAM Voltage:");
+        new tsl::elm::ListItem(i18n::t("RAM Voltage:"));
 
     if(IsMariko()) {
         this->listElement->addItem(ramVoltItem);
     }
     dispVoltItem =
-        new tsl::elm::ListItem("Display Voltage:");
+        new tsl::elm::ListItem(i18n::t("Display Voltage:"));
     this->listElement->addItem(dispVoltItem);
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Temperatures")
+        new tsl::elm::CategoryHeader(i18n::t("Temperatures"))
     );
     eristaPLLXItem =
-        new tsl::elm::ListItem("PLLX Temp:");
+        new tsl::elm::ListItem(i18n::t("PLLX Temp:"));
     if(this->context->temps[RClkThermalSensor_AO] > 0) { // Only show if the value is valid (not -126, which means not patched)
         this->listElement->addItem(eristaPLLXItem);
     }
 
     aotagTempItem =
-        new tsl::elm::ListItem("AOTAG Temp:");
+        new tsl::elm::ListItem(i18n::t("AOTAG Temp:"));
     this->listElement->addItem(aotagTempItem);
 
     bqtempitem =
-        new tsl::elm::ListItem("BQ24193 Temp:");
+        new tsl::elm::ListItem(i18n::t("BQ24193 Temp:"));
     this->listElement->addItem(bqtempitem);
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("RAM Bandwidth")
+        new tsl::elm::CategoryHeader(i18n::t("RAM Bandwidth"))
     );
 
     ramBWItemMax =
-        new tsl::elm::ListItem("RAM BW (Peak):");
+        new tsl::elm::ListItem(i18n::t("RAM BW (Peak):"));
     this->listElement->addItem(ramBWItemMax);
 
     ramBWItemAll =
-        new tsl::elm::ListItem("RAM BW (All):");
+        new tsl::elm::ListItem(i18n::t("RAM BW (All):"));
     this->listElement->addItem(ramBWItemAll);
 
     ramBWItemCpu =
-        new tsl::elm::ListItem("RAM BW (CPU):");
+        new tsl::elm::ListItem(i18n::t("RAM BW (CPU):"));
     this->listElement->addItem(ramBWItemCpu);
 
     ramBWItemGpu =
-        new tsl::elm::ListItem("RAM BW (GPU):");
+        new tsl::elm::ListItem(i18n::t("RAM BW (GPU):"));
     this->listElement->addItem(ramBWItemGpu);
 
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Hardware Info")
+        new tsl::elm::CategoryHeader(i18n::t("Hardware Info"))
     );
 
     cTypeItem =
-        new tsl::elm::ListItem("Console Type:");
+        new tsl::elm::ListItem(i18n::t("Console Type:"));
     this->listElement->addItem(cTypeItem);
 
     SpeedoItem =
-        new tsl::elm::ListItem("Speedo:");
+        new tsl::elm::ListItem(i18n::t("Speedo:"));
     this->listElement->addItem(SpeedoItem);
 
     IddqItem =
-        new tsl::elm::ListItem("IDDQ:");
+        new tsl::elm::ListItem(i18n::t("IDDQ:"));
     this->listElement->addItem(IddqItem);
 
     DramModule =
-        new tsl::elm::ListItem("DRAM Module: ");
+        new tsl::elm::ListItem(i18n::t("DRAM Module: "));
     this->listElement->addItem(DramModule);
 
     waferCordsItem =
-        new tsl::elm::ListItem("Wafer Position:");
+        new tsl::elm::ListItem(i18n::t("Wafer Position:"));
     this->listElement->addItem(waferCordsItem);
 
     if(IsHoag()) {
         RETROStatusItem =
-            new tsl::elm::ListItem("RR Display status:");
+            new tsl::elm::ListItem(i18n::t("RR Display status:"));
         this->listElement->addItem(RETROStatusItem);
     }
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Software Info")
+        new tsl::elm::CategoryHeader(i18n::t("Software Info"))
     );
 
-    // custRevItem = new tsl::elm::ListItem("CUST revision:");
+    // custRevItem = new tsl::elm::ListItem(i18n::t("CUST revision:"));
     // this->listElement->addItem(custRevItem);
 
-    kipVersionItem = new tsl::elm::ListItem("KIP version:");
+    kipVersionItem = new tsl::elm::ListItem(i18n::t("KIP version:"));
     this->listElement->addItem(kipVersionItem);
 
     if(!IsHoag()) {
         sysdockStatusItem =
-            new tsl::elm::ListItem("sys-dock status:");
+            new tsl::elm::ListItem(i18n::t("sys-dock status:"));
         this->listElement->addItem(sysdockStatusItem);
     }
 
     saltyNXStatusItem =
-        new tsl::elm::ListItem("SaltyNX status:");
+        new tsl::elm::ListItem(i18n::t("SaltyNX status:"));
     this->listElement->addItem(saltyNXStatusItem);
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Credits")
+        new tsl::elm::CategoryHeader(i18n::t("Credits"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Developers")
+        new tsl::elm::CategoryHeader(i18n::t("Developers"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Souldbminer")
+        new tsl::elm::ListItem(i18n::t("Souldbminer"))
     );
 
     // Create special clickable item for Lightos
-    auto lightosItem = new tsl::elm::ListItem("Lightos_");
+    auto lightosItem = new tsl::elm::ListItem(i18n::t("Lightos_"));
     lightosItem->setClickListener([this](u64 keys) -> bool {
         if (keys & HidNpadButton_A) {
             lightosClickCount++;
@@ -195,113 +196,113 @@ void AboutGui::listUI()
 
     // ---- Contributors ----
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Contributors")
+        new tsl::elm::CategoryHeader(i18n::t("Contributors"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Dom")
+        new tsl::elm::ListItem(i18n::t("Dom"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Blaise25")
+        new tsl::elm::ListItem(i18n::t("Blaise25"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("tetetete-ctrl")
+        new tsl::elm::ListItem(i18n::t("tetetete-ctrl"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("B3711")
+        new tsl::elm::ListItem(i18n::t("B3711"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("TDRR")
+        new tsl::elm::ListItem(i18n::t("TDRR"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("MasaGratoR")
+        new tsl::elm::ListItem(i18n::t("MasaGratoR"))
     );
 
     // ---- Testers ----
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Testers")
+        new tsl::elm::CategoryHeader(i18n::t("Testers"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Samybigio2011")
+        new tsl::elm::ListItem(i18n::t("Samybigio2011"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("arcdelta")
+        new tsl::elm::ListItem(i18n::t("arcdelta"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Miki1305")
+        new tsl::elm::ListItem(i18n::t("Miki1305"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Happy")
+        new tsl::elm::ListItem(i18n::t("Happy"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Winnerboi77")
+        new tsl::elm::ListItem(i18n::t("Winnerboi77"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Blaise25")
+        new tsl::elm::ListItem(i18n::t("Blaise25"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("WE1ZARD")
+        new tsl::elm::ListItem(i18n::t("WE1ZARD"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Alvise")
+        new tsl::elm::ListItem(i18n::t("Alvise"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("agjeococh")
+        new tsl::elm::ListItem(i18n::t("agjeococh"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Xenshen")
+        new tsl::elm::ListItem(i18n::t("Xenshen"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("Frost")
+        new tsl::elm::ListItem(i18n::t("Frost"))
     );
 
     // ---- Special Thanks ----
     this->listElement->addItem(
-        new tsl::elm::CategoryHeader("Special Thanks")
+        new tsl::elm::CategoryHeader(i18n::t("Special Thanks"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("SciresM - Atmosphere CFW")
+        new tsl::elm::ListItem(i18n::t("SciresM - Atmosphere CFW"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("KazushiMe - Switch OC Suite")
+        new tsl::elm::ListItem(i18n::t("KazushiMe - Switch OC Suite"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("hanai3Bi - Switch OC Suite & EOS")
+        new tsl::elm::ListItem(i18n::t("hanai3Bi - Switch OC Suite & EOS"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("NaGaa95 - L4T-OC-Kernel")
+        new tsl::elm::ListItem(i18n::t("NaGaa95 - L4T-OC-Kernel"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("RetroNX - sys-clk")
+        new tsl::elm::ListItem(i18n::t("RetroNX - sys-clk"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("ppkantorski - Ultrahand")
+        new tsl::elm::ListItem(i18n::t("ppkantorski - Ultrahand"))
     );
 
     this->listElement->addItem(
-        new tsl::elm::ListItem("CtCaer - Hekate, L4T and Proper Timings")
+        new tsl::elm::ListItem(i18n::t("CtCaer - Hekate, L4T and Proper Timings"))
     );
 
     // Create cat elements but hide them initially

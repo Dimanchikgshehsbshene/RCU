@@ -30,6 +30,7 @@
 #include "ui/gui/fatal_gui.h"
 #include "ui/gui/main_gui.h"
 #include "rgltr_services.h"  // for extern Service g_rgltrSrv, etc.
+#include "i18n.hpp"
 
 class AppOverlay : public tsl::Overlay
 {
@@ -48,6 +49,10 @@ class AppOverlay : public tsl::Overlay
 
         virtual std::unique_ptr<tsl::Gui> loadInitialGui() override
         {
+            // Load translation table early so all GUIs render in the user's
+            // language. Idempotent; cheap if already loaded.
+            i18n::Initialize();
+
             uint32_t apiVersion;
             smInitialize();
 
