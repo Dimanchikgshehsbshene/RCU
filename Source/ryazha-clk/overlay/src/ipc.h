@@ -34,8 +34,8 @@ extern "C"
 {
 #endif
 
-#include <hocclk.h>
-#include <hocclk/client/ipc.h>
+#include <rclk.h>
+#include <rclk/client/ipc.h>
 
 #if defined(__cplusplus)
 }

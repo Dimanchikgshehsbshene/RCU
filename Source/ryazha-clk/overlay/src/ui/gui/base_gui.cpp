@@ -47,7 +47,7 @@
 
 std::string getVersionString() {
     char buf[0x100] = "";
-    Result rc = hocclkIpcGetVersionString(buf, sizeof(buf));
+    Result rc = rclkIpcGetVersionString(buf, sizeof(buf));
     if (R_FAILED(rc) || buf[0] == '\0') {
         return "Unknown";
     }

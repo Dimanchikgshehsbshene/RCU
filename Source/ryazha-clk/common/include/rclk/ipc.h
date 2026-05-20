@@ -34,41 +34,41 @@
 #define HOCCLK_IPC_API_VERSION 2
 #define HOCCLK_IPC_SERVICE_NAME "hoc:clk"
 
-enum HocClkIpcCmd
+enum RClkIpcCmd
 {
-    HocClkIpcCmd_GetApiVersion = 0,
-    HocClkIpcCmd_GetVersionString = 1,
-    HocClkIpcCmd_GetCurrentContext = 2,
-    HocClkIpcCmd_Exit = 3,
-    HocClkIpcCmd_GetProfileCount = 4,
-    HocClkIpcCmd_GetProfiles = 5,
-    HocClkIpcCmd_SetProfiles = 6,
-    HocClkIpcCmd_SetEnabled = 7,
-    HocClkIpcCmd_SetOverride = 8,
-    HocClkIpcCmd_GetConfigValues = 9,
-    HocClkIpcCmd_SetConfigValues = 10,
-    HocClkIpcCmd_GetFreqList = 11,
-    HocClkIpcCmd_SetKipData = 12,
-    HocClkIpcCmd_GetKipData = 13,
-    HocClkIpcCmd_GetLadderConfig = 14,
-    HocClkIpcCmd_SetLadderConfig = 15,
+    RClkIpcCmd_GetApiVersion = 0,
+    RClkIpcCmd_GetVersionString = 1,
+    RClkIpcCmd_GetCurrentContext = 2,
+    RClkIpcCmd_Exit = 3,
+    RClkIpcCmd_GetProfileCount = 4,
+    RClkIpcCmd_GetProfiles = 5,
+    RClkIpcCmd_SetProfiles = 6,
+    RClkIpcCmd_SetEnabled = 7,
+    RClkIpcCmd_SetOverride = 8,
+    RClkIpcCmd_GetConfigValues = 9,
+    RClkIpcCmd_SetConfigValues = 10,
+    RClkIpcCmd_GetFreqList = 11,
+    RClkIpcCmd_SetKipData = 12,
+    RClkIpcCmd_GetKipData = 13,
+    RClkIpcCmd_GetLadderConfig = 14,
+    RClkIpcCmd_SetLadderConfig = 15,
 };
 
 
 typedef struct
 {
     uint64_t tid;
-    HocClkTitleProfileList profiles;
-} HocClkIpc_SetProfiles_Args;
+    RClkTitleProfileList profiles;
+} RClkIpc_SetProfiles_Args;
 
 typedef struct
 {
-    HocClkModule module;
+    RClkModule module;
     uint32_t hz;
-} HocClkIpc_SetOverride_Args;
+} RClkIpc_SetOverride_Args;
 
 typedef struct
 {
-    HocClkModule module;
+    RClkModule module;
     uint32_t maxCount;
-} HocClkIpc_GetFreqList_Args;
+} RClkIpc_GetFreqList_Args;

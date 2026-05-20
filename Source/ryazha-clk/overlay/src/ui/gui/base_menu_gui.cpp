@@ -116,9 +116,9 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer) {
     renderer->drawString(displayStrings[6], false, dataPositions[1], y, SMALL_TEXT_SIZE, tsl::infoTextColor);  // GPU real
     renderer->drawString(displayStrings[7], false, dataPositions[2], y, SMALL_TEXT_SIZE, tsl::infoTextColor);  // MEM real
 
-    renderer->drawString(displayStrings[28], false, positions[2], y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_CPU]);  // CPU Real Temp
-    renderer->drawString(displayStrings[29], false, positions[3], y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_GPU]);  // GPU Real Temp
-    renderer->drawString(displayStrings[30], false, positions[4], y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_MEM]);  // RAM Real Temp
+    renderer->drawString(displayStrings[28], false, positions[2], y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_CPU]);  // CPU Real Temp
+    renderer->drawString(displayStrings[29], false, positions[3], y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_GPU]);  // GPU Real Temp
+    renderer->drawString(displayStrings[30], false, positions[4], y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_MEM]);  // RAM Real Temp
 
     // === REAL FREQUENCIES ===
 
@@ -143,9 +143,9 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer) {
     renderer->drawString(labels[7], false, positions[7], y, SMALL_TEXT_SIZE, tsl::sectionTextColor);
 
     // Temperatures with color - use pre-computed colors
-    renderer->drawString(displayStrings[11], false, dataPositions[0] - 1, y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_SOC]);  // SOC
-    renderer->drawString(displayStrings[12], false, dataPositions[1], y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_PCB]);  // PCB
-    renderer->drawString(displayStrings[13], false, dataPositions[2], y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_Skin]);  // Skin
+    renderer->drawString(displayStrings[11], false, dataPositions[0] - 1, y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_SOC]);  // SOC
+    renderer->drawString(displayStrings[12], false, dataPositions[1], y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_PCB]);  // PCB
+    renderer->drawString(displayStrings[13], false, dataPositions[2], y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_Skin]);  // Skin
 
     y += 20; // Direct assignment (191 + 20)
 
@@ -162,7 +162,7 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer) {
 
     renderer->drawString(labels[10], false, positions[2], y, SMALL_TEXT_SIZE, tsl::sectionTextColor);
 
-    renderer->drawString(displayStrings[20], false, dataPositions[0], y, SMALL_TEXT_SIZE, tempColors[HocClkThermalSensor_Battery]);  // Battery
+    renderer->drawString(displayStrings[20], false, dataPositions[0], y, SMALL_TEXT_SIZE, tempColors[RClkThermalSensor_Battery]);  // Battery
 
     renderer->drawString(labels[12], false, positions[3], y, SMALL_TEXT_SIZE, tsl::sectionTextColor); // fan label
 
@@ -193,7 +193,7 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer) {
 // === Multi-rate refresh ==================================================
 // - Frame tick (каждый кадр): шаг EMA/slew по каналам, пересборка строк с
 //   гистерезисом — UI «жидкий», но CPU-дешёвый.
-// - Telemetry (~15 Гц): чтение HocClkContext через IPC и тик Living Ladder.
+// - Telemetry (~15 Гц): чтение RClkContext через IPC и тик Living Ladder.
 // - Config (~1 Гц): перечитывание настроек HOC.
 // Такое разделение убирает «дёрганье» цифр и снижает IPC-нагрузку.
 void BaseMenuGui::refresh()
@@ -233,20 +233,20 @@ void BaseMenuGui::refresh()
         this->lastTelemetryNs  = now_ns;
         this->lastContextUpdate = ticks;   // совместимость с прежними вызовами.
 
-        if (!this->context) [[unlikely]] this->context = new HocClkContext;
+        if (!this->context) [[unlikely]] this->context = new RClkContext;
 
-        Result rc = hocclkIpcGetCurrentContext(this->context);
+        Result rc = rclkIpcGetCurrentContext(this->context);
         if (R_FAILED(rc)) [[unlikely]] {
-            FatalGui::openWithResultCode("hocclkIpcGetCurrentContext", rc);
+            FatalGui::openWithResultCode("rclkIpcGetCurrentContext", rc);
             return;
         }
         haveFreshTelemetry = true;
 
         if (this->lastConfigNs == 0 || now_ns - this->lastConfigNs >= 1'000'000'000ULL) {
             this->lastConfigNs = now_ns;
-            rc = hocclkIpcGetConfigValues(&configList);
+            rc = rclkIpcGetConfigValues(&configList);
             if (R_FAILED(rc)) [[unlikely]] {
-                FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+                FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
                 return;
             }
         }
@@ -254,35 +254,35 @@ void BaseMenuGui::refresh()
         // Feed каналы сырыми данными из IPC-контекста.
         auto& s = this->smooth;
         auto feedTemp = [](SmoothedChannel& c, u32 milli) { c.feedRaw((float)milli); };
-        s.cpuHz.feedRaw((float)context->freqs[HocClkModule_CPU]);
-        s.gpuHz.feedRaw((float)context->freqs[HocClkModule_GPU]);
-        s.memHz.feedRaw((float)context->freqs[HocClkModule_MEM]);
-        s.cpuRealHz.feedRaw((float)context->realFreqs[HocClkModule_CPU]);
-        s.gpuRealHz.feedRaw((float)context->realFreqs[HocClkModule_GPU]);
-        s.memRealHz.feedRaw((float)context->realFreqs[HocClkModule_MEM]);
-        s.cpuLoad.feedRaw(context->partLoad[HocClkPartLoad_CPUMax] / 10.0f);
-        s.gpuLoad.feedRaw(context->partLoad[HocClkPartLoad_GPU]    / 10.0f);
-        s.memLoad.feedRaw(context->partLoad[HocClkPartLoad_EMC]    / 10.0f);
-        s.batLoad.feedRaw(context->partLoad[HocClkPartLoad_BAT]    / 1000.0f);
-        s.fanLoad.feedRaw((float)context->partLoad[HocClkPartLoad_FAN]);
-        feedTemp(s.socTemp,  context->temps[HocClkThermalSensor_SOC]);
-        feedTemp(s.pcbTemp,  context->temps[HocClkThermalSensor_PCB]);
-        feedTemp(s.skinTemp, context->temps[HocClkThermalSensor_Skin]);
-        feedTemp(s.cpuTemp,  context->temps[HocClkThermalSensor_CPU]);
-        feedTemp(s.gpuTemp,  context->temps[HocClkThermalSensor_GPU]);
-        feedTemp(s.memTemp,  context->temps[HocClkThermalSensor_MEM]);
-        feedTemp(s.batTemp,  context->temps[HocClkThermalSensor_Battery]);
-        s.cpuVolt.feedRaw((float)context->voltages[HocClkVoltage_CPU]);
-        s.gpuVolt.feedRaw((float)context->voltages[HocClkVoltage_GPU]);
-        s.socVolt.feedRaw((float)context->voltages[HocClkVoltage_SOC]);
-        const u32 emcV = (configList.values[HocClkConfigValue_RAMVoltDisplayMode] == RamDisplayMode_VDDQ)
-                          ? context->voltages[HocClkVoltage_EMCVDDQ]
-                          : context->voltages[HocClkVoltage_EMCVDD2];
+        s.cpuHz.feedRaw((float)context->freqs[RClkModule_CPU]);
+        s.gpuHz.feedRaw((float)context->freqs[RClkModule_GPU]);
+        s.memHz.feedRaw((float)context->freqs[RClkModule_MEM]);
+        s.cpuRealHz.feedRaw((float)context->realFreqs[RClkModule_CPU]);
+        s.gpuRealHz.feedRaw((float)context->realFreqs[RClkModule_GPU]);
+        s.memRealHz.feedRaw((float)context->realFreqs[RClkModule_MEM]);
+        s.cpuLoad.feedRaw(context->partLoad[RClkPartLoad_CPUMax] / 10.0f);
+        s.gpuLoad.feedRaw(context->partLoad[RClkPartLoad_GPU]    / 10.0f);
+        s.memLoad.feedRaw(context->partLoad[RClkPartLoad_EMC]    / 10.0f);
+        s.batLoad.feedRaw(context->partLoad[RClkPartLoad_BAT]    / 1000.0f);
+        s.fanLoad.feedRaw((float)context->partLoad[RClkPartLoad_FAN]);
+        feedTemp(s.socTemp,  context->temps[RClkThermalSensor_SOC]);
+        feedTemp(s.pcbTemp,  context->temps[RClkThermalSensor_PCB]);
+        feedTemp(s.skinTemp, context->temps[RClkThermalSensor_Skin]);
+        feedTemp(s.cpuTemp,  context->temps[RClkThermalSensor_CPU]);
+        feedTemp(s.gpuTemp,  context->temps[RClkThermalSensor_GPU]);
+        feedTemp(s.memTemp,  context->temps[RClkThermalSensor_MEM]);
+        feedTemp(s.batTemp,  context->temps[RClkThermalSensor_Battery]);
+        s.cpuVolt.feedRaw((float)context->voltages[RClkVoltage_CPU]);
+        s.gpuVolt.feedRaw((float)context->voltages[RClkVoltage_GPU]);
+        s.socVolt.feedRaw((float)context->voltages[RClkVoltage_SOC]);
+        const u32 emcV = (configList.values[RClkConfigValue_RAMVoltDisplayMode] == RamDisplayMode_VDDQ)
+                          ? context->voltages[RClkVoltage_EMCVDDQ]
+                          : context->voltages[RClkVoltage_EMCVDD2];
         s.emcVolt.feedRaw((float)emcV);
-        s.batVolt.feedRaw((float)context->voltages[HocClkVoltage_Battery]);
+        s.batVolt.feedRaw((float)context->voltages[RClkVoltage_Battery]);
         s.powerNow.feedRaw((float)context->power[0]);
         s.powerAvg.feedRaw((float)context->power[1]);
-        s.displayHz.feedRaw((float)context->realFreqs[HocClkModule_Display]);
+        s.displayHz.feedRaw((float)context->realFreqs[RClkModule_Display]);
         s.fps.feed(context->fps, now_ns);
 
         // Ladder tick УБРАН — живёт в sysmodule (auto_ryazha.cpp) и работает
@@ -299,7 +299,7 @@ void BaseMenuGui::refresh()
     sprintf(displayStrings[0], "%016lX", context->applicationId);
 
     // Profile
-    strcpy(displayStrings[1], hocclkFormatProfile(context->profile, true));
+    strcpy(displayStrings[1], rclkFormatProfile(context->profile, true));
     if (std::strcmp(displayStrings[1], "Docked") == 0) {
         std::strcpy(displayStrings[1], "Док");
     } else if (std::strcmp(displayStrings[1], "Handheld") == 0) {
@@ -327,7 +327,7 @@ void BaseMenuGui::refresh()
 
     // MEM target.
     {
-        const std::uint32_t unit = configList.values[HocClkConfigValue_RamDisplayUnit];
+        const std::uint32_t unit = configList.values[RClkConfigValue_RamDisplayUnit];
         const u32 hzT = (u32)std::max(0.0f, smF.memHz.value());
         const u32 hzR = (u32)std::max(0.0f, smF.memRealHz.value());
         u32 mhz   = hzT / 1000000U;
@@ -350,7 +350,7 @@ void BaseMenuGui::refresh()
     formatFreqMHz(displayStrings[6], smF.gpuRealHz.value());
 
     {
-        const std::uint32_t unit = configList.values[HocClkConfigValue_RamDisplayUnit];
+        const std::uint32_t unit = configList.values[RClkConfigValue_RamDisplayUnit];
         const u32 hzR = (u32)std::max(0.0f, smF.memRealHz.value());
         const u32 mhz = hzR / 1000000U;
         const u32 mts = mhz * 2;
@@ -373,7 +373,7 @@ void BaseMenuGui::refresh()
         sprintf(displayStrings[9], "%.1f мВ", mv_gpu);
     }
 
-    switch(configList.values[HocClkConfigValue_RAMVoltDisplayMode]) {
+    switch(configList.values[RClkConfigValue_RAMVoltDisplayMode]) {
         case RamDisplayMode_VDD2:
         case RamDisplayMode_VDDQ: {
             const u32 uv = (u32)std::max(0.0f, sm.emcVolt.value());
@@ -386,7 +386,7 @@ void BaseMenuGui::refresh()
     }
 
     // Temperatures — цвет через гистерезисные пороги (warning/danger).
-    auto setTempString = [&](int idx, HocClkThermalSensor sensor, float milliDeg, bool withUnit) {
+    auto setTempString = [&](int idx, RClkThermalSensor sensor, float milliDeg, bool withUnit) {
         const u32 mi = (u32)std::max(0.0f, milliDeg);
         if (withUnit) sprintf(displayStrings[idx], "%u.%u °C", mi / 1000U, (mi % 1000U) / 100U);
         else          sprintf(displayStrings[idx], "%u.%u",    mi / 1000U, (mi % 1000U) / 100U);
@@ -400,13 +400,13 @@ void BaseMenuGui::refresh()
         tempColors[sensor] = c;
     };
 
-    setTempString(11, HocClkThermalSensor_SOC,     sm.socTemp.value(),  true);
-    setTempString(12, HocClkThermalSensor_PCB,     sm.pcbTemp.value(),  true);
-    setTempString(13, HocClkThermalSensor_Skin,    sm.skinTemp.value(), true);
-    setTempString(20, HocClkThermalSensor_Battery, sm.batTemp.value(),  true);
-    setTempString(28, HocClkThermalSensor_CPU,     sm.cpuTemp.value(),  false);
-    setTempString(29, HocClkThermalSensor_GPU,     sm.gpuTemp.value(),  false);
-    setTempString(30, HocClkThermalSensor_MEM,     sm.memTemp.value(),  false);
+    setTempString(11, RClkThermalSensor_SOC,     sm.socTemp.value(),  true);
+    setTempString(12, RClkThermalSensor_PCB,     sm.pcbTemp.value(),  true);
+    setTempString(13, RClkThermalSensor_Skin,    sm.skinTemp.value(), true);
+    setTempString(20, RClkThermalSensor_Battery, sm.batTemp.value(),  true);
+    setTempString(28, RClkThermalSensor_CPU,     sm.cpuTemp.value(),  false);
+    setTempString(29, RClkThermalSensor_GPU,     sm.gpuTemp.value(),  false);
+    setTempString(30, RClkThermalSensor_MEM,     sm.memTemp.value(),  false);
 
     // SOC voltage (cached).
     sprintf(displayStrings[14], "%u мВ", (u32)std::max(0.0f, sm.socVolt.value() / 1000.0f));

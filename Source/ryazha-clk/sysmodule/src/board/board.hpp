@@ -27,7 +27,7 @@
 #pragma once
 
 #include <switch.h>
-#include <hocclk.h>
+#include <rclk.h>
 #include "board_fuse.hpp"
 #include "board_load.hpp"
 #include "board_name.hpp"
@@ -43,8 +43,8 @@ namespace board {
     extern u64 clkVirtAddr, dsiVirtAddr;
     void Initialize();
     void Exit();
-    HocClkSocType GetSocType();
-    HocClkConsoleType GetConsoleType();
+    RClkSocType GetSocType();
+    RClkConsoleType GetConsoleType();
     u8 GetDramID();
     u8 GetGpuSpeedoBracket();
     bool IsDram8GB();

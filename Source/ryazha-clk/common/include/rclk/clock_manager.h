@@ -12,9 +12,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
- 
+
 /* --------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
  * <p-sam@d3vs.net>, <natinusala@gmail.com>, <m4x@m4xw.net>
@@ -27,13 +27,52 @@
 
 #pragma once
 
+#include <stdint.h>
 #include "board.h"
 
-typedef struct {
-    uint32_t id;
-    uint32_t cpu_hz;
-    uint32_t gpu_hz;
-    uint32_t mem_hz;
-} HocClkApmConfiguration;
+typedef struct
+{
+    uint64_t applicationId;
+    RClkProfile profile;
+    uint32_t freqs[RClkModule_EnumMax];
+    uint32_t realFreqs[RClkModule_EnumMax];
+    uint32_t overrideFreqs[RClkModule_EnumMax];
+    uint32_t temps[RClkThermalSensor_EnumMax];
+    int32_t power[RClkPowerSensor_EnumMax];
+    uint32_t partLoad[RClkPartLoad_EnumMax];
+    uint32_t voltages[RClkVoltage_EnumMax];
+    u16 speedos[RClkSpeedo_EnumMax];
+    u16 iddq[RClkSpeedo_EnumMax];
+    u16 waferX;
+    u16 waferY;
 
-extern HocClkApmConfiguration hocclk_g_apm_configurations[];
+    // Misc stuff
+    GpuSchedulingMode gpuSchedulingMode;
+    bool isSysDockInstalled;
+    bool isSaltyNXInstalled;
+    bool isUsingRetroSuper;
+    u8 maxDisplayFreq;
+    u8 dramID;
+    bool isDram8GB;
+
+    // FPS / Resolution
+    u8 fps;
+    u16 resolutionHeight;
+
+    // Reserved for future use
+    u8 reserved[0x424];
+} RClkContext;
+
+typedef struct
+{
+    union {
+        uint32_t mhz[+RClkProfile_EnumMax * +RClkModule_EnumMax];
+        uint32_t mhzMap[+RClkProfile_EnumMax][+RClkModule_EnumMax];
+    };
+} RClkTitleProfileList;
+
+#define HOCCLK_FREQ_LIST_MAX 32
+
+#define HOCCLK_GLOBAL_PROFILE_TID 0xA111111111111111
+
+static_assert(sizeof(RClkContext) == 0x500);

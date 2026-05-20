@@ -69,13 +69,13 @@ static inline u8 sliderIndexToVrrMode(u8 idx)
     }
 }
 
-static void loadFreqNamed(HocClkModule m, std::vector<NamedValue>& out, u32& maxHzOut)
+static void loadFreqNamed(RClkModule m, std::vector<NamedValue>& out, u32& maxHzOut)
 {
     u32 raw[HOCCLK_FREQ_LIST_MAX];
     u32 cnt = 0;
     out.clear();
     out.emplace_back("Авто", 0);
-    if (R_FAILED(hocclkIpcGetFreqList(m, raw, HOCCLK_FREQ_LIST_MAX, &cnt)) || cnt == 0)
+    if (R_FAILED(rclkIpcGetFreqList(m, raw, HOCCLK_FREQ_LIST_MAX, &cnt)) || cnt == 0)
         return;
     std::sort(raw, raw + cnt);
     // Keep exact raw Hz values from frequency table.
@@ -121,8 +121,8 @@ void LivingLadderGui::listUI()
     const u8  vrrMinCap = 40;
     const u8  vrrMaxCap = isAula ? 65 : 75;
 
-    loadFreqNamed(HocClkModule_CPU, s_cpuFreqNamed, s_cpuFreqMaxHz);
-    loadFreqNamed(HocClkModule_GPU, s_gpuFreqNamed, s_gpuFreqMaxHz);
+    loadFreqNamed(RClkModule_CPU, s_cpuFreqNamed, s_cpuFreqMaxHz);
+    loadFreqNamed(RClkModule_GPU, s_gpuFreqNamed, s_gpuFreqMaxHz);
 
     // === Ryazha-ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚ÂÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â²ÃƒÆ’Ã¢â‚¬ËœÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã‚ÂÃƒâ€šÃ‚Â¾ ========================================================
     this->listElement->addItem(new tsl::elm::CategoryHeader("Ryazha-Авто"));

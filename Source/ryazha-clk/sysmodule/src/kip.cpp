@@ -27,7 +27,7 @@ namespace kip {
     void SetKipData()
     {
         // TODO: figure out if this REALLY causes issues (i doubt it)
-        // if(board::GetSocType() == HocClkSocType_Mariko) {
+        // if(board::GetSocType() == RClkSocType_Mariko) {
         //     if(R_FAILED(I2c_BuckConverter_SetMvOut(&I2c_Mariko_DRAM_VDDQ, config::GetConfigValue(KipConfigValue_marikoEmcVddqVolt) / 1000))) {
         //         fileUtils::LogLine("[clock_manager] Failed set i2c vddq");
         //         notification::writeNotification("Horizon OC\nFailed to write I2C\nwhile setting vddq");
@@ -125,11 +125,11 @@ namespace kip {
         CUST_WRITE_FIELD_BATCH(&table, gpuSpeedo, config::GetConfigValue(KipConfigValue_gpuSpeedo));
 
         for (int i = 0; i < 24; i++) {
-            table.marikoGpuVoltArray[i] = config::GetConfigValue((HocClkConfigValue)(KipConfigValue_g_volt_76800 + i));
+            table.marikoGpuVoltArray[i] = config::GetConfigValue((RClkConfigValue)(KipConfigValue_g_volt_76800 + i));
         }
 
         for (int i = 0; i < 27; i++) {
-            table.eristaGpuVoltArray[i] = config::GetConfigValue((HocClkConfigValue)(KipConfigValue_g_volt_e_76800 + i));
+            table.eristaGpuVoltArray[i] = config::GetConfigValue((RClkConfigValue)(KipConfigValue_g_volt_e_76800 + i));
         }
 
         CUST_WRITE_FIELD_BATCH(&table, t6_tRTW_fine_tune, config::GetConfigValue(KipConfigValue_t6_tRTW_fine_tune));
@@ -140,15 +140,15 @@ namespace kip {
             notification::writeNotification("Horizon OC\nKip write failed");
         }
 
-        HocClkConfigValueList configValues;
+        RClkConfigValueList configValues;
         config::GetConfigValues(&configValues);
 
         configValues.values[KipCrc32] = (u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip"); // write checksum
 
         if (config::SetConfigValues(&configValues, false)) {
             fileUtils::LogLine("[kip] KIP data set. CRC32: %ld (Cust Rev %ld)", configValues.values[KipCrc32], configValues.values[KipConfigValue_custRev]);
-            for (u64 i = KipConfigValue_hpMode; i < HocClkConfigValue_EnumMax; i++) {
-                fileUtils::LogLine("%s: %ld", hocclkFormatConfigValue((HocClkConfigValue)i, false), configValues.values[i]);
+            for (u64 i = KipConfigValue_hpMode; i < RClkConfigValue_EnumMax; i++) {
+                fileUtils::LogLine("%s: %ld", rclkFormatConfigValue((RClkConfigValue)i, false), configValues.values[i]);
             }
         } else {
             fileUtils::LogLine("[kip] Warning: Failed to set config values from KIP");
@@ -173,7 +173,7 @@ namespace kip {
                 fclose(fp);
             }
 
-            HocClkConfigValueList configValues;
+            RClkConfigValueList configValues;
             config::GetConfigValues(&configValues);
 
             CustomizeTable table;
@@ -188,13 +188,13 @@ namespace kip {
             //     return;
             // }
 
-            if ((u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip") != config::GetConfigValue(KipCrc32) && !config::GetConfigValue(HocClkConfigValue_IsFirstLoad)) {
+            if ((u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip") != config::GetConfigValue(KipCrc32) && !config::GetConfigValue(RClkConfigValue_IsFirstLoad)) {
                 SetKipData();
                 notification::writeNotification("Horizon OC\nKIP has been updated\nPlease reboot your console");
                 return;
             }
-            if (config::GetConfigValue(HocClkConfigValue_IsFirstLoad) == true) {
-                configValues.values[HocClkConfigValue_IsFirstLoad] = (u64)false;
+            if (config::GetConfigValue(RClkConfigValue_IsFirstLoad) == true) {
+                configValues.values[RClkConfigValue_IsFirstLoad] = (u64)false;
                 notification::writeNotification("Horizon OC has been installed");
             }
 
@@ -278,11 +278,11 @@ namespace kip {
             // if(cust_get_cust_rev(&table) == KIP_CUST_REV)
             //     return;
 
-            if (sizeof(HocClkConfigValueList) <= sizeof(configValues)) {
+            if (sizeof(RClkConfigValueList) <= sizeof(configValues)) {
                 if (config::SetConfigValues(&configValues, false)) {
                     fileUtils::LogLine("[kip] KIP loaded. CRC32: %ld (Cust Rev %ld)", configValues.values[KipCrc32], configValues.values[KipConfigValue_custRev]);
-                    for (u64 i = KipConfigValue_hpMode; i < HocClkConfigValue_EnumMax; i++) {
-                        fileUtils::LogLine("%s: %ld", hocclkFormatConfigValue((HocClkConfigValue)i, false), configValues.values[i]);
+                    for (u64 i = KipConfigValue_hpMode; i < RClkConfigValue_EnumMax; i++) {
+                        fileUtils::LogLine("%s: %ld", rclkFormatConfigValue((RClkConfigValue)i, false), configValues.values[i]);
                     }
                 } else {
                     fileUtils::LogLine("[kip] Warning: Failed to set config values from KIP");

@@ -37,10 +37,10 @@ void MainGui::listUI()
 {
     // this->enabledToggle = new tsl::elm::ToggleListItem("Enable", false);
     // enabledToggle->setStateChangedListener([this](bool state) {
-    //     Result rc = hocclkIpcSetEnabled(state);
+    //     Result rc = rclkIpcSetEnabled(state);
     //     if(R_FAILED(rc))
     //     {
-    //         FatalGui::openWithResultCode("hocclkIpcSetEnabled", rc);
+    //         FatalGui::openWithResultCode("rclkIpcSetEnabled", rc);
     //     }
 
     //     this->lastContextUpdate = armGetSystemTick();

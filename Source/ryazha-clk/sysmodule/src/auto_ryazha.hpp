@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <hocclk.h>
+#include <rclk.h>
 #include <switch.h>
 
 namespace autoRyazha {
@@ -20,7 +20,7 @@ namespace autoRyazha {
     void Start();                            // запустить tick-поток (вызывать после clockManager::SetRunning(true))
 
     // === IPC-визитные карточки =============================================
-    void GetConfig(HocClkLadderConfig* out);         // snapshot cfg для overlay
-    void SetConfig(const HocClkLadderConfig* cfg);   // overlay прислал новый cfg — применим и сохраним
+    void GetConfig(RClkLadderConfig* out);         // snapshot cfg для overlay
+    void SetConfig(const RClkLadderConfig* cfg);   // overlay прислал новый cfg — применим и сохраним
 
 }

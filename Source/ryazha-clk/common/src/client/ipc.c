@@ -29,12 +29,12 @@
 #include <switch.h>
 #include <string.h>
 #include <stdatomic.h>
-#include <hocclk/client/ipc.h>
+#include <rclk/client/ipc.h>
 
-static Service g_hocclkSrv;
+static Service g_rclkSrv;
 static atomic_size_t g_refCnt;
 
-bool hocclkIpcRunning()
+bool rclkIpcRunning()
 {
     Handle handle;
     bool running = R_FAILED(smRegisterService(&handle, smEncodeName(HOCCLK_IPC_SERVICE_NAME), false, 1));
@@ -47,110 +47,110 @@ bool hocclkIpcRunning()
   return running;
 }
 
-Result hocclkIpcInitialize(void)
+Result rclkIpcInitialize(void)
 {
     Result rc = 0;
 
     g_refCnt++;
 
-    if (serviceIsActive(&g_hocclkSrv))
+    if (serviceIsActive(&g_rclkSrv))
         return 0;
 
-    rc = smGetService(&g_hocclkSrv, HOCCLK_IPC_SERVICE_NAME);
+    rc = smGetService(&g_rclkSrv, HOCCLK_IPC_SERVICE_NAME);
 
-    if (R_FAILED(rc)) hocclkIpcExit();
+    if (R_FAILED(rc)) rclkIpcExit();
 
     return rc;
 }
 
-void hocclkIpcExit(void)
+void rclkIpcExit(void)
 {
     if (--g_refCnt == 0)
     {
-        serviceClose(&g_hocclkSrv);
+        serviceClose(&g_rclkSrv);
     }
 }
 
-Result hocclkIpcGetAPIVersion(u32* out_ver)
+Result rclkIpcGetAPIVersion(u32* out_ver)
 {
-    return serviceDispatchOut(&g_hocclkSrv, HocClkIpcCmd_GetApiVersion, *out_ver);
+    return serviceDispatchOut(&g_rclkSrv, RClkIpcCmd_GetApiVersion, *out_ver);
 }
 
-Result hocclkIpcGetVersionString(char* out, size_t len)
+Result rclkIpcGetVersionString(char* out, size_t len)
 {
-    return serviceDispatch(&g_hocclkSrv, HocClkIpcCmd_GetVersionString,
+    return serviceDispatch(&g_rclkSrv, RClkIpcCmd_GetVersionString,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_Out },
         .buffers = {{out, len}},
     );
 }
 
-Result hocclkIpcGetCurrentContext(HocClkContext* out_context)
+Result rclkIpcGetCurrentContext(RClkContext* out_context)
 {
-    return serviceDispatch(&g_hocclkSrv, HocClkIpcCmd_GetCurrentContext,
+    return serviceDispatch(&g_rclkSrv, RClkIpcCmd_GetCurrentContext,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_Out },
-        .buffers = {{out_context, sizeof(HocClkContext)}},
+        .buffers = {{out_context, sizeof(RClkContext)}},
     );
 }
 
-Result hocclkIpcGetProfileCount(u64 tid, u8* out_count)
+Result rclkIpcGetProfileCount(u64 tid, u8* out_count)
 {
-    return serviceDispatchInOut(&g_hocclkSrv, HocClkIpcCmd_GetProfileCount, tid, *out_count);
+    return serviceDispatchInOut(&g_rclkSrv, RClkIpcCmd_GetProfileCount, tid, *out_count);
 }
 
-Result hocclkIpcSetEnabled(bool enabled)
+Result rclkIpcSetEnabled(bool enabled)
 {
     u8 enabledRaw = (u8)enabled;
-    return serviceDispatchIn(&g_hocclkSrv, HocClkIpcCmd_SetEnabled, enabledRaw);
+    return serviceDispatchIn(&g_rclkSrv, RClkIpcCmd_SetEnabled, enabledRaw);
 }
 
-Result hocclkIpcSetOverride(HocClkModule module, u32 hz)
+Result rclkIpcSetOverride(RClkModule module, u32 hz)
 {
-    HocClkIpc_SetOverride_Args args = {
+    RClkIpc_SetOverride_Args args = {
         .module = module,
         .hz = hz
     };
-    return serviceDispatchIn(&g_hocclkSrv, HocClkIpcCmd_SetOverride, args);
+    return serviceDispatchIn(&g_rclkSrv, RClkIpcCmd_SetOverride, args);
 }
 
-Result hocclkIpcGetProfiles(u64 tid, HocClkTitleProfileList* out_profiles)
+Result rclkIpcGetProfiles(u64 tid, RClkTitleProfileList* out_profiles)
 {
-    return serviceDispatchIn(&g_hocclkSrv, HocClkIpcCmd_GetProfiles, tid,
+    return serviceDispatchIn(&g_rclkSrv, RClkIpcCmd_GetProfiles, tid,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_Out },
-        .buffers = {{out_profiles, sizeof(HocClkTitleProfileList)}},
+        .buffers = {{out_profiles, sizeof(RClkTitleProfileList)}},
     );
 }
 
-Result hocclkIpcSetProfiles(u64 tid, HocClkTitleProfileList* profiles)
+Result rclkIpcSetProfiles(u64 tid, RClkTitleProfileList* profiles)
 {
-    HocClkIpc_SetProfiles_Args args;
+    RClkIpc_SetProfiles_Args args;
     args.tid = tid;
-    memcpy(&args.profiles, profiles, sizeof(HocClkTitleProfileList));
-    return serviceDispatchIn(&g_hocclkSrv, HocClkIpcCmd_SetProfiles, args);
+    memcpy(&args.profiles, profiles, sizeof(RClkTitleProfileList));
+    return serviceDispatchIn(&g_rclkSrv, RClkIpcCmd_SetProfiles, args);
 }
 
-Result hocclkIpcGetConfigValues(HocClkConfigValueList* out_configValues)
+Result rclkIpcGetConfigValues(RClkConfigValueList* out_configValues)
 {
-    return serviceDispatch(&g_hocclkSrv, HocClkIpcCmd_GetConfigValues,
+    return serviceDispatch(&g_rclkSrv, RClkIpcCmd_GetConfigValues,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_Out },
-        .buffers = {{out_configValues, sizeof(HocClkConfigValueList)}},
+        .buffers = {{out_configValues, sizeof(RClkConfigValueList)}},
     );
 }
 
-Result hocclkIpcSetConfigValues(HocClkConfigValueList* configValues)
+Result rclkIpcSetConfigValues(RClkConfigValueList* configValues)
 {
-    return serviceDispatch(&g_hocclkSrv, HocClkIpcCmd_SetConfigValues,
+    return serviceDispatch(&g_rclkSrv, RClkIpcCmd_SetConfigValues,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_In },
-        .buffers = {{configValues, sizeof(HocClkConfigValueList)}},
+        .buffers = {{configValues, sizeof(RClkConfigValueList)}},
     );
 }
 
-Result hocclkIpcGetFreqList(HocClkModule module, u32* list, u32 maxCount, u32* outCount)
+Result rclkIpcGetFreqList(RClkModule module, u32* list, u32 maxCount, u32* outCount)
 {
-    HocClkIpc_GetFreqList_Args args = {
+    RClkIpc_GetFreqList_Args args = {
         .module = module,
         .maxCount = maxCount
     };
-    return serviceDispatchInOut(&g_hocclkSrv, HocClkIpcCmd_GetFreqList, args, *outCount,
+    return serviceDispatchInOut(&g_rclkSrv, RClkIpcCmd_GetFreqList, args, *outCount,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_Out },
         .buffers = {{list, maxCount * sizeof(u32)}},
     );
@@ -159,27 +159,27 @@ Result hocclkIpcGetFreqList(HocClkModule module, u32* list, u32 maxCount, u32* o
 Result hocClkIpcSetKipData()
 {
     u32 temp = 0;
-    return serviceDispatchIn(&g_hocclkSrv, HocClkIpcCmd_SetKipData, temp);
+    return serviceDispatchIn(&g_rclkSrv, RClkIpcCmd_SetKipData, temp);
 }
 
 Result hocClkIpcGetKipData()
 {
     u32 temp = 0;
-    return serviceDispatchIn(&g_hocclkSrv, HocClkIpcCmd_GetKipData, temp);
+    return serviceDispatchIn(&g_rclkSrv, RClkIpcCmd_GetKipData, temp);
 }
 
-Result hocclkIpcGetLadderConfig(HocClkLadderConfig* out_cfg)
+Result rclkIpcGetLadderConfig(RClkLadderConfig* out_cfg)
 {
-    return serviceDispatch(&g_hocclkSrv, HocClkIpcCmd_GetLadderConfig,
+    return serviceDispatch(&g_rclkSrv, RClkIpcCmd_GetLadderConfig,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_Out },
-        .buffers = {{out_cfg, sizeof(HocClkLadderConfig)}},
+        .buffers = {{out_cfg, sizeof(RClkLadderConfig)}},
     );
 }
 
-Result hocclkIpcSetLadderConfig(const HocClkLadderConfig* cfg)
+Result rclkIpcSetLadderConfig(const RClkLadderConfig* cfg)
 {
-    return serviceDispatch(&g_hocclkSrv, HocClkIpcCmd_SetLadderConfig,
+    return serviceDispatch(&g_rclkSrv, RClkIpcCmd_SetLadderConfig,
         .buffer_attrs = { SfBufferAttr_HipcAutoSelect | SfBufferAttr_In },
-        .buffers = {{(void*)cfg, sizeof(HocClkLadderConfig)}},
+        .buffers = {{(void*)cfg, sizeof(RClkLadderConfig)}},
     );
 }

@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <hocclk.h>
+#include <rclk.h>
 #include <switch.h>
 #include <nxExt/cpp/lockable_mutex.h>
 
@@ -43,8 +43,8 @@ namespace clockManager {
     // instance variables
     extern bool gRunning;
     extern LockableMutex gContextMutex;
-    extern HocClkContext gContext;
-    extern FreqTable gFreqTable[HocClkModule_EnumMax];
+    extern RClkContext gContext;
+    extern FreqTable gFreqTable[RClkModule_EnumMax];
     extern std::uint64_t gLastTempLogNs;
     extern std::uint64_t gLastFreqLogNs;
     extern std::uint64_t gLastPowerLogNs;
@@ -54,15 +54,15 @@ namespace clockManager {
     void Initialize();
     void Exit();
 
-    HocClkContext GetCurrentContext();
+    RClkContext GetCurrentContext();
 
     void SetRunning(bool running);
     bool Running();
 
-    std::uint32_t GetMaxAllowedHz(HocClkModule module, HocClkProfile profile);
-    bool IsAssignableHz(HocClkModule module, std::uint32_t hz);
+    std::uint32_t GetMaxAllowedHz(RClkModule module, RClkProfile profile);
+    bool IsAssignableHz(RClkModule module, std::uint32_t hz);
 
-    void GetFreqList(HocClkModule module, std::uint32_t* list, std::uint32_t maxCount, std::uint32_t* outCount);
+    void GetFreqList(RClkModule module, std::uint32_t* list, std::uint32_t maxCount, std::uint32_t* outCount);
 
     /** Сбросить очередь тика: применить частоты сразу после IPC (профиль/оверрайд/конфиг). */
     void NotifyClockReapply();

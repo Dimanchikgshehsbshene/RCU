@@ -1,4 +1,4 @@
-name: Build Horizon OC Zeus
+name: Build Ryazha-CLK
 
 on:
   push:

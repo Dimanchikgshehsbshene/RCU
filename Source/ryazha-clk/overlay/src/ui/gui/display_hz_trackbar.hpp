@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <string>
 
-#include <hocclk/auto_ryazha.h>
+#include <rclk/auto_ryazha.h>
 #include <tesla.hpp>
 #include <tsl_utils.hpp>
 
@@ -36,9 +36,9 @@ inline u16 displayHzToProgress(u32 hz, u32 minHz, u32 maxHz, u32 stepHz) {
 }
 
 inline bool ladderVrrCoreActive(u8 mode) {
-    if (mode == HocClkLadderVrr_On || mode == HocClkLadderVrr_SuperPro)
-        mode = HocClkLadderVrr_Auto;
-    return mode != HocClkLadderVrr_Off;
+    if (mode == RClkLadderVrr_On || mode == RClkLadderVrr_SuperPro)
+        mode = RClkLadderVrr_Auto;
+    return mode != RClkLadderVrr_Off;
 }
 
 inline void syncLadderVrrMaxToPanelHz(u32 hz) {

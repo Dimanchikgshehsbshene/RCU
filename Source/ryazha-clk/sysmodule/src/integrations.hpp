@@ -18,7 +18,7 @@
 #pragma once
 
 #include <switch.h>
-#include <hocclk.h>
+#include <rclk.h>
 
 namespace integrations {
 

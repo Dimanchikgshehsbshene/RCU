@@ -346,9 +346,9 @@ void AboutGui::refresh()
     if (!this->context)
         return;
     // Format strings once per refresh
-    sprintf(strings[0], "%u/%u/%u", this->context->speedos[HocClkSpeedo_CPU], this->context->speedos[HocClkSpeedo_GPU], this->context->speedos[HocClkSpeedo_SOC]);
+    sprintf(strings[0], "%u/%u/%u", this->context->speedos[RClkSpeedo_CPU], this->context->speedos[RClkSpeedo_GPU], this->context->speedos[RClkSpeedo_SOC]);
     // This is how hekate does it
-    sprintf(strings[1], "%u/%u/%u", this->context->iddq[HocClkSpeedo_CPU], this->context->iddq[HocClkSpeedo_GPU], this->context->iddq[HocClkSpeedo_SOC]);
+    sprintf(strings[1], "%u/%u/%u", this->context->iddq[RClkSpeedo_CPU], this->context->iddq[RClkSpeedo_GPU], this->context->iddq[RClkSpeedo_SOC]);
     SpeedoItem->setValue(strings[0]);
     IddqItem->setValue(strings[1]);
     DramModule->setValue(formatRamModule());
@@ -364,30 +364,30 @@ void AboutGui::refresh()
     waferCordsItem->setValue(strings[2]);
 
     if(IsErista()) {
-        u32 millis = context->temps[HocClkThermalSensor_PLLX];
+        u32 millis = context->temps[RClkThermalSensor_PLLX];
         sprintf(strings[3], "%u.%u °C", millis / 1000U, (millis % 1000U) / 100U);
         eristaPLLXItem->setValue(strings[3]);
     }
 
-    sprintf(strings[4], "%u.%u / %u mV", context->voltages[HocClkVoltage_EMCVDD2] / 1000U, (context->voltages[HocClkVoltage_EMCVDD2] % 1000U) / 100U, context->voltages[HocClkVoltage_EMCVDDQ] / 1000);
+    sprintf(strings[4], "%u.%u / %u mV", context->voltages[RClkVoltage_EMCVDD2] / 1000U, (context->voltages[RClkVoltage_EMCVDD2] % 1000U) / 100U, context->voltages[RClkVoltage_EMCVDDQ] / 1000);
     ramVoltItem->setValue(strings[4]);
     
-    sprintf(strings[5], "%u.%u mV", context->voltages[HocClkVoltage_Display] / 1000U, (context->voltages[HocClkVoltage_Display] % 1000U) / 100U);
+    sprintf(strings[5], "%u.%u mV", context->voltages[RClkVoltage_Display] / 1000U, (context->voltages[RClkVoltage_Display] % 1000U) / 100U);
     dispVoltItem->setValue(strings[5]);
 
-    sprintf(strings[6], "%u MB/s", context->partLoad[HocClkPartLoad_RamBWAll]);
+    sprintf(strings[6], "%u MB/s", context->partLoad[RClkPartLoad_RamBWAll]);
     ramBWItemAll->setValue(strings[6]);
 
-    sprintf(strings[7], "%u MB/s", context->partLoad[HocClkPartLoad_RamBWCpu]);
+    sprintf(strings[7], "%u MB/s", context->partLoad[RClkPartLoad_RamBWCpu]);
     ramBWItemCpu->setValue(strings[7]);
 
-    sprintf(strings[8], "%u MB/s", context->partLoad[HocClkPartLoad_RamBWGpu]);
+    sprintf(strings[8], "%u MB/s", context->partLoad[RClkPartLoad_RamBWGpu]);
     ramBWItemGpu->setValue(strings[8]);
 
-    sprintf(strings[9], "%u MB/s", context->partLoad[HocClkPartLoad_RamBWPeak]);
+    sprintf(strings[9], "%u MB/s", context->partLoad[RClkPartLoad_RamBWPeak]);
     ramBWItemMax->setValue(strings[9]);
 
-    switch(context->temps[HocClkThermalSensor_BQ24193]) {
+    switch(context->temps[RClkThermalSensor_BQ24193]) {
         case 0: 
             strcpy(strings[10], "Normal"); 
             break;

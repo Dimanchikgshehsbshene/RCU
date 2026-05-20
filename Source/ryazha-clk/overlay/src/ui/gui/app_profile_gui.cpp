@@ -33,32 +33,32 @@
 #include "living_ladder.h"
 #include "display_hz_trackbar.hpp"
 
-static const char* moduleNameRu(HocClkModule module) {
+static const char* moduleNameRu(RClkModule module) {
     switch (module) {
-        case HocClkModule_CPU: return "ЦП";
-        case HocClkModule_GPU: return "ГП";
-        case HocClkModule_MEM: return "ОЗУ";
-        default: return hocclkFormatModule(module, true);
+        case RClkModule_CPU: return "ЦП";
+        case RClkModule_GPU: return "ГП";
+        case RClkModule_MEM: return "ОЗУ";
+        default: return rclkFormatModule(module, true);
     }
 }
 
 /** Если для USB/зарядки частота дисплея не задана — показываем и применяем значение «Портатив». */
-static u32 effectiveTitleProfileDisplayHz(const HocClkTitleProfileList* pl, HocClkProfile profile) {
-    u32 v = pl->mhzMap[profile][HocClkModule_Display];
+static u32 effectiveTitleProfileDisplayHz(const RClkTitleProfileList* pl, RClkProfile profile) {
+    u32 v = pl->mhzMap[profile][RClkModule_Display];
     if (v != 0)
         return v;
     switch (profile) {
-        case HocClkProfile_HandheldChargingUSB:
-        case HocClkProfile_HandheldChargingOfficial:
-        case HocClkProfile_HandheldCharging:
-            return pl->mhzMap[HocClkProfile_Handheld][HocClkModule_Display];
+        case RClkProfile_HandheldChargingUSB:
+        case RClkProfile_HandheldChargingOfficial:
+        case RClkProfile_HandheldCharging:
+            return pl->mhzMap[RClkProfile_Handheld][RClkModule_Display];
         default:
             return 0;
     }
 }
 
-static std::string profileNameRu(HocClkProfile profile) {
-    std::string p = hocclkFormatProfile(profile, true);
+static std::string profileNameRu(RClkProfile profile) {
+    std::string p = rclkFormatProfile(profile, true);
     if (p == "Docked") return "Док";
     if (p == "Handheld") return "Портатив";
     if (p == "Charging") return "Зарядка";
@@ -66,7 +66,7 @@ static std::string profileNameRu(HocClkProfile profile) {
     if (p == "PD Charger") return "PD зарядка";
     return p;
 }
-AppProfileGui::AppProfileGui(std::uint64_t applicationId, HocClkTitleProfileList* profileList)
+AppProfileGui::AppProfileGui(std::uint64_t applicationId, RClkTitleProfileList* profileList)
 {
     this->applicationId = applicationId;
     this->profileList = profileList;
@@ -77,33 +77,33 @@ AppProfileGui::~AppProfileGui()
     delete this->profileList;
 }
 
-void AppProfileGui::openFreqChoiceGui(tsl::elm::ListItem* listItem, HocClkProfile profile, HocClkModule module)
+void AppProfileGui::openFreqChoiceGui(tsl::elm::ListItem* listItem, RClkProfile profile, RClkModule module)
 {
     std::uint32_t hzList[HOCCLK_FREQ_LIST_MAX];
     std::uint32_t hzCount;
-    Result rc = hocclkIpcGetFreqList(module, &hzList[0], HOCCLK_FREQ_LIST_MAX, &hzCount);
+    Result rc = rclkIpcGetFreqList(module, &hzList[0], HOCCLK_FREQ_LIST_MAX, &hzCount);
     if(R_FAILED(rc))
     {
-        FatalGui::openWithResultCode("hocclkIpcGetFreqList", rc);
+        FatalGui::openWithResultCode("rclkIpcGetFreqList", rc);
         return;
     }
     std::map<uint32_t, std::string> labels = {};
 
-    if (module == HocClkModule_CPU) {
+    if (module == RClkModule_CPU) {
         bool isUsingUv = IsMariko() ? configList.values[KipConfigValue_marikoCpuUVHigh] : configList.values[KipConfigValue_eristaCpuUV];
         labels = IsMariko() ? (isUsingUv ? cpu_freq_label_m_uv : cpu_freq_label_m) : (isUsingUv ? cpu_freq_label_e_uv : cpu_freq_label_e);
-    } else if (module == HocClkModule_GPU) {
+    } else if (module == RClkModule_GPU) {
         labels = IsMariko() ? *(marikoUV[configList.values[KipConfigValue_marikoGpuUV]]) : *(eristaUV[configList.values[KipConfigValue_eristaGpuUV]]);
     }
-    RamDisplayUnit memUnit = (RamDisplayUnit)configList.values[HocClkConfigValue_RamDisplayUnit];
+    RamDisplayUnit memUnit = (RamDisplayUnit)configList.values[RClkConfigValue_RamDisplayUnit];
     tsl::changeTo<FreqChoiceGui>(this->profileList->mhzMap[profile][module] * 1000000, hzList, hzCount, module, [this, listItem, profile, module, memUnit](std::uint32_t hz) {
         this->profileList->mhzMap[profile][module] = hz / 1000000;
         std::uint32_t mhz = this->profileList->mhzMap[profile][module];
-        listItem->setValue(module == HocClkModule_MEM ? formatListFreqMem(mhz, memUnit) : formatListFreqMHz(mhz));
-        Result rc = hocclkIpcSetProfiles(this->applicationId, this->profileList);
+        listItem->setValue(module == RClkModule_MEM ? formatListFreqMem(mhz, memUnit) : formatListFreqMHz(mhz));
+        Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
         if(R_FAILED(rc))
         {
-            FatalGui::openWithResultCode("hocclkIpcSetProfiles", rc);
+            FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
             return false;
         }
 
@@ -139,12 +139,12 @@ void AppProfileGui::openValueChoiceGui(
     );
 }
 
-void AppProfileGui::addModuleListItem(HocClkProfile profile, HocClkModule module)
+void AppProfileGui::addModuleListItem(RClkProfile profile, RClkModule module)
 {
     tsl::elm::ListItem* listItem = new tsl::elm::ListItem(moduleNameRu(module));
-    RamDisplayUnit memUnit = (RamDisplayUnit)configList.values[HocClkConfigValue_RamDisplayUnit];
+    RamDisplayUnit memUnit = (RamDisplayUnit)configList.values[RClkConfigValue_RamDisplayUnit];
     std::uint32_t mhz = this->profileList->mhzMap[profile][module];
-    listItem->setValue(module == HocClkModule_MEM ? formatListFreqMem(mhz, memUnit) : formatListFreqMHz(mhz));
+    listItem->setValue(module == RClkModule_MEM ? formatListFreqMem(mhz, memUnit) : formatListFreqMHz(mhz));
     listItem->setClickListener([this, listItem, profile, module, memUnit](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A)
         {
@@ -155,12 +155,12 @@ void AppProfileGui::addModuleListItem(HocClkProfile profile, HocClkModule module
         {
             // Reset to "Default" (0 MHz)
             this->profileList->mhzMap[profile][module] = 0;
-            listItem->setValue(module == HocClkModule_MEM ? formatListFreqMem(0, memUnit) : formatListFreqMHz(0));
+            listItem->setValue(module == RClkModule_MEM ? formatListFreqMem(0, memUnit) : formatListFreqMHz(0));
             
-            Result rc = hocclkIpcSetProfiles(this->applicationId, this->profileList);
+            Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
             if(R_FAILED(rc))
             {
-                FatalGui::openWithResultCode("hocclkIpcSetProfiles", rc);
+                FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
                 return false;
             }
             return true;
@@ -170,7 +170,7 @@ void AppProfileGui::addModuleListItem(HocClkProfile profile, HocClkModule module
     this->listElement->addItem(listItem);
 }
 
-void AppProfileGui::addModuleListItemToggle(HocClkProfile profile, HocClkModule module)
+void AppProfileGui::addModuleListItemToggle(RClkProfile profile, RClkModule module)
 {
     const char* moduleName = moduleNameRu(module);
     std::uint32_t currentValue = this->profileList->mhzMap[profile][module];
@@ -180,10 +180,10 @@ void AppProfileGui::addModuleListItemToggle(HocClkProfile profile, HocClkModule 
     toggle->setStateChangedListener([this, profile, module](bool state) {
         this->profileList->mhzMap[profile][module] = state ? 1 : 0;
         
-        Result rc = hocclkIpcSetProfiles(this->applicationId, this->profileList);
+        Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
         if(R_FAILED(rc))
         {
-            FatalGui::openWithResultCode("hocclkIpcSetProfiles", rc);
+            FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
         }
     });
     
@@ -221,8 +221,8 @@ std::string AppProfileGui::formatValueDisplay(
 }
 
 void AppProfileGui::addModuleListItemValue(
-    HocClkProfile profile,
-    HocClkModule module,
+    RClkProfile profile,
+    RClkModule module,
     const std::string& categoryName,
     std::uint32_t min,
     std::uint32_t max,
@@ -280,12 +280,12 @@ void AppProfileGui::addModuleListItemValue(
                         listItem->setValue(this->formatValueDisplay(value / divisor, namedValues, suffix, divisor, decimalPlaces));
                         
                         Result rc =
-                            hocclkIpcSetProfiles(this->applicationId,
+                            rclkIpcSetProfiles(this->applicationId,
                                                  this->profileList);
                         if (R_FAILED(rc))
                         {
                             FatalGui::openWithResultCode(
-                                "hocclkIpcSetProfiles", rc);
+                                "rclkIpcSetProfiles", rc);
                             return false;
                         }
                         return true;
@@ -303,11 +303,11 @@ void AppProfileGui::addModuleListItemValue(
                 this->profileList->mhzMap[profile][module] = 0;
                 listItem->setValue(FREQ_DEFAULT_TEXT);
                 Result rc =
-                    hocclkIpcSetProfiles(this->applicationId,
+                    rclkIpcSetProfiles(this->applicationId,
                                          this->profileList);
                 if (R_FAILED(rc))
                 {
-                    FatalGui::openWithResultCode("hocclkIpcSetProfiles", rc);
+                    FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
                     return false;
                 }
                 return true;
@@ -319,19 +319,19 @@ void AppProfileGui::addModuleListItemValue(
 
 class GovernorProfileSubMenuGui : public BaseMenuGui {
     uint64_t applicationId;
-    HocClkTitleProfileList* profileList;
-    HocClkProfile profile;
+    RClkTitleProfileList* profileList;
+    RClkProfile profile;
 public:
-    GovernorProfileSubMenuGui(uint64_t appId, HocClkTitleProfileList* pList, HocClkProfile prof)
+    GovernorProfileSubMenuGui(uint64_t appId, RClkTitleProfileList* pList, RClkProfile prof)
         : applicationId(appId), profileList(pList), profile(prof) {}
 
     void listUI() override {
         BaseMenuGui::refresh(); // get latest context
         if(!this->context)
             return;
-        Result rc = hocclkIpcGetConfigValues(&configList);
+        Result rc = rclkIpcGetConfigValues(&configList);
         if (R_FAILED(rc)) [[unlikely]] {
-            FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+            FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
         this->listElement->addItem(new tsl::elm::CategoryHeader("Говернер"));
@@ -339,11 +339,11 @@ public:
         static constexpr struct { const char* label; int shift; } kAll[] = {
             {"ЦП", 0}, {"ГП", 8}, {"VRR", 16}
         };
-        int count = configList.values[HocClkConfigValue_OverwriteRefreshRate] || this->context->isUsingRetroSuper ? 3 : 2;
+        int count = configList.values[RClkConfigValue_OverwriteRefreshRate] || this->context->isUsingRetroSuper ? 3 : 2;
 
         for (int i = 0; i < count; i++) {
             const bool isVrr = (kAll[i].shift == 16);
-            u8 cur = (this->profileList->mhzMap[this->profile][HocClkModule_Governor] >> kAll[i].shift) & 0xFF;
+            u8 cur = (this->profileList->mhzMap[this->profile][RClkModule_Governor] >> kAll[i].shift) & 0xFF;
 
             tsl::elm::NamedStepTrackBar* bar;
             if (isVrr) {
@@ -383,17 +383,17 @@ public:
                         livingLadder().push();
                     }
                 }
-                u32& packed = this->profileList->mhzMap[this->profile][HocClkModule_Governor];
+                u32& packed = this->profileList->mhzMap[this->profile][RClkModule_Governor];
                 packed = (packed & ~(0xFFu << shift)) | ((u32)sysValue << shift);
-                Result rc = hocclkIpcSetProfiles(this->applicationId, this->profileList);
-                if (R_FAILED(rc)) FatalGui::openWithResultCode("hocclkIpcSetProfiles", rc);
+                Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
+                if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
             });
             this->listElement->addItem(bar);
         }
     }
 };
 
-void AppProfileGui::addGovernorSection(HocClkProfile profile) {
+void AppProfileGui::addGovernorSection(RClkProfile profile) {
     auto* item = new tsl::elm::ListItem("Говернер");
     item->setValue("\u2192"); // Right arrow
     item->setClickListener([this, profile](u64 keys) {
@@ -408,17 +408,17 @@ void AppProfileGui::addGovernorSection(HocClkProfile profile) {
     this->listElement->addItem(item);
 }
 
-void AppProfileGui::addProfileUI(HocClkProfile profile)
+void AppProfileGui::addProfileUI(RClkProfile profile)
 {    
     BaseMenuGui::refresh();
     if(!this->context)
         return;
-    Result rc = hocclkIpcGetConfigValues(&configList);
+    Result rc = rclkIpcGetConfigValues(&configList);
     if (R_FAILED(rc)) [[unlikely]] {
-        FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+        FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
         return;
     }
-    if (profile == HocClkProfile_Docked && IsHoag()) {
+    if (profile == RClkProfile_Docked && IsHoag()) {
         /* Lite: док-режима нет — показываем заголовок и пояснение вместо полного молчаливого пропуска. */
         this->listElement->addItem(new tsl::elm::CategoryHeader(profileNameRu(profile) + std::string(" ") + ult::DIVIDER_SYMBOL));
         auto* liteInfo = new tsl::elm::ListItem("Профиль дока на Switch Lite не используется");
@@ -426,14 +426,14 @@ void AppProfileGui::addProfileUI(HocClkProfile profile)
         this->listElement->addItem(liteInfo);
         return;
     }
-    if (profile == HocClkProfile_HandheldCharging)
+    if (profile == RClkProfile_HandheldCharging)
         return;
     this->listElement->addItem(new tsl::elm::CategoryHeader(profileNameRu(profile) + std::string(" ") + ult::DIVIDER_SYMBOL + " \ue0e3 Сброс"));
-    this->addModuleListItem(profile, HocClkModule_CPU);
-    this->addModuleListItem(profile, HocClkModule_GPU);
-    this->addModuleListItem(profile, HocClkModule_MEM);
+    this->addModuleListItem(profile, RClkModule_CPU);
+    this->addModuleListItem(profile, RClkModule_GPU);
+    this->addModuleListItem(profile, RClkModule_MEM);
     #if IS_MINIMAL == 0
-        if(configList.values[HocClkConfigValue_OverwriteRefreshRate]) {
+        if(configList.values[RClkConfigValue_OverwriteRefreshRate]) {
             auto addDisplayTrackbar = [this, profile](u32 minHz, u32 maxHz, u32 stepHz) {
                 u32 hi = ryazha_ui::displayHzOrDefault(maxHz);
                 auto* bar = new ryazha_ui::DisplayHzTrackBar(minHz, hi, stepHz, "Дисплей");
@@ -442,22 +442,22 @@ void AppProfileGui::addProfileUI(HocClkProfile profile)
                 bar->setProgress(ryazha_ui::displayHzToProgress(cur, bar->minHz(), bar->maxHz(), bar->stepHz()));
                 bar->setValueChangedListener([this, profile, bar](u16 value) {
                     const u32 hz = std::min(bar->maxHz(), bar->minHz() + (u32)value * bar->stepHz());
-                    this->profileList->mhzMap[profile][HocClkModule_Display] = hz;
-                    if (profile == HocClkProfile_Handheld) {
-                        this->profileList->mhzMap[HocClkProfile_HandheldChargingUSB][HocClkModule_Display] = hz;
-                        this->profileList->mhzMap[HocClkProfile_HandheldChargingOfficial][HocClkModule_Display] = hz;
+                    this->profileList->mhzMap[profile][RClkModule_Display] = hz;
+                    if (profile == RClkProfile_Handheld) {
+                        this->profileList->mhzMap[RClkProfile_HandheldChargingUSB][RClkModule_Display] = hz;
+                        this->profileList->mhzMap[RClkProfile_HandheldChargingOfficial][RClkModule_Display] = hz;
                     }
-                    Result rc = hocclkIpcSetProfiles(this->applicationId, this->profileList);
+                    Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
                     if (R_FAILED(rc)) {
-                        FatalGui::openWithResultCode("hocclkIpcSetProfiles", rc);
+                        FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
                     }
                     ryazha_ui::syncLadderVrrMaxToPanelHz(hz);
                 });
                 this->listElement->addItem(bar);
             };
 
-            if(profile != HocClkProfile_Docked) {
-                u32 cap = (u32)configList.values[HocClkConfigValue_MaxDisplayClockH];
+            if(profile != RClkProfile_Docked) {
+                u32 cap = (u32)configList.values[RClkConfigValue_MaxDisplayClockH];
                 addDisplayTrackbar(IsAula() ? 45u : 40u, cap, this->context->isUsingRetroSuper ? 5u : 1u);
             } else if(IsAula() && this->context->isSysDockInstalled) {
                 addDisplayTrackbar(40u, 240u, 1u);
@@ -473,21 +473,21 @@ void AppProfileGui::addProfileUI(HocClkProfile profile)
 
 void AppProfileGui::listUI()
 {
-    this->addProfileUI(HocClkProfile_Docked);
-    this->addProfileUI(HocClkProfile_Handheld);
-    this->addProfileUI(HocClkProfile_HandheldCharging);
-    this->addProfileUI(HocClkProfile_HandheldChargingOfficial);
-    this->addProfileUI(HocClkProfile_HandheldChargingUSB);
+    this->addProfileUI(RClkProfile_Docked);
+    this->addProfileUI(RClkProfile_Handheld);
+    this->addProfileUI(RClkProfile_HandheldCharging);
+    this->addProfileUI(RClkProfile_HandheldChargingOfficial);
+    this->addProfileUI(RClkProfile_HandheldChargingUSB);
 }
 
 void AppProfileGui::changeTo(std::uint64_t applicationId)
 {
-    HocClkTitleProfileList* profileList = new HocClkTitleProfileList;
-    Result rc = hocclkIpcGetProfiles(applicationId, profileList);
+    RClkTitleProfileList* profileList = new RClkTitleProfileList;
+    Result rc = rclkIpcGetProfiles(applicationId, profileList);
     if(R_FAILED(rc))
     {
         delete profileList;
-        FatalGui::openWithResultCode("hocclkIpcGetProfiles", rc);
+        FatalGui::openWithResultCode("rclkIpcGetProfiles", rc);
         return;
     }
 

@@ -43,7 +43,7 @@ class AppOverlay : public tsl::Overlay
 
         virtual void exitServices() override {
             rgltrExit();
-            hocclkIpcExit();
+            rclkIpcExit();
         }
 
         virtual std::unique_ptr<tsl::Gui> loadInitialGui() override
@@ -53,7 +53,7 @@ class AppOverlay : public tsl::Overlay
 
             tsl::hlp::ScopeGuard smGuard([] { smExit(); });
 
-            if(!hocclkIpcRunning())
+            if(!rclkIpcRunning())
             {
                 return initially<FatalGui>(
                     "ryazha-clk is not running.\n\n"
@@ -64,7 +64,7 @@ class AppOverlay : public tsl::Overlay
                 );
             }
 
-            if(R_FAILED(hocclkIpcInitialize()) || R_FAILED(hocclkIpcGetAPIVersion(&apiVersion)))
+            if(R_FAILED(rclkIpcInitialize()) || R_FAILED(rclkIpcGetAPIVersion(&apiVersion)))
             {
                 return initially<FatalGui>(
                     "Could not connect to ryazha-clk.\n\n"

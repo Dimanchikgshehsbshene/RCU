@@ -34,22 +34,22 @@ public:
     void refresh() override;
     
 protected:
-    HocClkConfigValueList* configList;
-    std::map<HocClkConfigValue, tsl::elm::ListItem*> configButtons;
-    std::map<HocClkConfigValue, ValueRange> configRanges;
-    std::map<HocClkConfigValue, std::vector<NamedValue>> configNamedValues;
-    std::map<HocClkConfigValue, tsl::elm::ToggleListItem*> configToggles;
-    std::map<HocClkConfigValue, std::tuple<tsl::elm::TrackBar*, tsl::elm::ListItem*, std::vector<uint64_t>>> configTrackbars;
-    std::set<HocClkConfigValue> configButtonSKeys;
-    std::map<HocClkConfigValue, std::string> configButtonSSubtext;
-    std::set<HocClkConfigValue> emcClockConfigs;
+    RClkConfigValueList* configList;
+    std::map<RClkConfigValue, tsl::elm::ListItem*> configButtons;
+    std::map<RClkConfigValue, ValueRange> configRanges;
+    std::map<RClkConfigValue, std::vector<NamedValue>> configNamedValues;
+    std::map<RClkConfigValue, tsl::elm::ToggleListItem*> configToggles;
+    std::map<RClkConfigValue, std::tuple<tsl::elm::TrackBar*, tsl::elm::ListItem*, std::vector<uint64_t>>> configTrackbars;
+    std::set<RClkConfigValue> configButtonSKeys;
+    std::map<RClkConfigValue, std::string> configButtonSSubtext;
+    std::set<RClkConfigValue> emcClockConfigs;
     
-    void addConfigToggle(HocClkConfigValue configVal, const char* altName, bool kip = false);
-    void addConfigTrackbar(HocClkConfigValue configVal, const char* altName, const ValueRange& range, bool kip = true);
-    void addMappedConfigTrackbar(HocClkConfigValue configVal, const char* altName,
+    void addConfigToggle(RClkConfigValue configVal, const char* altName, bool kip = false);
+    void addConfigTrackbar(RClkConfigValue configVal, const char* altName, const ValueRange& range, bool kip = true);
+    void addMappedConfigTrackbar(RClkConfigValue configVal, const char* altName,
                                   std::vector<u32> vals,
                                   std::initializer_list<std::string> names, bool kip = true);
-    void addConfigButton(HocClkConfigValue configVal,
+    void addConfigButton(RClkConfigValue configVal,
         const char* altName,
         const ValueRange& range,
         const std::string& categoryName,
@@ -59,7 +59,7 @@ protected:
         bool showDefaultValue = true,
         bool kip = false);
 
-    void addConfigButtonS(HocClkConfigValue configVal,
+    void addConfigButtonS(RClkConfigValue configVal,
         const char* altName,
         const ValueRange& range,
         const std::string& categoryName,
@@ -69,9 +69,9 @@ protected:
         bool showDefaultValue = true,
         const char* subText = nullptr,
         bool kip = false);
-    void addFreqButton(HocClkConfigValue configVal,
+    void addFreqButton(RClkConfigValue configVal,
                             const char* altName,
-                            HocClkModule module,
+                            RClkModule module,
                             const std::map<uint32_t, std::string>& labels = {});
     void updateConfigToggles();
     

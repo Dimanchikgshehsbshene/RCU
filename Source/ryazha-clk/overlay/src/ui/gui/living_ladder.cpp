@@ -10,8 +10,8 @@
 
 void LivingLadderProxy::ensureLoaded() const {
     if (loaded_) return;
-    HocClkLadderConfig tmp{};
-    if (R_SUCCEEDED(hocclkIpcGetLadderConfig(&tmp))) {
+    RClkLadderConfig tmp{};
+    if (R_SUCCEEDED(rclkIpcGetLadderConfig(&tmp))) {
         cfg_ = tmp;
     }
     loaded_ = true;
@@ -29,12 +29,12 @@ const LadderConfig& LivingLadderProxy::config() const {
 
 void LivingLadderProxy::push() {
     ensureLoaded();
-    (void)hocclkIpcSetLadderConfig(&cfg_);
+    (void)rclkIpcSetLadderConfig(&cfg_);
 }
 
 void LivingLadderProxy::pull() {
-    HocClkLadderConfig tmp{};
-    if (R_SUCCEEDED(hocclkIpcGetLadderConfig(&tmp))) {
+    RClkLadderConfig tmp{};
+    if (R_SUCCEEDED(rclkIpcGetLadderConfig(&tmp))) {
         cfg_ = tmp;
     }
     loaded_ = true;

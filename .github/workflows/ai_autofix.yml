@@ -2,7 +2,7 @@ name: Fully Autonomous AI Fixer
 
 on:
   workflow_run:
-    workflows: ["Build Horizon OC Zeus"]
+    workflows: ["Build Ryazha-CLK"]
     types:
       - completed
 

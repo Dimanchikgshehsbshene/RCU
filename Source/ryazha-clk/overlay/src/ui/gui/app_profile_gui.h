@@ -32,10 +32,10 @@ class AppProfileGui : public BaseMenuGui
 {
     protected:
         std::uint64_t applicationId;
-        HocClkTitleProfileList* profileList;
-        void openFreqChoiceGui(tsl::elm::ListItem* listItem, HocClkProfile profile, HocClkModule module);
-        void addModuleListItem(HocClkProfile profile, HocClkModule module);
-        void addModuleListItemToggle(HocClkProfile profile, HocClkModule module);
+        RClkTitleProfileList* profileList;
+        void openFreqChoiceGui(tsl::elm::ListItem* listItem, RClkProfile profile, RClkModule module);
+        void addModuleListItem(RClkProfile profile, RClkModule module);
+        void addModuleListItemToggle(RClkProfile profile, RClkModule module);
         void openValueChoiceGui(
             tsl::elm::ListItem* listItem,
             std::uint32_t currentValue,
@@ -56,8 +56,8 @@ class AppProfileGui : public BaseMenuGui
             int decimalPlaces
         );
         void addModuleListItemValue(
-            HocClkProfile profile,
-            HocClkModule module,
+            RClkProfile profile,
+            RClkModule module,
             const std::string& categoryName,
             std::uint32_t min,
             std::uint32_t max,
@@ -69,10 +69,10 @@ class AppProfileGui : public BaseMenuGui
             std::vector<NamedValue> namedValues = {},
             bool showDefaultValue = true
         );
-        void addGovernorSection(HocClkProfile profile);
-        void addProfileUI(HocClkProfile profile);
+        void addGovernorSection(RClkProfile profile);
+        void addProfileUI(RClkProfile profile);
     public:
-        AppProfileGui(std::uint64_t applicationId, HocClkTitleProfileList* profileList);
+        AppProfileGui(std::uint64_t applicationId, RClkTitleProfileList* profileList);
         ~AppProfileGui();
         void listUI() override;
         static void changeTo(std::uint64_t applicationId);

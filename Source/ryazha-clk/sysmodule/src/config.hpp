@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <hocclk.h>
+#include <rclk.h>
 #include <switch.h>
 
 #define CONFIG_VAL_SECTION "values"
@@ -40,22 +40,22 @@ namespace config {
     bool HasProfilesLoaded();
 
     std::uint8_t GetProfileCount(std::uint64_t tid);
-    void GetProfiles(std::uint64_t tid, HocClkTitleProfileList* out_profiles);
-    bool SetProfiles(std::uint64_t tid, HocClkTitleProfileList* profiles, bool immediate);
-    std::uint32_t GetAutoClockHz(std::uint64_t tid, HocClkModule module, HocClkProfile profile, bool returnRaw);
+    void GetProfiles(std::uint64_t tid, RClkTitleProfileList* out_profiles);
+    bool SetProfiles(std::uint64_t tid, RClkTitleProfileList* profiles, bool immediate);
+    std::uint32_t GetAutoClockHz(std::uint64_t tid, RClkModule module, RClkProfile profile, bool returnRaw);
 
     void SetEnabled(bool enabled);
     bool Enabled();
-    void SetOverrideHz(HocClkModule module, std::uint32_t hz);
-    std::uint32_t GetOverrideHz(HocClkModule module);
+    void SetOverrideHz(RClkModule module, std::uint32_t hz);
+    std::uint32_t GetOverrideHz(RClkModule module);
 
-    std::uint64_t GetConfigValue(HocClkConfigValue val);
-    const char* GetConfigValueName(HocClkConfigValue val, bool pretty);
-    void GetConfigValues(HocClkConfigValueList* out_configValues);
-    bool SetConfigValues(HocClkConfigValueList* configValues, bool immediate);
-    bool ResetConfigValue(HocClkConfigValue kval);
-    bool SetConfigValue(HocClkConfigValue kval, std::uint64_t value, bool immediate = true);
+    std::uint64_t GetConfigValue(RClkConfigValue val);
+    const char* GetConfigValueName(RClkConfigValue val, bool pretty);
+    void GetConfigValues(RClkConfigValueList* out_configValues);
+    bool SetConfigValues(RClkConfigValueList* configValues, bool immediate);
+    bool ResetConfigValue(RClkConfigValue kval);
+    bool SetConfigValue(RClkConfigValue kval, std::uint64_t value, bool immediate = true);
 
-    extern uint64_t configValues[HocClkConfigValue_EnumMax];
+    extern uint64_t configValues[RClkConfigValue_EnumMax];
 
 }

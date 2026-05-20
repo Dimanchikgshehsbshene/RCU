@@ -55,7 +55,7 @@ namespace ipcService {
             return 0;
         }
 
-        Result GetCurrentContext(HocClkContext* out_ctx) {
+        Result GetCurrentContext(RClkContext* out_ctx) {
             *out_ctx = clockManager::GetCurrentContext();
             return 0;
         }
@@ -73,7 +73,7 @@ namespace ipcService {
             return 0;
         }
 
-        Result GetProfiles(std::uint64_t* tid, HocClkTitleProfileList* out_profiles) {
+        Result GetProfiles(std::uint64_t* tid, RClkTitleProfileList* out_profiles) {
             if (!config::HasProfilesLoaded()) {
                 return HOCCLK_ERROR(ConfigNotLoaded);
             }
@@ -81,11 +81,11 @@ namespace ipcService {
             return 0;
         }
 
-        Result SetProfiles(HocClkIpc_SetProfiles_Args* args) {
+        Result SetProfiles(RClkIpc_SetProfiles_Args* args) {
             if (!config::HasProfilesLoaded()) {
                 return HOCCLK_ERROR(ConfigNotLoaded);
             }
-            HocClkTitleProfileList profiles = args->profiles;
+            RClkTitleProfileList profiles = args->profiles;
             if (!config::SetProfiles(args->tid, &profiles, true)) {
                 return HOCCLK_ERROR(ConfigSaveFailed);
             }
@@ -98,8 +98,8 @@ namespace ipcService {
             return 0;
         }
 
-        Result SetOverride(HocClkIpc_SetOverride_Args* args) {
-            if (!HOCCLK_ENUM_VALID(HocClkModule, args->module)) {
+        Result SetOverride(RClkIpc_SetOverride_Args* args) {
+            if (!HOCCLK_ENUM_VALID(RClkModule, args->module)) {
                 return HOCCLK_ERROR(Generic);
             }
             config::SetOverrideHz(args->module, args->hz);
@@ -107,7 +107,7 @@ namespace ipcService {
             return 0;
         }
 
-        Result GetConfigValuesHandler(HocClkConfigValueList* out_configValues) {
+        Result GetConfigValuesHandler(RClkConfigValueList* out_configValues) {
             if (!config::HasProfilesLoaded()) {
                 return HOCCLK_ERROR(ConfigNotLoaded);
             }
@@ -115,11 +115,11 @@ namespace ipcService {
             return 0;
         }
 
-        Result SetConfigValuesHandler(HocClkConfigValueList* configValues) {
+        Result SetConfigValuesHandler(RClkConfigValueList* configValues) {
             if (!config::HasProfilesLoaded()) {
                 return HOCCLK_ERROR(ConfigNotLoaded);
             }
-            HocClkConfigValueList copy = *configValues;
+            RClkConfigValueList copy = *configValues;
             if (!config::SetConfigValues(&copy, true)) {
                 return HOCCLK_ERROR(ConfigSaveFailed);
             }
@@ -127,8 +127,8 @@ namespace ipcService {
             return 0;
         }
 
-        Result GetFreqList(HocClkIpc_GetFreqList_Args* args, std::uint32_t* out_list, std::size_t size, std::uint32_t* out_count) {
-            if (!HOCCLK_ENUM_VALID(HocClkModule, args->module)) {
+        Result GetFreqList(RClkIpc_GetFreqList_Args* args, std::uint32_t* out_list, std::size_t size, std::uint32_t* out_count) {
+            if (!HOCCLK_ENUM_VALID(RClkModule, args->module)) {
                 return HOCCLK_ERROR(Generic);
             }
             if (args->maxCount != size/sizeof(*out_list)) {
@@ -141,11 +141,11 @@ namespace ipcService {
         Result ServiceHandlerFunc(void* arg, const IpcServerRequest* r, u8* out_data, size_t* out_dataSize) {
             (void)arg;
             switch (r->data.cmdId) {
-                case HocClkIpcCmd_GetApiVersion:
+                case RClkIpcCmd_GetApiVersion:
                     *out_dataSize = sizeof(u32);
                     return GetApiVersion((u32*)out_data);
 
-                case HocClkIpcCmd_GetVersionString:
+                case RClkIpcCmd_GetVersionString:
                     if (r->hipc.meta.num_recv_buffers >= 1) {
                         return GetVersionString(
                             (char*)hipcGetBufferAddress(r->hipc.data.recv_buffers),
@@ -154,75 +154,75 @@ namespace ipcService {
                     }
                     break;
 
-                case HocClkIpcCmd_GetCurrentContext:
+                case RClkIpcCmd_GetCurrentContext:
                     if (r->data.size >= sizeof(std::uint64_t) && r->hipc.meta.num_recv_buffers >= 1) {
                         size_t bufSize = hipcGetBufferSize(r->hipc.data.recv_buffers);
-                        if (bufSize >= sizeof(HocClkContext)) {
-                            return GetCurrentContext((HocClkContext*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
+                        if (bufSize >= sizeof(RClkContext)) {
+                            return GetCurrentContext((RClkContext*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
                         }
                     }
                     break;
 
-                case HocClkIpcCmd_Exit:
+                case RClkIpcCmd_Exit:
                     return ExitHandler();
 
-                case HocClkIpcCmd_GetProfileCount:
+                case RClkIpcCmd_GetProfileCount:
                     if (r->data.size >= sizeof(std::uint64_t)) {
                         *out_dataSize = sizeof(std::uint8_t);
                         return GetProfileCount((std::uint64_t*)r->data.ptr, (std::uint8_t*)out_data);
                     }
                     break;
 
-                case HocClkIpcCmd_GetProfiles:
+                case RClkIpcCmd_GetProfiles:
                     if (r->data.size >= sizeof(std::uint64_t) && r->hipc.meta.num_recv_buffers >= 1) {
                         size_t bufSize = hipcGetBufferSize(r->hipc.data.recv_buffers);
-                        if (bufSize >= sizeof(HocClkTitleProfileList)) {
-                            return GetProfiles((std::uint64_t*)r->data.ptr, (HocClkTitleProfileList*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
+                        if (bufSize >= sizeof(RClkTitleProfileList)) {
+                            return GetProfiles((std::uint64_t*)r->data.ptr, (RClkTitleProfileList*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
                         }
                     }
                     break;
 
-                case HocClkIpcCmd_SetProfiles:
-                    if (r->data.size >= sizeof(HocClkIpc_SetProfiles_Args)) {
-                        return SetProfiles((HocClkIpc_SetProfiles_Args*)r->data.ptr);
+                case RClkIpcCmd_SetProfiles:
+                    if (r->data.size >= sizeof(RClkIpc_SetProfiles_Args)) {
+                        return SetProfiles((RClkIpc_SetProfiles_Args*)r->data.ptr);
                     }
                     break;
 
-                case HocClkIpcCmd_SetEnabled:
+                case RClkIpcCmd_SetEnabled:
                     if (r->data.size >= sizeof(std::uint8_t)) {
                         return SetEnabled((std::uint8_t*)r->data.ptr);
                     }
                     break;
 
-                case HocClkIpcCmd_SetOverride:
-                    if (r->data.size >= sizeof(HocClkIpc_SetOverride_Args)) {
-                        return SetOverride((HocClkIpc_SetOverride_Args*)r->data.ptr);
+                case RClkIpcCmd_SetOverride:
+                    if (r->data.size >= sizeof(RClkIpc_SetOverride_Args)) {
+                        return SetOverride((RClkIpc_SetOverride_Args*)r->data.ptr);
                     }
                     break;
 
-                case HocClkIpcCmd_GetConfigValues:
+                case RClkIpcCmd_GetConfigValues:
                     if (r->hipc.meta.num_recv_buffers >= 1) {
                         size_t bufSize = hipcGetBufferSize(r->hipc.data.recv_buffers);
-                        if (bufSize >= sizeof(HocClkConfigValueList)) {
-                            return GetConfigValuesHandler((HocClkConfigValueList*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
+                        if (bufSize >= sizeof(RClkConfigValueList)) {
+                            return GetConfigValuesHandler((RClkConfigValueList*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
                         }
                     }
                     break;
 
-                case HocClkIpcCmd_SetConfigValues:
+                case RClkIpcCmd_SetConfigValues:
                     if (r->hipc.meta.num_send_buffers >= 1) {
                         size_t bufSize = hipcGetBufferSize(r->hipc.data.send_buffers);
-                        if (bufSize >= sizeof(HocClkConfigValueList)) {
-                            return SetConfigValuesHandler((HocClkConfigValueList*)hipcGetBufferAddress(r->hipc.data.send_buffers));
+                        if (bufSize >= sizeof(RClkConfigValueList)) {
+                            return SetConfigValuesHandler((RClkConfigValueList*)hipcGetBufferAddress(r->hipc.data.send_buffers));
                         }
                     }
                     break;
 
-                case HocClkIpcCmd_GetFreqList:
-                    if (r->data.size >= sizeof(HocClkIpc_GetFreqList_Args) && r->hipc.meta.num_recv_buffers >= 1) {
+                case RClkIpcCmd_GetFreqList:
+                    if (r->data.size >= sizeof(RClkIpc_GetFreqList_Args) && r->hipc.meta.num_recv_buffers >= 1) {
                         *out_dataSize = sizeof(std::uint32_t);
                         return GetFreqList(
-                            (HocClkIpc_GetFreqList_Args*)r->data.ptr,
+                            (RClkIpc_GetFreqList_Args*)r->data.ptr,
                             (std::uint32_t*)hipcGetBufferAddress(r->hipc.data.recv_buffers),
                             hipcGetBufferSize(r->hipc.data.recv_buffers),
                             (std::uint32_t*)out_data
@@ -230,28 +230,28 @@ namespace ipcService {
                     }
                     break;
 
-                case HocClkIpcCmd_SetKipData:
+                case RClkIpcCmd_SetKipData:
                     if (r->data.size >= 0) {
                         kip::SetKipData();
                         return 0;
                     }
                     break;
 
-                case HocClkIpcCmd_GetLadderConfig:
+                case RClkIpcCmd_GetLadderConfig:
                     if (r->hipc.meta.num_recv_buffers >= 1) {
                         size_t bufSize = hipcGetBufferSize(r->hipc.data.recv_buffers);
-                        if (bufSize >= sizeof(HocClkLadderConfig)) {
-                            autoRyazha::GetConfig((HocClkLadderConfig*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
+                        if (bufSize >= sizeof(RClkLadderConfig)) {
+                            autoRyazha::GetConfig((RClkLadderConfig*)hipcGetBufferAddress(r->hipc.data.recv_buffers));
                             return 0;
                         }
                     }
                     break;
 
-                case HocClkIpcCmd_SetLadderConfig:
+                case RClkIpcCmd_SetLadderConfig:
                     if (r->hipc.meta.num_send_buffers >= 1) {
                         size_t bufSize = hipcGetBufferSize(r->hipc.data.send_buffers);
-                        if (bufSize >= sizeof(HocClkLadderConfig)) {
-                            autoRyazha::SetConfig((HocClkLadderConfig*)hipcGetBufferAddress(r->hipc.data.send_buffers));
+                        if (bufSize >= sizeof(RClkLadderConfig)) {
+                            autoRyazha::SetConfig((RClkLadderConfig*)hipcGetBufferAddress(r->hipc.data.send_buffers));
                             return 0;
                         }
                     }

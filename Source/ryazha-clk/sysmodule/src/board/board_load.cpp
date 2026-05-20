@@ -25,7 +25,7 @@
  */
 
 #include <switch.h>
-#include <hocclk.h>
+#include <rclk.h>
 #include <nxExt.h>
 #include <algorithm>
 #include <math.h>
@@ -104,32 +104,32 @@ namespace board {
         return std::round(std::max({cpuUsage0, cpuUsage1, cpuUsage2}));
     }
 
-    u32 GetPartLoad(HocClkPartLoad loadSource) {
+    u32 GetPartLoad(RClkPartLoad loadSource) {
         switch(loadSource) {
-            case HocClkPartLoad_EMC:
+            case RClkPartLoad_EMC:
                 return t210EmcLoadAll();
-            case HocClkPartLoad_EMCCpu:
+            case RClkPartLoad_EMCCpu:
                 return t210EmcLoadCpu();
-            case HocClkPartLoad_GPU:
+            case RClkPartLoad_GPU:
                 return gpuLoad;
-            case HocClkPartLoad_CPUMax:
+            case RClkPartLoad_CPUMax:
                 return GetMaxCpuLoad();
-            case HocClkPartLoad_BAT:
+            case RClkPartLoad_BAT:
                 BatteryChargeInfo info;
                 batteryInfoGetChargeInfo(&info);
                 return info.RawBatteryCharge;
-            case HocClkPartLoad_FAN:
+            case RClkPartLoad_FAN:
                 return GetFanLevel();
-            case HocClkPartLoad_RamBWAll:
+            case RClkPartLoad_RamBWAll:
                 return t210EmcBwAll();
-            case HocClkPartLoad_RamBWCpu:
+            case RClkPartLoad_RamBWCpu:
                 return t210EmcBwCpu();
-            case HocClkPartLoad_RamBWGpu:
+            case RClkPartLoad_RamBWGpu:
                 return t210EmcBwGpu();
-            case HocClkPartLoad_RamBWPeak:
+            case RClkPartLoad_RamBWPeak:
                 return t210EmcBwPeak();
             default:
-                ASSERT_ENUM_VALID(HocClkPartLoad, loadSource);
+                ASSERT_ENUM_VALID(RClkPartLoad, loadSource);
         }
         return 0;
     }

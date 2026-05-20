@@ -27,38 +27,13 @@
 
 #pragma once
 
-#include <list>
-#include <functional>
-#include <map>
-#include "base_menu_gui.h"
+#include "board.h"
 
-using FreqChoiceListener = std::function<bool(std::uint32_t hz)>;
+typedef struct {
+    uint32_t id;
+    uint32_t cpu_hz;
+    uint32_t gpu_hz;
+    uint32_t mem_hz;
+} RClkApmConfiguration;
 
-class FreqChoiceGui : public BaseMenuGui
-{
-protected:
-    RClkConfigValueList* configList;
-    std::uint32_t selectedHz;
-    std::uint32_t* hzList;
-    std::uint32_t hzCount;
-    RClkModule module;
-    FreqChoiceListener listener;
-    bool checkMax;
-
-    std::map<uint32_t, std::string> labels;
-
-    tsl::elm::ListItem* createFreqListItem(std::uint32_t hz, bool selected, int safety);
-
-public:
-    FreqChoiceGui(std::uint32_t selectedHz,
-                  std::uint32_t* hzList,
-                  std::uint32_t hzCount,
-                  RClkModule module,
-                  FreqChoiceListener listener,
-                  bool checkMax = true,
-                  std::map<uint32_t, std::string> labels = {});
-
-    ~FreqChoiceGui();
-
-    void listUI() override;
-};
+extern RClkApmConfiguration rclk_g_apm_configurations[];

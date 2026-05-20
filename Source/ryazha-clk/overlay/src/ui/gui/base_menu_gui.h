@@ -95,13 +95,13 @@ class BaseMenuGui : public BaseGui
 
     public:
         // u8 dockedHighestAllowedRefreshRate = 60;
-        HocClkContext* context;
+        RClkContext* context;
         std::uint64_t lastContextUpdate;    // совместимость: используется только для ladder.
         std::uint64_t lastTelemetryNs = 0;  // ~15 Гц чтение контек/ipc.
         std::uint64_t lastConfigNs    = 0;  // 1 Гц перечитывание config.
         std::uint64_t lastFrameTicks  = 0;  // для dt между кадрами (EMA/slew).
         HudSmoothBank smooth;
-        HocClkConfigValueList configList;
+        RClkConfigValueList configList;
         bool g_hardwareModelCached = false;
         bool g_isMariko = false;
         bool g_isAula = false;
@@ -150,5 +150,5 @@ class BaseMenuGui : public BaseGui
 
     private:
         char displayStrings[48][32];  // Pre-formatted display strings
-        tsl::Color tempColors[HocClkThermalSensor_EnumMax];  // Pre-computed temperature colors
+        tsl::Color tempColors[RClkThermalSensor_EnumMax];  // Pre-computed temperature colors
 };

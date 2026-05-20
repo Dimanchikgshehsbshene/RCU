@@ -26,13 +26,13 @@
 
 #pragma once
 #include <switch.h>
-#include <hocclk.h>
+#include <rclk.h>
 
 namespace board {
 
     void StartLoad(Result nvCheck, u32 fd);
     void ExitLoad();
-    u32 GetPartLoad(HocClkPartLoad loadSource);
+    u32 GetPartLoad(RClkPartLoad loadSource);
     void SetGpuSchedulingMode(GpuSchedulingMode mode, GpuSchedulingOverrideMethod method);
     void SchedSetFD2(u32 fd2);
     void NvSchedSucceed(Result nvSched);

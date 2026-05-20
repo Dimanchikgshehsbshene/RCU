@@ -67,7 +67,7 @@ class ExperimentalSettingsSubMenuGui;
 
 MiscGui::MiscGui()
 {
-    this->configList = new HocClkConfigValueList {};
+    this->configList = new RClkConfigValueList {};
 }
 
 MiscGui::~MiscGui()
@@ -88,16 +88,16 @@ MiscGui::~MiscGui()
     this->configRanges.clear();
 }
 
-void MiscGui::addConfigToggle(HocClkConfigValue configVal, const char* altName, bool kip) {
-    const char* configName = altName ? altName : hocclkFormatConfigValue(configVal, true);
+void MiscGui::addConfigToggle(RClkConfigValue configVal, const char* altName, bool kip) {
+    const char* configName = altName ? altName : rclkFormatConfigValue(configVal, true);
     tsl::elm::ToggleListItem* toggle = new tsl::elm::ToggleListItem(configName, this->configList->values[configVal]);
     if (!kip)
         toggle->setTextColor(tsl::Color(120, 235, 255, 255));
     toggle->setStateChangedListener([this, configVal, kip](bool state) {
         this->configList->values[configVal] = uint64_t(state);
-        Result rc = hocclkIpcSetConfigValues(this->configList);
+        Result rc = rclkIpcSetConfigValues(this->configList);
         if (R_FAILED(rc)) {
-            FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+            FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
         } else if (kip) {
             shouldSaveKip = true;
         }
@@ -107,7 +107,7 @@ void MiscGui::addConfigToggle(HocClkConfigValue configVal, const char* altName, 
     this->configToggles[configVal] = toggle;
 }
 
-void MiscGui::addConfigTrackbar(HocClkConfigValue configVal, const char* altName, const ValueRange& range, bool kip) {
+void MiscGui::addConfigTrackbar(RClkConfigValue configVal, const char* altName, const ValueRange& range, bool kip) {
     struct IndexedBar : tsl::elm::NamedStepTrackBar {
         IndexedBar(const char* label, const ValueRange& r)
             : tsl::elm::NamedStepTrackBar("", {""}, true, label) {
@@ -123,7 +123,7 @@ void MiscGui::addConfigTrackbar(HocClkConfigValue configVal, const char* altName
             m_selection = m_stepDescriptions[0];
         }
     };
-    const char* name = altName ? altName : hocclkFormatConfigValue(configVal, true);
+    const char* name = altName ? altName : rclkFormatConfigValue(configVal, true);
     auto* bar = new IndexedBar(name, range);
     u32 cur = (u32)this->configList->values[configVal];
     u16 curStep = 0;
@@ -132,17 +132,17 @@ void MiscGui::addConfigTrackbar(HocClkConfigValue configVal, const char* altName
     bar->setProgress(curStep);
     bar->setValueChangedListener([this, configVal, kip, range](u16 v) {
         this->configList->values[configVal] = range.min + (u32)v * range.step;
-        Result rc = hocclkIpcSetConfigValues(this->configList);
-        if (R_FAILED(rc)) FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+        Result rc = rclkIpcSetConfigValues(this->configList);
+        if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
         if (kip) shouldSaveKip = true;
     });
     this->listElement->addItem(bar);
 }
 
-void MiscGui::addMappedConfigTrackbar(HocClkConfigValue configVal, const char* altName,
+void MiscGui::addMappedConfigTrackbar(RClkConfigValue configVal, const char* altName,
                                        std::vector<u32> vals,
                                        std::initializer_list<std::string> names, bool kip) {
-    const char* name = altName ? altName : hocclkFormatConfigValue(configVal, true);
+    const char* name = altName ? altName : rclkFormatConfigValue(configVal, true);
     auto* bar = new tsl::elm::NamedStepTrackBar("", names, true, name);
     u32 cur = (u32)this->configList->values[configVal];
     u16 curIdx = 0;
@@ -153,15 +153,15 @@ void MiscGui::addMappedConfigTrackbar(HocClkConfigValue configVal, const char* a
     bar->setValueChangedListener([this, configVal, kip, vals](u16 idx) {
         if (idx < (u16)vals.size())
             this->configList->values[configVal] = vals[idx];
-        Result rc = hocclkIpcSetConfigValues(this->configList);
-        if (R_FAILED(rc)) FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+        Result rc = rclkIpcSetConfigValues(this->configList);
+        if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
         if (kip) shouldSaveKip = true;
     });
     this->listElement->addItem(bar);
 }
 
 
-void MiscGui::addConfigButton(HocClkConfigValue configVal,
+void MiscGui::addConfigButton(RClkConfigValue configVal,
     const char* altName,
     const ValueRange& range,
     const std::string& categoryName,
@@ -171,7 +171,7 @@ void MiscGui::addConfigButton(HocClkConfigValue configVal,
     bool showDefaultValue,
     bool kip)
 {
-    const char* configName = altName ? altName : hocclkFormatConfigValue(configVal, true);
+    const char* configName = altName ? altName : rclkFormatConfigValue(configVal, true);
 
     tsl::elm::ListItem* listItem = new tsl::elm::ListItem(configName);
     if (!kip)
@@ -225,9 +225,9 @@ void MiscGui::addConfigButton(HocClkConfigValue configVal,
                     categoryName,
                     [this, configVal, kip](std::uint32_t value) {
                         this->configList->values[configVal] = value;
-                        Result rc = hocclkIpcSetConfigValues(this->configList);
+                        Result rc = rclkIpcSetConfigValues(this->configList);
                         if (R_FAILED(rc)) {
-                            FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                            FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                             return false;
                         }
                         if (kip) {
@@ -250,9 +250,9 @@ void MiscGui::addConfigButton(HocClkConfigValue configVal,
                     categoryName,
                     [this, configVal, kip](std::uint32_t value) {
                         this->configList->values[configVal] = value;
-                        Result rc = hocclkIpcSetConfigValues(this->configList);
+                        Result rc = rclkIpcSetConfigValues(this->configList);
                         if (R_FAILED(rc)) {
-                            FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                            FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                             return false;
                         }
                         if (kip) {
@@ -278,7 +278,7 @@ void MiscGui::addConfigButton(HocClkConfigValue configVal,
     this->configNamedValues[configVal] = namedValues;
 }
 
-void MiscGui::addConfigButtonS(HocClkConfigValue configVal,
+void MiscGui::addConfigButtonS(RClkConfigValue configVal,
     const char* altName,
     const ValueRange& range,
     const std::string& categoryName,
@@ -343,9 +343,9 @@ void MiscGui::addConfigButtonS(HocClkConfigValue configVal,
                     categoryName,
                     [this, configVal, kip](std::uint32_t value) {
                         this->configList->values[configVal] = value;
-                        Result rc = hocclkIpcSetConfigValues(this->configList);
+                        Result rc = rclkIpcSetConfigValues(this->configList);
                         if (R_FAILED(rc)) {
-                            FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                            FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                             return false;
                         }
                         if (kip) {
@@ -368,9 +368,9 @@ void MiscGui::addConfigButtonS(HocClkConfigValue configVal,
                     categoryName,
                     [this, configVal, kip](std::uint32_t value) {
                         this->configList->values[configVal] = value;
-                        Result rc = hocclkIpcSetConfigValues(this->configList);
+                        Result rc = rclkIpcSetConfigValues(this->configList);
                         if (R_FAILED(rc)) {
-                            FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                            FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                             return false;
                         }
                         if (kip) {
@@ -406,12 +406,12 @@ void MiscGui::updateConfigToggles() {
     }
 }
 
-void MiscGui::addFreqButton(HocClkConfigValue configVal,
+void MiscGui::addFreqButton(RClkConfigValue configVal,
                             const char* altName,
-                            HocClkModule module,
+                            RClkModule module,
                             const std::map<uint32_t, std::string>& labels)
 {
-    const char* configName = altName ? altName : hocclkFormatConfigValue(configVal, true);
+    const char* configName = altName ? altName : rclkFormatConfigValue(configVal, true);
 
     tsl::elm::ListItem* listItem = new tsl::elm::ListItem(configName);
 
@@ -429,9 +429,9 @@ void MiscGui::addFreqButton(HocClkConfigValue configVal,
             std::uint32_t hzList[HOCCLK_FREQ_LIST_MAX];
             std::uint32_t hzCount;
 
-            Result rc = hocclkIpcGetFreqList(module, hzList, HOCCLK_FREQ_LIST_MAX, &hzCount);
+            Result rc = rclkIpcGetFreqList(module, hzList, HOCCLK_FREQ_LIST_MAX, &hzCount);
             if (R_FAILED(rc)) {
-                FatalGui::openWithResultCode("hocclkIpcGetFreqList", rc);
+                FatalGui::openWithResultCode("rclkIpcGetFreqList", rc);
                 return false;
             }
 
@@ -447,9 +447,9 @@ void MiscGui::addFreqButton(HocClkConfigValue configVal,
                     uint64_t mhz = hz / 1'000'000;
                     this->configList->values[configVal] = mhz;
 
-                    Result rc = hocclkIpcSetConfigValues(this->configList);
+                    Result rc = rclkIpcSetConfigValues(this->configList);
                     if (R_FAILED(rc)) {
-                        FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                        FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                         return false;
                     }
 
@@ -471,9 +471,9 @@ void MiscGui::addFreqButton(HocClkConfigValue configVal,
 
 void MiscGui::listUI()
 {
-    Result rc = hocclkIpcGetConfigValues(configList);
+    Result rc = rclkIpcGetConfigValues(configList);
     if (R_FAILED(rc)) [[unlikely]] {
-        FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+        FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
         return;
     }
 
@@ -566,7 +566,7 @@ void MiscGui::listUI()
     displaySubMenu->setValue(R_ARROW);
     this->listElement->addItem(displaySubMenu);
 
-    if(this->configList->values[HocClkConfigValue_EnableExperimentalSettings]) {
+    if(this->configList->values[RClkConfigValue_EnableExperimentalSettings]) {
         tsl::elm::ListItem* experimentalSubMenu = new tsl::elm::ListItem("Экспериментальные настройки");
         experimentalSubMenu->setClickListener([](u64 keys) {
             if (keys & HidNpadButton_A) {
@@ -587,8 +587,8 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         this->listElement->addItem(new tsl::elm::CategoryHeader("Общие настройки"));
         ValueThresholds thresholdsDisabled(0, 0);
         std::vector<NamedValue> ramVoltDispModes = {
@@ -597,7 +597,7 @@ protected:
         };
 
         if(IsMariko()) {
-            addConfigButton(HocClkConfigValue_RAMVoltDisplayMode, "Показ напряжения ОЗУ", ValueRange(0, 12, 1, "", 0), "Показ напряжения ОЗУ", &thresholdsDisabled, {}, ramVoltDispModes, false);
+            addConfigButton(RClkConfigValue_RAMVoltDisplayMode, "Показ напряжения ОЗУ", ValueRange(0, 12, 1, "", 0), "Показ напряжения ОЗУ", &thresholdsDisabled, {}, ramVoltDispModes, false);
         }
 
         std::vector<NamedValue> RamDisplayUnitValues = {
@@ -606,7 +606,7 @@ protected:
             NamedValue("МГц и МТ/с", RamDisplayUnit_MHzMTs),
         };
         addConfigButton(
-            HocClkConfigValue_RamDisplayUnit,
+            RClkConfigValue_RamDisplayUnit,
             "Единицы отображения ОЗУ",
             ValueRange(0, 0, 2, "", 0),
             "Единицы отображения ОЗУ",
@@ -618,7 +618,7 @@ protected:
         );
         
         addConfigButton(
-            HocClkConfigValue_PollingIntervalMs,
+            RClkConfigValue_PollingIntervalMs,
             "Интервал опроса",
             ValueRange(50, 1000, 50, " мс", 1),
             "Интервал опроса",
@@ -636,7 +636,7 @@ protected:
         exSetWarning->setBoundaries(0, 0, tsl::cfg::FramebufferWidth, 90);
         this->listElement->addItem(exSetWarning);
 
-        addConfigToggle(HocClkConfigValue_EnableExperimentalSettings, "Экспериментальные настройки");
+        addConfigToggle(RClkConfigValue_EnableExperimentalSettings, "Экспериментальные настройки");
     }
 };
 
@@ -646,18 +646,18 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         this->listElement->addItem(new tsl::elm::CategoryHeader("Экспериментальные настройки"));
         ValueThresholds thresholdsDisabled(0, 0);
 
-        addConfigToggle(HocClkConfigValue_LiveCpuUv, "Live UV ЦП");
+        addConfigToggle(RClkConfigValue_LiveCpuUv, "Live UV ЦП");
         std::vector<NamedValue> gpuSchedMethodValues = {
             NamedValue("INI", GpuSchedulingOverrideMethod_Ini),
             NamedValue("NV сервис", GpuSchedulingOverrideMethod_NvService),
         };
         addConfigButton(
-            HocClkConfigValue_GPUSchedulingMethod,
+            RClkConfigValue_GPUSchedulingMethod,
             "Метод переопр. планирования ГП",
             ValueRange(0, 0, 1, "", 0),
             "Метод переопр. планирования ГП",
@@ -673,7 +673,7 @@ protected:
             NamedValue("Actmon", MemoryFrequencyMeasurementMode_Actmon),
         };
         addConfigButton(
-            HocClkConfigValue_MemoryFrequencyMeasurementMode,
+            RClkConfigValue_MemoryFrequencyMeasurementMode,
             "Режим измер. частоты ОЗУ",
             ValueRange(0, 0, 1, "", 0),
             "Режим измер. частоты ОЗУ",
@@ -708,7 +708,7 @@ protected:
                 ValueThresholds chargerThresholds(2048, 2049);
 
                 addConfigButton(
-                    HocClkConfigValue_BatteryChargeCurrent,
+                    RClkConfigValue_BatteryChargeCurrent,
                     "Переопределение тока зарядки",
                     ValueRange(0, 0, 1, "", 0),
                     "Переопределение тока зарядки",
@@ -733,7 +733,7 @@ protected:
             ValueThresholds chargerThresholds(1664, 1793);
 
             addConfigButton(
-                HocClkConfigValue_BatteryChargeCurrent,
+                RClkConfigValue_BatteryChargeCurrent,
                 "Переопределение тока зарядки",
                 ValueRange(0, 0, 1, "", 0),
                 "Переопределение тока зарядки",
@@ -754,8 +754,8 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         this->listElement->addItem(new tsl::elm::CategoryHeader("Настройки Говернера"));
         ValueThresholds thresholdsDisabled(0, 0);
 
@@ -769,7 +769,7 @@ protected:
         };
 
         addConfigButton(
-            HocClkConfigValue_CpuGovernorMinimumFreq,
+            RClkConfigValue_CpuGovernorMinimumFreq,
             "CPU Governor Minimum Frequency",
             ValueRange(0, 0, 1, "", 0),
             "CPU Governor Minimum Frequency",
@@ -789,8 +789,8 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         ValueThresholds thresholdsDisabled(0, 0);
 
         BaseMenuGui::refresh(); // get latest context
@@ -798,7 +798,7 @@ protected:
             return;
 
         this->listElement->addItem(new tsl::elm::CategoryHeader("Настройки дисплея"));
-        addConfigToggle(HocClkConfigValue_OverwriteRefreshRate, "Изменение частоты обновления дисплея");
+        addConfigToggle(RClkConfigValue_OverwriteRefreshRate, "Изменение частоты обновления дисплея");
         if(!this->context->isUsingRetroSuper) {
             tsl::elm::CustomDrawer* warningText = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
                 renderer->drawString("\uE150 Небезопасные частоты дисплея", false, x + 20, y + 30, 18, tsl::style::color::ColorText);
@@ -812,13 +812,13 @@ protected:
             const u32 capMin = 60u;
             const u32 capMax = IsAula() ? 65u : 75u;
             auto* maxHzBar = new ryazha_ui::DisplayHzTrackBar(capMin, capMax, 1u, "Макс. частота экрана, Гц");
-            u32 capCur = ryazha_ui::displayHzOrDefault((u32)this->configList->values[HocClkConfigValue_MaxDisplayClockH]);
+            u32 capCur = ryazha_ui::displayHzOrDefault((u32)this->configList->values[RClkConfigValue_MaxDisplayClockH]);
             maxHzBar->setProgress(ryazha_ui::displayHzToProgress(capCur, maxHzBar->minHz(), maxHzBar->maxHz(), maxHzBar->stepHz()));
             maxHzBar->setValueChangedListener([this, maxHzBar](u16 v) {
                 const u32 hz = std::min(maxHzBar->maxHz(), maxHzBar->minHz() + (u32)v * maxHzBar->stepHz());
-                this->configList->values[HocClkConfigValue_MaxDisplayClockH] = hz;
-                Result rc = hocclkIpcSetConfigValues(this->configList);
-                if (R_FAILED(rc)) FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                this->configList->values[RClkConfigValue_MaxDisplayClockH] = hz;
+                Result rc = rclkIpcSetConfigValues(this->configList);
+                if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                 ryazha_ui::syncLadderVrrMaxToHocCap(hz);
                 this->lastContextUpdate = armGetSystemTick();
             });
@@ -826,7 +826,7 @@ protected:
         }
         if(!IsAula()) {
             addConfigButton(
-                HocClkConfigValue_DisplayVoltage,
+                RClkConfigValue_DisplayVoltage,
                 "Напряжение дисплея",
                 ValueRange(800, 1200, 25, " мВ", 1),
                 "Напряжение дисплея",
@@ -849,7 +849,7 @@ protected:
             };
 
             addConfigButton(
-                HocClkConfigValue_AulaDisplayColorPreset,
+                RClkConfigValue_AulaDisplayColorPreset,
                 "Цветовой режим OLED",
                 ValueRange(0, 1, 1, "", 0),
                 "Цветовой режим OLED",
@@ -871,12 +871,12 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         this->listElement->addItem(new tsl::elm::CategoryHeader("Настройки безопасности"));
-        addConfigToggle(HocClkConfigValue_UncappedClocks, "Без лимита частот");
-        addConfigToggle(HocClkConfigValue_ThermalThrottle, "Термо-троттлинг");
-        addConfigToggle(HocClkConfigValue_HandheldTDP, "Лимит TDP (портатив)");
+        addConfigToggle(RClkConfigValue_UncappedClocks, "Без лимита частот");
+        addConfigToggle(RClkConfigValue_ThermalThrottle, "Термо-троттлинг");
+        addConfigToggle(RClkConfigValue_HandheldTDP, "Лимит TDP (портатив)");
 
         #if IS_MINIMAL == 0
             std::map<uint32_t, std::string> labels_pwr_l = {
@@ -886,7 +886,7 @@ protected:
             if(IsHoag()) {
                 ValueThresholds tdpThresholdsLite(6400, 7500);
                 addConfigButton(
-                    HocClkConfigValue_LiteTDPLimit,
+                    RClkConfigValue_LiteTDPLimit,
                     "Порог TDP",
                     ValueRange(4000, 8000, 100, "мВт", 1),
                     "Мощность",
@@ -896,7 +896,7 @@ protected:
             } else {
                 ValueThresholds tdpThresholds(9600, 11000);
                 addConfigButton(
-                    HocClkConfigValue_HandheldTDPLimit,
+                    RClkConfigValue_HandheldTDPLimit,
                     "Порог TDP",
                     ValueRange(8000, 12000, 100, "мВт", 1),
                     "Мощность",
@@ -906,7 +906,7 @@ protected:
 
             ValueThresholds throttleThresholds(70, 80);
             addConfigButton(
-                HocClkConfigValue_ThermalThrottleThreshold,
+                RClkConfigValue_ThermalThrottleThreshold,
                 "Лимит термо-троттлинга",
                 ValueRange(50, 85, 1, "°C", 1),
                 "Температура",
@@ -926,8 +926,8 @@ protected:
         if(!this->context)
             return;
 
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         ValueThresholds thresholdsDisabled(0, 0);
         std::vector<NamedValue> noNamedValues = {};
 
@@ -937,7 +937,7 @@ protected:
         
         addConfigTrackbar(KipConfigValue_emcDvbShift,  "SoC DVB Shift",  ValueRange(0, 16, 1)); // yes, DVB 16 is nessesary
         if(IsMariko()) {
-            u32 socSpeedo = this->context->speedos[HocClkSpeedo_SOC];
+            u32 socSpeedo = this->context->speedos[RClkSpeedo_SOC];
             std::string autoText = "1000 мВ";
             if (socSpeedo <= 1597) {
                 autoText = "1050 мВ";
@@ -1035,7 +1035,7 @@ protected:
             freqSubmenu->setValue(R_ARROW);
             this->listElement->addItem(freqSubmenu);
         } else {
-            RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit];
+            RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit];
             std::vector<NamedValue> marikoMaxEmcClock = {
                 NamedValue("1600 MHz", 1600000),
                 NamedValue("1633 MHz", 1633000),
@@ -1135,8 +1135,8 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         this->listElement->addItem(new tsl::elm::CategoryHeader("Memory Timings"));
 
         addConfigTrackbar(KipConfigValue_t1_tRCD,  "t1 tRCD",  ValueRange(0, 7,  1));
@@ -1210,7 +1210,7 @@ protected:
             // NamedValue("3466MHz (Needs ridiculous Speedo/PLL)", 3466000),
             // NamedValue("3500MHz (Needs ridiculous Speedo/PLL)", 3500000),
         };
-        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit];
+        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit];
 
         for (size_t i = 1; i < timingTbreakFreqs.size(); ++i) {
             auto &nv = timingTbreakFreqs[i];
@@ -1238,7 +1238,7 @@ public:
 
 protected:
 
-    void normalizeLatencies(const HocClkConfigValue keysArr[4]) {
+    void normalizeLatencies(const RClkConfigValue keysArr[4]) {
         uint32_t maxClock = (uint32_t)this->configList->values[KipConfigValue_marikoEmcMaxClock];
         uint32_t vals[4];
 
@@ -1284,14 +1284,14 @@ protected:
             return;
         }
 
-        Result rc = hocclkIpcGetConfigValues(this->configList);
+        Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] {
-            FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+            FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
 
         uint32_t maxClock = (uint32_t)this->configList->values[KipConfigValue_marikoEmcMaxClock];
-        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit];
+        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit];
 
         static const std::vector<uint32_t> kFreqOptions = {
             1633000, 1666000, 1700000, 1733000, 1766000, 1800000,
@@ -1304,13 +1304,13 @@ protected:
             3200000, 3233000, 3266000, 3300000,
         };
 
-        static const HocClkConfigValue kLatencyRKeys[4] = {
+        static const RClkConfigValue kLatencyRKeys[4] = {
             KipConfigValue_read_latency_1333,
             KipConfigValue_read_latency_1600,
             KipConfigValue_read_latency_1866,
             KipConfigValue_read_latency_2133,
         };
-        static const HocClkConfigValue kLatencyWKeys[4] = {
+        static const RClkConfigValue kLatencyWKeys[4] = {
             KipConfigValue_write_latency_1333,
             KipConfigValue_write_latency_1600,
             KipConfigValue_write_latency_1866,
@@ -1342,8 +1342,8 @@ protected:
             return formatMemClockKhzLabel(rawVal, unit);
         };
 
-        auto addLatencyRow = [&](const char* label, int tierIdx, const HocClkConfigValue keysArr[4]) {
-            HocClkConfigValue thisKey = keysArr[tierIdx];
+        auto addLatencyRow = [&](const char* label, int tierIdx, const RClkConfigValue keysArr[4]) {
+            RClkConfigValue thisKey = keysArr[tierIdx];
             uint32_t currentVal = (uint32_t)this->configList->values[thisKey];
 
             tsl::elm::ListItem* item = new tsl::elm::ListItem(label);
@@ -1358,7 +1358,7 @@ protected:
                     vals[i] = (uint32_t)this->configList->values[keysArr[i]];
 
                 uint32_t maxClock = (uint32_t)this->configList->values[KipConfigValue_marikoEmcMaxClock];
-                RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit];
+                RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit];
 
                 auto resolveVal = [maxClock](uint32_t v) -> uint32_t {
                     return (v == 0xFFFFFFFFu) ? maxClock : v;
@@ -1391,9 +1391,9 @@ protected:
                         std::string("2133 Latency Max"),
                         [this, thisKey, keysArr](uint32_t chosen) -> bool {
                             this->configList->values[thisKey] = chosen;
-                            Result rc = hocclkIpcSetConfigValues(this->configList);
+                            Result rc = rclkIpcSetConfigValues(this->configList);
                             if (R_FAILED(rc)) {
-                                FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                                FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                                 return false;
                             }
                             shouldSaveKip = true;
@@ -1451,9 +1451,9 @@ protected:
                     [this, thisKey, keysArr](uint32_t chosen) -> bool {
                         this->configList->values[thisKey] = chosen;
                         normalizeLatencies(keysArr);
-                        Result rc = hocclkIpcSetConfigValues(this->configList);
+                        Result rc = rclkIpcSetConfigValues(this->configList);
                         if (R_FAILED(rc)) {
-                            FatalGui::openWithResultCode("hocclkIpcSetConfigValues", rc);
+                            FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                             return false;
                         }
                         shouldSaveKip = true;
@@ -1491,9 +1491,9 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList); // populate config list early otherwise wont work
+        Result rc = rclkIpcGetConfigValues(this->configList); // populate config list early otherwise wont work
         if (R_FAILED(rc)) [[unlikely]] {
-            FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+            FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
 
@@ -1652,7 +1652,7 @@ protected:
             };
             ValueThresholds eCpuMaxClockThresholds(1785, 2091);
             addConfigButton(
-                HocClkConfigValue_EristaMaxCpuClock,
+                RClkConfigValue_EristaMaxCpuClock,
                 "CPU Max Clock",
                 ValueRange(0, 0, 1, "", 1),
                 "CPU Max Clock",
@@ -1682,7 +1682,7 @@ protected:
                 true
             );
         }
-        addConfigToggle(HocClkConfigValue_OverwriteBoostMode, nullptr);
+        addConfigToggle(RClkConfigValue_OverwriteBoostMode, nullptr);
 
     }
 };
@@ -1693,13 +1693,13 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         this->listElement->addItem(new tsl::elm::CategoryHeader("RAM Frequency Editor"));
 
         ValueThresholds thresholdsDisabled(0, 0);
         // 1600000, 1331200, 1065600, 800000, 665600, 408000, 204000
-        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit];
+        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit];
 
         this->listElement->addItem(new tsl::elm::ListItem(formatMemClockKhzLabel(665600, unit)));
         this->listElement->addItem(new tsl::elm::ListItem(formatMemClockKhzLabel(800000, unit)));
@@ -1765,8 +1765,8 @@ public:
 
 protected:
     void listUI() override {
-        Result rc = hocclkIpcGetConfigValues(this->configList);
-        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc); return; }
+        Result rc = rclkIpcGetConfigValues(this->configList);
+        if (R_FAILED(rc)) [[unlikely]] { FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc); return; }
         ValueThresholds thresholdsDisabled(0, 0);
         std::vector<NamedValue> noNamedValues = {};
 
@@ -1899,7 +1899,7 @@ protected:
         };
 
         addConfigButton(
-            HocClkConfigValue_GPUScheduling,
+            RClkConfigValue_GPUScheduling,
             "GPU Scheduling Override",
             ValueRange(0, 0, 1, "", 0),
             "GPU Scheduling Override",
@@ -1941,7 +1941,7 @@ protected:
             };
 
             addConfigButton(
-                HocClkConfigValue_DVFSMode,
+                RClkConfigValue_DVFSMode,
                 "GPU DVFS Mode",
                 ValueRange(0, 0, 1, "", 0),
                 "GPU DVFS Mode",
@@ -1951,7 +1951,7 @@ protected:
                 false
             );
 
-            addConfigButton(HocClkConfigValue_DVFSOffset, "GPU DVFS Offset", ValueRange(0, 12, 1, "", 0), "GPU DVFS Offset", &thresholdsDisabled, {}, dvfsOffset, false);
+            addConfigButton(RClkConfigValue_DVFSOffset, "GPU DVFS Offset", ValueRange(0, 12, 1, "", 0), "GPU DVFS Offset", &thresholdsDisabled, {}, dvfsOffset, false);
         }
 
         tsl::elm::ListItem* customTableSubmenu = new tsl::elm::ListItem("GPU Voltage Table");
@@ -1974,9 +1974,9 @@ public:
 protected:
     void listUI() override {
 
-        Result rc = hocclkIpcGetConfigValues(this->configList); // populate config list early otherwise wont work
+        Result rc = rclkIpcGetConfigValues(this->configList); // populate config list early otherwise wont work
         if (R_FAILED(rc)) [[unlikely]] {
-            FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+            FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
 
@@ -2229,16 +2229,16 @@ void MiscGui::refresh() {
     if (this->context && ++frameCounter >= 60) {
         frameCounter = 0;
 
-        Result rc = hocclkIpcGetConfigValues(this->configList);
+        Result rc = rclkIpcGetConfigValues(this->configList);
         if (R_FAILED(rc)) [[unlikely]] {
-            FatalGui::openWithResultCode("hocclkIpcGetConfigValues", rc);
+            FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
         updateConfigToggles();
 
         // relabel when display unit changes
-        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit];
-        constexpr HocClkConfigValue emcKeys[] = {
+        RamDisplayUnit unit = (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit];
+        constexpr RClkConfigValue emcKeys[] = {
             KipConfigValue_marikoEmcMaxClock,
             KipConfigValue_eristaEmcMaxClock,
             KipConfigValue_eristaEmcMaxClock1,

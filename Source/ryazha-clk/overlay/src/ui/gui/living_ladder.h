@@ -4,8 +4,8 @@
  * Оверлейный прокси для Ryazha-Авто.
  * ВСЯ логика (VRR, TDP throttle, ladder, RAM-pin) теперь живёт в sysmodule
  * (см. sysmodule/src/auto_ryazha.cpp). Оверлей — это тонкий UI:
- *   1) забирает cfg через hocclkIpcGetLadderConfig;
- *   2) отдаёт обновлённый cfg через hocclkIpcSetLadderConfig на каждый клик;
+ *   1) забирает cfg через rclkIpcGetLadderConfig;
+ *   2) отдаёт обновлённый cfg через rclkIpcSetLadderConfig на каждый клик;
  *   3) НЕ имеет собственного tick'а.
  *
  */
@@ -14,23 +14,23 @@
 
 #include <cstdint>
 #include <switch/types.h>
-#include <hocclk/auto_ryazha.h>
+#include <rclk/auto_ryazha.h>
 
-using LadderConfig = HocClkLadderConfig;
+using LadderConfig = RClkLadderConfig;
 
 enum LadderAlgo : u8 {
-    LadderAlgo_Cycle   = HocClkLadderAlgo_Cycle,
-    LadderAlgo_Pro     = HocClkLadderAlgo_Pro,
-    LadderAlgo_EnumMax = HocClkLadderAlgo_EnumMax,
+    LadderAlgo_Cycle   = RClkLadderAlgo_Cycle,
+    LadderAlgo_Pro     = RClkLadderAlgo_Pro,
+    LadderAlgo_EnumMax = RClkLadderAlgo_EnumMax,
 };
 
 enum LadderVrrMode : u8 {
-    LadderVrr_Off      = HocClkLadderVrr_Off,
-    LadderVrr_On       = HocClkLadderVrr_On,
-    LadderVrr_Auto     = HocClkLadderVrr_Auto,
-    LadderVrr_Smart    = HocClkLadderVrr_Smart,
-    LadderVrr_SuperPro = HocClkLadderVrr_SuperPro,
-    LadderVrr_EnumMax  = HocClkLadderVrr_EnumMax,
+    LadderVrr_Off      = RClkLadderVrr_Off,
+    LadderVrr_On       = RClkLadderVrr_On,
+    LadderVrr_Auto     = RClkLadderVrr_Auto,
+    LadderVrr_Smart    = RClkLadderVrr_Smart,
+    LadderVrr_SuperPro = RClkLadderVrr_SuperPro,
+    LadderVrr_EnumMax  = RClkLadderVrr_EnumMax,
 };
 
 class LivingLadderProxy {

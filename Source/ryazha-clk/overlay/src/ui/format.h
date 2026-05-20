@@ -30,7 +30,7 @@
 #include <cstdio>
 #include <string>
 #include <cstdint>
-#include <hocclk/board.h>
+#include <rclk/board.h>
 
 #define FREQ_DEFAULT_TEXT "Не определять"
 

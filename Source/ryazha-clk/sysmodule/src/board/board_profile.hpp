@@ -25,10 +25,10 @@
  */
 
 #pragma once
-#include <hocclk.h>
+#include <rclk.h>
 
 namespace board {
 
-    HocClkProfile GetProfile();
+    RClkProfile GetProfile();
 
 }
