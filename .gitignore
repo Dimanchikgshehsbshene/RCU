@@ -4,12 +4,20 @@ out/
 dist/.commit
 *.o
 *.d
-*.elf
 *.lst
 *.map
 
+# Intermediate build .elf (only in build/ or out/ dirs)
+build/**/*.elf
+out/**/*.elf
+Source/**/build/**/*.elf
+Source/**/out/**/*.elf
+
+# IMPORTANT: SaltyNX distributes its bootstrap/core as .elf in dist/SaltySD/
+# Those must NOT be ignored.
+!dist/**/*.elf
+
 # Compiled binaries (kept in repo but not in src)
-# Keep .ovl, .nsp, .kip in dist/ but ignore in source build dirs
 Source/**/build/
 Source/**/out/
 
