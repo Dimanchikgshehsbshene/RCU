@@ -31,9 +31,9 @@ APP_TITLE	:=	Ryazha-CLK
 NO_ICON		:=	1
 
 
-# libryazhahand is our rebranded fork of libultrahand. Its ultrahand.mk is
-# API-compatible with upstream, so this stays a one-line include.
-include ${TOPDIR}/lib/libryazhahand/ultrahand.mk
+# libryazhahand is our rebranded fork of libultrahand. The mk file is also
+# renamed (ryazhahand.mk) but its include API is identical to upstream.
+include ${TOPDIR}/lib/libryazhahand/ryazhahand.mk
 
 
 #---------------------------------------------------------------------------------
