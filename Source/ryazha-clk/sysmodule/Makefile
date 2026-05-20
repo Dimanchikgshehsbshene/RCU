@@ -22,9 +22,9 @@ CONFIG_DIR	:=	ryazha-clk
 BUILD		:=	build
 OUTDIR		:=	out
 RESOURCES	:=	res
-SOURCES		:=	src src/hos src/i2c src/ipc src/board src/display src/tsensor src/mgr src/file src/soc src/mapping src/pwr src/util
+SOURCES		:=	src src/hos src/i2c src/board src/display src/tsensor
 DATA		:=	data
-INCLUDES	:=	../common/include src/hos src/soc src/i2c src/util src/pwr src/ipc
+INCLUDES	:=	../common/include src/hos src/i2c src/tsensor
 EXEFS_SRC	:=	exefs_src
 LIBNAMES	:=	minIni
 # major minor patch
