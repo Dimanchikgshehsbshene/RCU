@@ -18,6 +18,7 @@
  */
 
 #include "misc_gui.h"
+#include "language_gui.h"
 #include "fatal_gui.h"
 #include "config_info_strings.h"
 #include "../format.h"
@@ -571,6 +572,18 @@ void MiscGui::listUI()
     });
     sysmoduleSettingsSubMenu->setValue(R_ARROW);
     this->listElement->addItem(sysmoduleSettingsSubMenu);
+
+    // Language selector — see language_gui.h. Persists choice to config.ini.
+    tsl::elm::ListItem* languageSubMenu = new tsl::elm::ListItem(i18n::t("Language"));
+    languageSubMenu->setClickListener([](u64 keys) {
+        if (keys & HidNpadButton_A) {
+            tsl::changeTo<LanguageGui>();
+            return true;
+        }
+        return false;
+    });
+    languageSubMenu->setValue(R_ARROW);
+    this->listElement->addItem(languageSubMenu);
 
     tsl::elm::ListItem* governorSettingsSubMenu = new tsl::elm::ListItem(i18n::t("Governor Settings"));
     governorSettingsSubMenu->setClickListener([](u64 keys) {

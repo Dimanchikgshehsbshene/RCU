@@ -27,7 +27,7 @@ INCLUDES	:=	../common/include
 EXEFS_SRC	:=	exefs_src
 IS_MINIMAL	:=	0
 
-APP_TITLE	:=	Ryazha-CLK Gaea
+APP_TITLE	:=	Ryazha-CLK
 NO_ICON		:=	1
 
 
