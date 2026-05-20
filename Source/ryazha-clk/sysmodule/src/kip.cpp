@@ -19,7 +19,8 @@
 #include "board/board.hpp"
 #include "file_utils.hpp"
 
-#define CUST_REV 2
+/* CUST_REV is defined by Makefile via -DCUST_REV=N */
+
 namespace kip {
 
     bool kipAvailable = false;
