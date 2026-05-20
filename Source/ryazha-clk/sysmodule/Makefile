@@ -22,11 +22,11 @@ CONFIG_DIR	:=	ryazha-clk
 BUILD		:=	build
 OUTDIR		:=	out
 RESOURCES	:=	res
-SOURCES		:=	src src/hos src/i2c src/board src/display src/tsensor
+SOURCES		:=	src src/board src/display ../common/src ../common/src/client
 DATA		:=	data
-INCLUDES	:=	../common/include src/hos src/i2c src/tsensor
+INCLUDES	:=	../common/include
 EXEFS_SRC	:=	exefs_src
-LIBNAMES	:=	minIni
+LIBNAMES	:=	minIni nxExt
 # major minor patch
 TARGET_VERSION	:= 2.3.1
 KIP_VERSION :=  231

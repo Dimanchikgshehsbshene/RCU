@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * Sysmodule-side реализация Ryazha-Авто. Полностью самостоятельный поток,
  * который каждые ~200 мс:

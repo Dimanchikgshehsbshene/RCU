@@ -27,14 +27,8 @@
 #pragma once
 #include <switch.h>
 #include <rclk.h>
-#include "../hos/apm_ext.h"
-#include <i2c.h>
-#include <t210.h>
-#include <max17050.h>
-#include <tmp451.h>
-#include <ipc_server.h>
-#include <lockable_mutex.h>
-#include "../file/errors.hpp"
+#include <nxExt.h>
+#include "../errors.hpp"
 
 namespace board {
 
@@ -44,8 +38,7 @@ namespace board {
     u32 GetRealHz(RClkModule module);
     void GetFreqList(RClkModule module, u32 *outList, u32 maxCount, u32 *outCount);
     u32 GetHighestDockedDisplayRate();
-    void HandleCpuUv();
-    
+
     void ResetToStock();
     void ResetToStockDisplay();
 

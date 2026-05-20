@@ -18,11 +18,8 @@
 #include "kip.hpp"
 #include "board/board.hpp"
 #include "file_utils.hpp"
-#include "clock_manager.hpp"
 
 #define CUST_REV 2
-#define KIP_VERSION 220
-
 namespace kip {
 
     bool kipAvailable = false;
@@ -61,6 +58,7 @@ namespace kip {
         //     return;
         // }
 
+        CUST_WRITE_FIELD_BATCH(&table, custRev, config::GetConfigValue(KipConfigValue_custRev));
         // CUST_WRITE_FIELD_BATCH(&table, mtcConf, config::GetConfigValue(KipConfigValue_mtcConf));
         CUST_WRITE_FIELD_BATCH(&table, hpMode, config::GetConfigValue(KipConfigValue_hpMode));
 
@@ -202,14 +200,6 @@ namespace kip {
 
             configValues.values[KipCrc32] = (u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip"); // write checksum
             // configValues.values[KipConfigValue_mtcConf] = cust_get_mtc_conf(&table);
-            clockManager::gContext.custRev    = cust_get_cust_rev(&table);
-
-            u16 kipVersion = cust_get_kip_version(&table);
-            if (kipVersion != KIP_VERSION) {
-                notification::writeNotification("Ryazha CLK\nKip version mismatch detected!");
-            }
-
-            clockManager::gContext.kipVersion = kipVersion;
             configValues.values[KipConfigValue_hpMode] = cust_get_hp_mode(&table);
 
             configValues.values[KipConfigValue_commonEmcMemVolt] = cust_get_common_emc_volt(&table);

@@ -30,11 +30,11 @@ namespace board {
         u16 gpuIDDQ;
         u16 socIDDQ;
 
-        s16 waferX;
-        s16 waferY;
+        u16 waferX;
+        u16 waferY;
     };
 
-    void ReadFuses(FuseData &speedo, u64 fuseVa);
+    void ReadFuses(FuseData &speedo);
     void SetGpuBracket(u16 gpuSpeedo, u8 &gpuBracket);
 
 }

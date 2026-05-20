@@ -27,6 +27,7 @@
 #include <switch.h>
 #include <pwm.h>
 #include <cmath>
+#include <rgltr.h>
 
 namespace board {
 

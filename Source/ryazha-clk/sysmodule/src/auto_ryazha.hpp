@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * Sysmodule-side Ryazha-Авто / VRR подсистема. Работает в фоновом потоке —
  * не зависит от открытого оверлея и продолжает регулировать CPU/GPU/RAM

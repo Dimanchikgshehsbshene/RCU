@@ -22,13 +22,13 @@
 #include <memmem.h>
 #include <registers.h>
 #include <cstring>
+#include <rgltr.h>
 #include <battery.h>
 #include "board.hpp"
 #include "board_freq.hpp"
 #include "board_volt.hpp"
-#include "../file/file_utils.hpp"
-#include "../i2c/i2cDrv.h"
-#include "../hos/rgltr.h"
+#include "../file_utils.hpp"
+
 namespace board {
 
     GpuVoltData voltData = {};
@@ -50,8 +50,7 @@ namespace board {
             u32 tune1_high;
         };
 
-        EristaCpuUvEntry eristaCpuUvTable[6] = {
-            {0xFFEAD0FF, 0x0},
+        EristaCpuUvEntry eristaCpuUvTable[5] = {
             {0xffff, 0x27007ff},
             {0xefff, 0x27407ff},
             {0xdfff, 0x27807ff},
@@ -136,16 +135,19 @@ namespace board {
                 return;
             }
         } else {
-            // if (GetHz(RClkModule_CPU) < tbreakPoint || (!levelLow)) { // account for tbreak
-            //     *tune0_ptr = cachedTune.tune0Low; // I think each erista has a different tune0/tune1?
-            //     *tune1_ptr = cachedTune.tune1Low;
-            //     return;
-            // } else {
-            //     if (levelLow) {
-                     *tune0_ptr = eristaCpuUvTable[levelLow].tune0;
-                     *tune1_ptr = eristaCpuUvTable[levelLow].tune1;
-            //     } else {
-            // }
+            if (GetHz(RClkModule_CPU) < tbreakPoint || (!levelLow)) { // account for tbreak
+                *tune0_ptr = cachedTune.tune0Low; // I think each erista has a different tune0/tune1?
+                *tune1_ptr = cachedTune.tune1Low;
+                return;
+            } else {
+                if (levelLow) {
+                    *tune0_ptr = eristaCpuUvTable[levelLow-1].tune0;
+                    *tune1_ptr = eristaCpuUvTable[levelLow-1].tune1;
+                } else {
+                    *tune0_ptr = 0x0;
+                    *tune1_ptr = 0x0;
+                }
+            }
         }
     }
 
@@ -212,47 +214,60 @@ namespace board {
         PcvPowerDomainId_Max77812_Dram = 0x3A000005, // vddq
     } PowerDomainId;
     */
-   /*
-    Note: I think Nintendo's I2C driver (or my driver, but it looks correct to me)
-   */
     u32 GetVoltage(RClkVoltage voltage) {
+        RgltrSession session;
+        Result rc = 0;
         u32 out = 0;
         BatteryChargeInfo info;
-        RgltrSession s;
+
         switch (voltage) {
             case RClkVoltage_SOC:
-                out = I2c_BuckConverter_GetUvOut(&I2c_SOC);
+                rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77620_Sd0);
+                ASSERT_RESULT_OK(rc, "rgltrOpenSession")
+                rgltrGetVoltage(&session, &out);
+                rgltrCloseSession(&session);
                 break;
             case RClkVoltage_EMCVDD2:
-                out = I2c_BuckConverter_GetUvOut(&I2c_VDD2);
+                rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77620_Sd1);
+                ASSERT_RESULT_OK(rc, "rgltrOpenSession")
+                rgltrGetVoltage(&session, &out);
+                rgltrCloseSession(&session);
                 break;
             case RClkVoltage_CPU:
-                if(GetSocType() == RClkSocType_Mariko) {
-                    out = I2c_BuckConverter_GetUvOut(&I2c_Mariko_CPU);
+                if (GetSocType() == RClkSocType_Mariko) {
+                    rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77621_Cpu);
                 } else {
-                    rgltrOpenSession(&s, PcvPowerDomainId_Max77621_Cpu);
-                    rgltrGetVoltage(&s, &out);
-                    rgltrCloseSession(&s);
+                    rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77812_Cpu);
                 }
+                ASSERT_RESULT_OK(rc, "rgltrOpenSession")
+                rgltrGetVoltage(&session, &out);
+                rgltrCloseSession(&session);
                 break;
             case RClkVoltage_GPU:
-                if(GetSocType() == RClkSocType_Mariko) {
-                    out = I2c_BuckConverter_GetUvOut(&I2c_Mariko_GPU);
+                if (GetSocType() == RClkSocType_Mariko) {
+                    rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77621_Gpu);
                 } else {
-                    rgltrOpenSession(&s, PcvPowerDomainId_Max77621_Gpu);
-                    rgltrGetVoltage(&s, &out);
-                    rgltrCloseSession(&s);
-                }               
+                    rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77812_Gpu);
+                }
+                ASSERT_RESULT_OK(rc, "rgltrOpenSession")
+                rgltrGetVoltage(&session, &out);
+                rgltrCloseSession(&session);
                 break;
             case RClkVoltage_EMCVDDQ:
-                if(GetSocType() == RClkSocType_Mariko) {
-                    out = I2c_BuckConverter_GetUvOut(&I2c_Mariko_DRAM_VDDQ);
+                if (GetSocType() == RClkSocType_Mariko) {
+                    rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77812_Dram);
+                    ASSERT_RESULT_OK(rc, "rgltrOpenSession")
+                    rgltrGetVoltage(&session, &out);
+                    rgltrCloseSession(&session);
                 } else {
-                    out = I2c_BuckConverter_GetUvOut(&I2c_VDD2);
+                    out = GetVoltage(RClkVoltage_EMCVDD2);
                 }
                 break;
             case RClkVoltage_Display:
-                out = I2c_BuckConverter_GetUvOut(&I2c_Display);
+                rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77620_Ldo0);
+                ASSERT_RESULT_OK(rc, "rgltrOpenSession")
+                rgltrGetVoltage(&session, &out);
+                rgltrCloseSession(&session);
                 break;
             case RClkVoltage_Battery:
                 batteryInfoGetChargeInfo(&info);
@@ -306,7 +321,6 @@ namespace board {
     }
 
     void CacheGpuVoltTable() {
-        // Likely CPU regulator?
         UnkRegulator reg = {
             .voltageMin  = 600000,
             .voltageStep = 12500,
@@ -372,7 +386,6 @@ namespace board {
                 svcCloseHandle(handle);
                 handle = INVALID_HANDLE;
 
-                // Print info AFTER we exit the handle to avoid hangs
                 for(int i = 0; i < (int)std::size(cpuVoltTable); ++i) {
                     fileUtils::LogLine("[dvfs] cpu volt %d: %u mV", i, cpuVoltTable[i]);
                 }
@@ -422,21 +435,21 @@ namespace board {
 
     u32 GetMinimumGpuVmin(u32 freqMhz, u32 bracket) {
         static const u32 ramTable[][22] = {
-            { 2133, 2200, 2266, 2300, 2366, 2400, 2433, 2466, 2533, 2566, 2600, 2633, 2700, 2733, 2766, 2833, 2866, 2900, 2933, 3033, 3066, 3100, }, // Bracket 0
-            { 2300, 2366, 2433, 2466, 2533, 2566, 2633, 2700, 2733, 2800, 2833, 2900, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3266, }, // Bracket 1
-            { 2433, 2466, 2533, 2566, 2600, 2666, 2766, 2800, 2833, 2866, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3300, 3333, 3366, }, // Bracket 2
-            { 2500, 2533, 2600, 2633, 2666, 2733, 2800, 2866, 2900, 2966, 3033, 3100, 3166, 3200, 3233, 3266, 3300, 3333, 3366, 3400, 3400, 3400, }, // Bracket 3
+            { 2133, 2200, 2266, 2300, 2366, 2400, 2433, 2466, 2533, 2566, 2600, 2633, 2700, 2733, 2766, 2833, 2866, 2900, 2933, 3033, 3066, 3100, },
+            { 2300, 2366, 2433, 2466, 2533, 2566, 2633, 2700, 2733, 2800, 2833, 2900, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3266, },
+            { 2433, 2466, 2533, 2600, 2666, 2733, 2766, 2800, 2833, 2866, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3300, 3333, 3366, },
+            { 2500, 2533, 2600, 2633, 2666, 2733, 2800, 2866, 2900, 2966, 3033, 3100, 3166, 3200, 3233, 3266, 3300, 3333, 3366, 3400, 3400, 3400, },
         };
 
         static const u32 gpuVoltArray[] = { 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750, 760, 770, 780, 790, 800, };
 
-        if (freqMhz <= 1600) return 0; // DVFS doesnt work below 1600MHz, it will just use vMin
+        if (freqMhz <= 1600) return 0;
         if (bracket >= std::size(ramTable)) bracket = 0;
 
         u32 bracketStart = ramTable[bracket][0];
         
     
-        u32 rampStartVolt = (bracket == 0) ? 535 : 525; // Do not touch!
+        u32 rampStartVolt = (bracket == 0) ? 535 : 525;
         u32 rampSpan = 590 - rampStartVolt; 
 
 
@@ -459,4 +472,5 @@ namespace board {
 
         return baseVolt;
     }
+
 }
