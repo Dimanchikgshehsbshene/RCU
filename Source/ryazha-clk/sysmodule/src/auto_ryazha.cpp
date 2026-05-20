@@ -374,6 +374,9 @@ void ApplyVrr(const RClkLadderConfig& cfg, bool fpsKnown, u8 fps) {
     if (board::GetConsoleType() == RClkConsoleType_Aula) {
         lo = std::max<u8>(lo, 43);
     }
+    // Hard cap by hardware panel max (Aula=65, LCD=75) so we never ask the
+    // panel for a refresh it can't physically do.
+    hi = std::min<u8>(hi, PanelMaxHz());
     if (lo > hi) std::swap(lo, hi);
     u8 hz;
     if (lo == hi) {
