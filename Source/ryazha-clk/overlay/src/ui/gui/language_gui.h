@@ -16,6 +16,11 @@ public:
     LanguageGui()  = default;
     ~LanguageGui() = default;
 
+    // Override baseUI() чтобы убрать 35-px spacer, который BaseMenuGui
+    // добавляет всем меню. Для статичного списка языков это огромный
+    // пустой блок -- юзер думал что это лаг рендера.
+    tsl::elm::Element* baseUI() override;
+
     void listUI() override;
     void refresh() override;
 };
