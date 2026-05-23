@@ -12,7 +12,7 @@ class DvbEntry:
     volts: List[u32]
 
 
-oldDvbTable = [
+old_dvb_table = [
     DvbEntry(204000,  [637, 637, 637]),
     DvbEntry(1331200, [650, 637, 637]),
     DvbEntry(1600000, [675, 650, 637]),
@@ -22,10 +22,9 @@ oldDvbTable = [
     DvbEntry(2666000, [775, 750, 725]),
     DvbEntry(2933000, [800, 775, 750]),
     DvbEntry(3200000, [800, 800, 775]),
-    DvbEntry(0xFFFFFFFF,      []),
 ]
 
-newDvbTable = [
+new_dvb_table = [
     DvbEntry(204000,  [637, 637, 637]),
     DvbEntry(1331200, [650, 637, 637]),
     DvbEntry(1600000, [675, 650, 637]),
@@ -35,11 +34,9 @@ newDvbTable = [
     DvbEntry(2666000, [850, 825, 800]),
     DvbEntry(2933000, [950, 925, 900]),
     DvbEntry(3200000, [1050, 1025, 1000]),
-    DvbEntry(0xFFFFFFFF,      []),
 ]
 
-DVB_TABLE_SIZE = len(oldDvbTable)
-INVALID_TABLE_INDEX = 32
+DVB_TABLE_SIZE = len(old_dvb_table)
 
 
 def print_and_scan(message: str) -> u32:
@@ -70,7 +67,7 @@ def get_voltage_and_index(
         voltage = dvb_table[i].volts[process_id] + (25 * dvb_shift)
         return voltage, i
 
-    return 0, INVALID_TABLE_INDEX
+    return 0, 0
 
 
 def get_shift(
@@ -79,10 +76,7 @@ def get_shift(
     dvb_table: List[DvbEntry],
     index: u32,
 ) -> s32:
-    return (
-        int(old_voltage)
-        - int(dvb_table[index].volts[process_id])
-    ) // 25
+    return (old_voltage - dvb_table[index].volts[process_id]) // 25
 
 
 def main():
@@ -93,23 +87,21 @@ def main():
     emc_max_khz = emc_max_mhz * 1000
     process_id = get_process_id(speedo)
 
-    table_index = INVALID_TABLE_INDEX
-
     old_voltage, table_index = get_voltage_and_index(
         old_dvb,
         emc_max_khz,
         process_id,
-        oldDvbTable,
+        old_dvb_table,
     )
 
-    if old_voltage == 0 or table_index == INVALID_TABLE_INDEX:
+    if old_voltage == 0 or table_index == 0:
         print("Invalid values!")
-        return -1
+        return
 
     new_shift = get_shift(
         old_voltage,
         process_id,
-        newDvbTable,
+        new_dvb_table,
         table_index,
     )
 
