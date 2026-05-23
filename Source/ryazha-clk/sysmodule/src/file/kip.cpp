@@ -53,9 +53,17 @@ namespace kip {
             return;
         }
 
-        if(cust_get_cust_rev(&table) != CUST_REV || cust_get_kip_version(&table) != KIP_VERSION) {
-            fileUtils::LogLine("Revision: %u", cust_get_cust_rev(&table));
-            notification::writeNotification("Ryazha CLK\nKip version mismatch\nPlease reinstall Ryazha CLK");
+        u32 custRev    = cust_get_cust_rev(&table);
+        u32 kipVersion = cust_get_kip_version(&table)
+        if (custRev < CUST_REV || kipVersion < KIP_VERSION) {
+            notification::writeNotification("Ryazha CLK\nOutdated kip detected!\nPlease update Ryazha CLK");
+            fileUtils::LogLine("Cust revision: %u", custRev);
+            fileUtils::LogLine("Kip version: %u", kipVersion);
+            return;
+        } else if (custRev > CUST_REV || kipVersion > KIP_VERSION) {
+            notification::writeNotification("Ryazha CLK\nOutdated sysmodule detected!\nPlease update Ryazha CLK");
+            fileUtils::LogLine("Cust revision: %u", custRev);
+            fileUtils::LogLine("Kip version: %u", kipVersion);
             return;
         }
 
@@ -201,9 +209,17 @@ namespace kip {
         // configValues.values[KipConfigValue_mtcConf] = cust_get_mtc_conf(&table);
         clockManager::gContext.custRev    = cust_get_cust_rev(&table);
 
-        u16 kipVersion = cust_get_kip_version(&table);
-        if (kipVersion != KIP_VERSION || cust_get_cust_rev(&table) != CUST_REV) {
-            notification::writeNotification("Ryazha CLK\nKip version mismatch detected!");
+        u32 custRev    = cust_get_cust_rev(&table);
+        u32 kipVersion = cust_get_kip_version(&table)
+        if (custRev < CUST_REV || kipVersion < KIP_VERSION) {
+            notification::writeNotification("Ryazha CLK\nOutdated kip detected!\nPlease update Ryazha CLK");
+            fileUtils::LogLine("Cust revision: %u", custRev);
+            fileUtils::LogLine("Kip version: %u", kipVersion);
+            return;
+        } else if (custRev > CUST_REV || kipVersion > KIP_VERSION) {
+            notification::writeNotification("Ryazha CLK\nOutdated sysmodule detected!\nPlease update Ryazha CLK");
+            fileUtils::LogLine("Cust revision: %u", custRev);
+            fileUtils::LogLine("Kip version: %u", kipVersion);
             return;
         }
 
