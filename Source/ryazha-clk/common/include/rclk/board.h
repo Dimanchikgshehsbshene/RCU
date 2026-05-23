@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -33,96 +33,96 @@
 #include <switch/types.h>
 typedef enum
 {
-    RClkSocType_Erista = 0, // T210, found in Icosa and Copper
-    RClkSocType_Mariko,     // T214/T210B01, found in Hoag, Iowa, Calcio and Aula
-//  RClkSocType_Drake,      // T239, found in Switch 2. Maybe someday...
-    RClkSocType_EnumMax
-} RClkSocType;
+    HocClkSocType_Erista = 0, // T210, found in Icosa and Copper
+    HocClkSocType_Mariko,     // T214/T210B01, found in Hoag, Iowa, Calcio and Aula
+//  HocClkSocType_Drake,      // T239, found in Switch 2. Maybe someday...
+    HocClkSocType_EnumMax
+} HocClkSocType;
 
 typedef enum
 {
-    RClkConsoleType_Icosa = 0, // V1
-    RClkConsoleType_Iowa,      // V2
-    RClkConsoleType_Hoag,      // Lite
-    RClkConsoleType_Aula,      // OLED
-    RClkConsoleType_EnumMax,
-} RClkConsoleType;
+    HocClkConsoleType_Icosa = 0, // V1
+    HocClkConsoleType_Iowa,      // V2
+    HocClkConsoleType_Hoag,      // Lite
+    HocClkConsoleType_Aula,      // OLED
+    HocClkConsoleType_EnumMax,
+} HocClkConsoleType;
 
 typedef enum {
-    RClkVoltage_SOC = 0, // VDD_SOC rail. 
-    RClkVoltage_EMCVDD2, // DRAM VDD2 rail
-    RClkVoltage_CPU,     // CPU rail
-    RClkVoltage_GPU,     // GPU rail
-    RClkVoltage_EMCVDDQ, // DRAM VDDQ rail
-    RClkVoltage_Display, // Display rail
-    RClkVoltage_Battery, // Battery voltage
-    RClkVoltage_EnumMax,
-} RClkVoltage;
+    HocClkVoltage_SOC = 0, // VDD_SOC rail. 
+    HocClkVoltage_EMCVDD2, // DRAM VDD2 rail
+    HocClkVoltage_CPU,     // CPU rail
+    HocClkVoltage_GPU,     // GPU rail
+    HocClkVoltage_EMCVDDQ, // DRAM VDDQ rail
+    HocClkVoltage_Display, // Display rail
+    HocClkVoltage_Battery, // Battery voltage
+    HocClkVoltage_EnumMax,
+} HocClkVoltage;
 
 typedef enum
 {
-    RClkProfile_Handheld = 0,
-    RClkProfile_HandheldCharging, // Not a real profile, just a marker
-    RClkProfile_HandheldChargingUSB,
-    RClkProfile_HandheldChargingOfficial,
-    RClkProfile_Docked, // Not shown on Lites
-    RClkProfile_EnumMax
-} RClkProfile;
+    HocClkProfile_Handheld = 0,
+    HocClkProfile_HandheldCharging, // Not a real profile, just a marker
+    HocClkProfile_HandheldChargingUSB,
+    HocClkProfile_HandheldChargingOfficial,
+    HocClkProfile_Docked, // Not shown on Lites
+    HocClkProfile_EnumMax
+} HocClkProfile;
 
 typedef enum
 {
-    RClkModule_CPU = 0, 
-    RClkModule_GPU,
-    RClkModule_MEM,
-    RClkModule_Governor,
-    RClkModule_Display,
-    RClkModule_EnumMax,
-} RClkModule;
+    HocClkModule_CPU = 0, 
+    HocClkModule_GPU,
+    HocClkModule_MEM,
+    HocClkModule_Governor,
+    HocClkModule_Display,
+    HocClkModule_EnumMax,
+} HocClkModule;
 
 typedef enum
 {
-    RClkThermalSensor_SOC = 0, // SoC temperature in millicelcius
-    RClkThermalSensor_PCB,     // PCB temperature in millicelcius
-    RClkThermalSensor_Skin,    // "Skin" temperature in millicelcius
-    RClkThermalSensor_Battery, // Battery temperature in millicelcius
-    RClkThermalSensor_PMIC, // Always return 50.0C, as thats the only reasonable value the PMIC sensor can generate
-    RClkThermalSensor_CPU, // CPU temperature in millicelcius
-    RClkThermalSensor_GPU, // GPU temperature in millicelcius
-    RClkThermalSensor_MEM, // MEM temperature in millicelcius. Returns the PLLX sensor value on Mariko
-    RClkThermalSensor_PLLX, // PLLX temperature in millicelcius
-    RClkThermalSensor_AO, // AOTAG
-    RClkThermalSensor_BQ24193, // BQ24193 temperature. Refer to BQ24193Temp for returned values
-    RClkThermalSensor_EnumMax
-} RClkThermalSensor;
+    HocClkThermalSensor_SOC = 0, // SoC temperature in millicelcius
+    HocClkThermalSensor_PCB,     // PCB temperature in millicelcius
+    HocClkThermalSensor_Skin,    // "Skin" temperature in millicelcius
+    HocClkThermalSensor_Battery, // Battery temperature in millicelcius
+    HocClkThermalSensor_PMIC, // Always return 50.0C, as thats the only reasonable value the PMIC sensor can generate
+    HocClkThermalSensor_CPU, // CPU temperature in millicelcius
+    HocClkThermalSensor_GPU, // GPU temperature in millicelcius
+    HocClkThermalSensor_MEM, // MEM temperature in millicelcius. Returns the PLLX sensor value on Mariko
+    HocClkThermalSensor_PLLX, // PLLX temperature in millicelcius
+    HocClkThermalSensor_AO, // AOTAG
+    HocClkThermalSensor_BQ24193, // BQ24193 temperature. Refer to BQ24193Temp for returned values
+    HocClkThermalSensor_EnumMax
+} HocClkThermalSensor;
 
 typedef enum
 {
-    RClkPowerSensor_Now = 0,
-    RClkPowerSensor_Avg,
-    RClkPowerSensor_EnumMax
-} RClkPowerSensor;
+    HocClkPowerSensor_Now = 0,
+    HocClkPowerSensor_Avg,
+    HocClkPowerSensor_EnumMax
+} HocClkPowerSensor;
 
 typedef enum
 {
-    RClkPartLoad_EMC = 0,
-    RClkPartLoad_EMCCpu,
-    RClkPartLoad_GPU,
-    RClkPartLoad_CPUMax,
-    RClkPartLoad_BAT, // Battery raw charge percentage
-    RClkPartLoad_FAN,
-    RClkPartLoad_RamBWAll,
-    RClkPartLoad_RamBWCpu,
-    RClkPartLoad_RamBWGpu,
-    RClkPartLoad_RamBWPeak, // Maximum possible RAM bandwidth
-    RClkPartLoad_EnumMax
-} RClkPartLoad;
+    HocClkPartLoad_EMC = 0,
+    HocClkPartLoad_EMCCpu,
+    HocClkPartLoad_GPU,
+    HocClkPartLoad_CPUMax,
+    HocClkPartLoad_BAT, // Battery raw charge percentage
+    HocClkPartLoad_FAN,
+    HocClkPartLoad_RamBWAll,
+    HocClkPartLoad_RamBWCpu,
+    HocClkPartLoad_RamBWGpu,
+    HocClkPartLoad_RamBWPeak, // Maximum possible RAM bandwidth
+    HocClkPartLoad_EnumMax
+} HocClkPartLoad;
 
 typedef enum {
-    RClkSpeedo_CPU = 0,
-    RClkSpeedo_GPU,
-    RClkSpeedo_SOC,
-    RClkSpeedo_EnumMax,
-} RClkSpeedo;
+    HocClkSpeedo_CPU = 0,
+    HocClkSpeedo_GPU,
+    HocClkSpeedo_SOC,
+    HocClkSpeedo_EnumMax,
+} HocClkSpeedo;
 
 typedef enum {
     GPUUVLevel_HiOPT = 0,
@@ -219,7 +219,7 @@ typedef enum AulaColorMode {
 // 	// Found on 5.5" clones with AUO A055TAN02 (59.05A30.001) fake markings.
 // 	PANEL_OEM_CLONE       = 0x0000
 // 	//0x0F40 [40] 94 [0F], 5.5" clone
-// } RClkDisplayPanel;
+// } HocClkDisplayPanel;
 
 #define RCLK_ENUM_VALID(n, v) ((v) < n##_EnumMax)
 
@@ -242,81 +242,81 @@ inline u8 GovernorStateVrr(u32 p) {
     return (u8)((p >> 16) & 0xFF);
 }
 
-static inline const char* rclkFormatModule(RClkModule module, bool pretty)
+static inline const char* rclkFormatModule(HocClkModule module, bool pretty)
 {
     switch(module)
     {
-        case RClkModule_CPU:
+        case HocClkModule_CPU:
             return pretty ? "CPU" : "cpu";
-        case RClkModule_GPU:
+        case HocClkModule_GPU:
             return pretty ? "GPU" : "gpu";
-        case RClkModule_MEM:
+        case HocClkModule_MEM:
             return pretty ? "Memory" : "mem";
-        case RClkModule_Display:
+        case HocClkModule_Display:
             return pretty ? "Display" : "display";
-        case RClkModule_Governor:
+        case HocClkModule_Governor:
             return pretty ? "Governor" : "governor";
         default:
             return "null";
     }
 }
 
-static inline const char* rclkFormatThermalSensor(RClkThermalSensor thermSensor, bool pretty)
+static inline const char* rclkFormatThermalSensor(HocClkThermalSensor thermSensor, bool pretty)
 {
     switch(thermSensor) {
-        case RClkThermalSensor_SOC:
+        case HocClkThermalSensor_SOC:
             return pretty ? "SOC" : "soc";
-        case RClkThermalSensor_PCB:
+        case HocClkThermalSensor_PCB:
             return pretty ? "PCB" : "pcb";
-        case RClkThermalSensor_Skin:
+        case HocClkThermalSensor_Skin:
             return pretty ? "Skin" : "skin";
-        case RClkThermalSensor_Battery:
+        case HocClkThermalSensor_Battery:
             return pretty ? "BAT" : "battery";
-        case RClkThermalSensor_PMIC:
+        case HocClkThermalSensor_PMIC:
             return pretty ? "PMIC" : "pmic";
-        case RClkThermalSensor_CPU:
+        case HocClkThermalSensor_CPU:
             return pretty ? "CPU" : "cpu";
-        case RClkThermalSensor_GPU:
+        case HocClkThermalSensor_GPU:
             return pretty ? "GPU" : "gpu";
-        case RClkThermalSensor_MEM:
+        case HocClkThermalSensor_MEM:
             return pretty ? "MEM" : "mem";
-        case RClkThermalSensor_PLLX:
+        case HocClkThermalSensor_PLLX:
             return pretty ? "PLLX" : "pllx";
-        case RClkThermalSensor_AO:
+        case HocClkThermalSensor_AO:
             return pretty ? "AO" : "ao";
-        case RClkThermalSensor_BQ24193:
+        case HocClkThermalSensor_BQ24193:
             return pretty ? "BQ24193" : "bq24193";
         default:
             return "unknown";
     }
 }
 
-static inline const char* rclkFormatPowerSensor(RClkPowerSensor powSensor, bool pretty)
+static inline const char* rclkFormatPowerSensor(HocClkPowerSensor powSensor, bool pretty)
 {
     switch(powSensor)
     {
-        case RClkPowerSensor_Now:
+        case HocClkPowerSensor_Now:
             return pretty ? "Now" : "now";
-        case RClkPowerSensor_Avg:
+        case HocClkPowerSensor_Avg:
             return pretty ? "Avg" : "avg";
         default:
             return "unknown";
     }
 }
 
-static inline const char* rclkFormatProfile(RClkProfile profile, bool pretty)
+static inline const char* rclkFormatProfile(HocClkProfile profile, bool pretty)
 {
     switch(profile)
     {
-        case RClkProfile_Docked:
+        case HocClkProfile_Docked:
             return pretty ? "Docked" : "docked";
-        case RClkProfile_Handheld:
+        case HocClkProfile_Handheld:
             return pretty ? "Handheld" : "handheld";
-        case RClkProfile_HandheldCharging:
+        case HocClkProfile_HandheldCharging:
             return pretty ? "Charging" : "handheld_charging";
-        case RClkProfile_HandheldChargingUSB:
+        case HocClkProfile_HandheldChargingUSB:
             return pretty ? "USB Charger" : "handheld_charging_usb";
-        case RClkProfile_HandheldChargingOfficial:
+        case HocClkProfile_HandheldChargingOfficial:
             return pretty ? "PD Charger" : "handheld_charging_official";
         default:
             return "unknown";
@@ -324,45 +324,45 @@ static inline const char* rclkFormatProfile(RClkProfile profile, bool pretty)
 }
 
 
-static inline const char* hocClkFormatVoltage(RClkVoltage voltage, bool pretty)
+static inline const char* hocClkFormatVoltage(HocClkVoltage voltage, bool pretty)
 {
     switch(voltage)
     {
-        case RClkVoltage_CPU:
+        case HocClkVoltage_CPU:
             return pretty ? "CPU" : "cpu";
-        case RClkVoltage_GPU:
+        case HocClkVoltage_GPU:
             return pretty ? "GPU" : "gpu";
-        case RClkVoltage_EMCVDD2:
+        case HocClkVoltage_EMCVDD2:
             return pretty ? "VDD2" : "vdd2";
-        case RClkVoltage_EMCVDDQ:
+        case HocClkVoltage_EMCVDDQ:
             return pretty ? "VDDQ" : "vddq";
-        case RClkVoltage_SOC:
+        case HocClkVoltage_SOC:
             return pretty ? "SOC" : "soc";
-        case RClkVoltage_Display:
+        case HocClkVoltage_Display:
             return pretty ? "Display" : "display";
         default:
             return "unknown";
     }
 }
 
-static inline const char* hocClkFormatConsoleType(RClkConsoleType consoleType, bool pretty)
+static inline const char* hocClkFormatConsoleType(HocClkConsoleType consoleType, bool pretty)
 {
     switch(consoleType)
     {
-        case RClkConsoleType_Icosa:
+        case HocClkConsoleType_Icosa:
             return pretty ? "Icosa (V1)" : "icosa";
-        case RClkConsoleType_Iowa:
+        case HocClkConsoleType_Iowa:
             return pretty ? "Iowa (V2)" : "iowa";
-        case RClkConsoleType_Hoag:
+        case HocClkConsoleType_Hoag:
             return pretty ? "Hoag (Lite)" : "hoag";
-        case RClkConsoleType_Aula:
+        case HocClkConsoleType_Aula:
             return pretty ? "Aula (OLED)" : "aula";
         default:
             return "unknown";
     }
 }
 
-// static inline const char* hocClkFormatPanel(RClkDisplayPanel panel, bool pretty)
+// static inline const char* hocClkFormatPanel(HocClkDisplayPanel panel, bool pretty)
 // {
 //     switch(panel)
 //     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -45,7 +45,7 @@ namespace board {
     void SetDfllTunings(u32 levelLow, u32 levelHigh, u32 tbreakPoint);
     void CacheDfllData();
     u32 CalculateTbreak(u32 table);
-    u32 GetVoltage(RClkVoltage voltage);
+    u32 GetVoltage(HocClkVoltage voltage);
     void CacheGpuVoltTable();
     void PcvHijackGpuVolts(u32 vmin);
     u32 GetMinimumGpuVmin(u32 freqMhz, u32 bracket);

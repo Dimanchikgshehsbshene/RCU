@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -31,49 +31,48 @@
 #include <stddef.h>
 #include "board.h"
 typedef enum {
-    RClkConfigValue_PollingIntervalMs = 0,
-    RClkConfigValue_TempLogIntervalMs,
-    RClkConfigValue_FreqLogIntervalMs,
-    RClkConfigValue_PowerLogIntervalMs,
-    RClkConfigValue_CsvWriteIntervalMs,
+    HocClkConfigValue_PollingIntervalMs = 0,
+    HocClkConfigValue_TempLogIntervalMs,
+    HocClkConfigValue_FreqLogIntervalMs,
+    HocClkConfigValue_PowerLogIntervalMs,
+    HocClkConfigValue_CsvWriteIntervalMs,
 
-    RClkConfigValue_UncappedClocks,
-    RClkConfigValue_OverwriteBoostMode,
+    HocClkConfigValue_UncappedClocks,
+    HocClkConfigValue_OverwriteBoostMode,
 
-    RClkConfigValue_EristaMaxCpuClock,
-    RClkConfigValue_MarikoMaxCpuClock,
+    HocClkConfigValue_EristaMaxCpuClock,
+    HocClkConfigValue_MarikoMaxCpuClock,
 
-    RClkConfigValue_ThermalThrottle,
-    RClkConfigValue_ThermalThrottleThreshold,
+    HocClkConfigValue_ThermalThrottle,
+    HocClkConfigValue_ThermalThrottleThreshold,
 
-    RClkConfigValue_HandheldTDP,
-    RClkConfigValue_HandheldTDPLimit,
+    HocClkConfigValue_HandheldTDP,
+    HocClkConfigValue_HandheldTDPLimit,
 
-    RClkConfigValue_LiteTDPLimit,
+    HocClkConfigValue_LiteTDPLimit,
 
-    RClkConfigValue_BatteryChargeCurrent,
+    HocClkConfigValue_BatteryChargeCurrent,
 
-    RClkConfigValue_OverwriteRefreshRate,
-    RClkConfigValue_MaxDisplayClockH,
+    HocClkConfigValue_OverwriteRefreshRate,
+    HocClkConfigValue_MaxDisplayClockH,
 
-    RClkConfigValue_DVFSMode,
-    RClkConfigValue_DVFSOffset,
-    RClkConfigValue_LiveCpuUv,
-    RClkConfigValue_EnableExperimentalSettings,
+    HocClkConfigValue_DVFSMode,
+    HocClkConfigValue_DVFSOffset,
+    HocClkConfigValue_LiveCpuUv,
+    HocClkConfigValue_EnableExperimentalSettings,
 
-    RClkConfigValue_GPUScheduling,
-    RClkConfigValue_GPUSchedulingMethod,
+    HocClkConfigValue_GPUScheduling,
+    HocClkConfigValue_GPUSchedulingMethod,
 
-    RClkConfigValue_RAMVoltDisplayMode,
-    RClkConfigValue_CpuGovernorMinimumFreq,
-    RClkConfigValue_DisplayVoltage,
+    HocClkConfigValue_RAMVoltDisplayMode,
+    HocClkConfigValue_CpuGovernorMinimumFreq,
+    HocClkConfigValue_DisplayVoltage,
 
-    RClkConfigValue_MemoryFrequencyMeasurementMode,
-    RClkConfigValue_RamDisplayUnit,
-    RClkConfigValue_IsFirstLoad,
+    HocClkConfigValue_MemoryFrequencyMeasurementMode,
+    HocClkConfigValue_RamDisplayUnit,
+    HocClkConfigValue_IsFirstLoad,
 
-    RClkConfigValue_AulaDisplayColorPreset,
-    RClkConfigValue_MarikoMiddleFreqs,
+    HocClkConfigValue_AulaDisplayColorPreset,
 
     KipConfigValue_custRev,
     // KipConfigValue_mtcConf,
@@ -200,98 +199,97 @@ typedef enum {
     KipConfigValue_t7_tWTR_fine_tune,
 
     KipCrc32,
-    RClkConfigValue_EnumMax,
-} RClkConfigValue;
+    HocClkConfigValue_EnumMax,
+} HocClkConfigValue;
 
 typedef struct {
-    uint64_t values[RClkConfigValue_EnumMax];
-} RClkConfigValueList;
+    uint64_t values[HocClkConfigValue_EnumMax];
+} HocClkConfigValueList;
 
-static inline const char* rclkFormatConfigValue(RClkConfigValue val, bool pretty)
+static inline const char* rclkFormatConfigValue(HocClkConfigValue val, bool pretty)
 {
     switch(val)
     {
-        case RClkConfigValue_PollingIntervalMs:
+        case HocClkConfigValue_PollingIntervalMs:
             return pretty ? "Polling Interval (ms)" : "poll_interval_ms";
-        case RClkConfigValue_TempLogIntervalMs:
+        case HocClkConfigValue_TempLogIntervalMs:
             return pretty ? "Temperature logging interval (ms)" : "temp_log_interval_ms";
-        case RClkConfigValue_FreqLogIntervalMs:
+        case HocClkConfigValue_FreqLogIntervalMs:
             return pretty ? "Frequency logging interval (ms)" : "freq_log_interval_ms";
-        case RClkConfigValue_PowerLogIntervalMs:
+        case HocClkConfigValue_PowerLogIntervalMs:
             return pretty ? "Power logging interval (ms)" : "power_log_interval_ms";
-        case RClkConfigValue_CsvWriteIntervalMs:
+        case HocClkConfigValue_CsvWriteIntervalMs:
             return pretty ? "CSV write interval (ms)" : "csv_write_interval_ms";
 
-        case RClkConfigValue_UncappedClocks:
+        case HocClkConfigValue_UncappedClocks:
             return pretty ? "Uncapped Clocks" : "uncapped_clocks";
-        case RClkConfigValue_OverwriteBoostMode:
+        case HocClkConfigValue_OverwriteBoostMode:
             return pretty ? "Overwrite Boost Mode" : "ow_boost";
 
-        case RClkConfigValue_EristaMaxCpuClock:
+        case HocClkConfigValue_EristaMaxCpuClock:
             return pretty ? "CPU Max Clock" : "cpu_max_e";
 
-        case RClkConfigValue_MarikoMaxCpuClock:
+        case HocClkConfigValue_MarikoMaxCpuClock:
             return pretty ? "CPU Max Display Clock" : "cpu_max_m";
 
-        case RClkConfigValue_ThermalThrottle:
+        case HocClkConfigValue_ThermalThrottle:
             return pretty ? "Thermal Throttle" : "thermal_throttle";
 
-        case RClkConfigValue_ThermalThrottleThreshold:
+        case HocClkConfigValue_ThermalThrottleThreshold:
             return pretty ? "Thermal Throttle Threshold" : "thermal_throttle_threshold";
 
-        case RClkConfigValue_HandheldTDP:
+        case HocClkConfigValue_HandheldTDP:
             return pretty ? "Handheld TDP" : "handheld_tdp";
 
-        case RClkConfigValue_HandheldTDPLimit:
+        case HocClkConfigValue_HandheldTDPLimit:
             return pretty ? "Handheld TDP Limit" : "tdp_limit";
 
-        case RClkConfigValue_LiteTDPLimit:
+        case HocClkConfigValue_LiteTDPLimit:
             return pretty ? "Handheld TDP Limit" : "tdp_limit_l";
 
-        case RClkConfigValue_BatteryChargeCurrent:
+        case HocClkConfigValue_BatteryChargeCurrent:
             return pretty ? "Battery Charge Current" : "bat_charge_current";
 
-        case RClkConfigValue_OverwriteRefreshRate:
+        case HocClkConfigValue_OverwriteRefreshRate:
             return pretty ? "Display Refresh Rate Changing" : "drr_changing";
 
-        case RClkConfigValue_MaxDisplayClockH:
+        case HocClkConfigValue_MaxDisplayClockH:
             return pretty ? "Max Display Clock (Handheld)" : "drr_max_clock";
 
-        case RClkConfigValue_DVFSMode:
+        case HocClkConfigValue_DVFSMode:
             return pretty ? "DVFS Mode" : "dvfs_mode";
 
-        case RClkConfigValue_DVFSOffset:
+        case HocClkConfigValue_DVFSOffset:
             return pretty ? "DVFS Offset" : "dvfs_offset";
 
-        case RClkConfigValue_GPUScheduling:
+        case HocClkConfigValue_GPUScheduling:
             return pretty ? "GPU Scheduling" : "gpu_scheduling";
 
-        case RClkConfigValue_GPUSchedulingMethod:
+        case HocClkConfigValue_GPUSchedulingMethod:
             return pretty ? "GPU Scheduling Method" : "gpu_sched_method";
 
-        case RClkConfigValue_LiveCpuUv:
+        case HocClkConfigValue_LiveCpuUv:
             return pretty ? "Live CPU Undervolt" : "live_cpu_uv";
 
-        case RClkConfigValue_EnableExperimentalSettings:
+        case HocClkConfigValue_EnableExperimentalSettings:
             return pretty ? "Enable Experimental Settings" : "enable_experimental_settings";
 
-        case RClkConfigValue_RAMVoltDisplayMode:
+        case HocClkConfigValue_RAMVoltDisplayMode:
             return pretty ? "RAM Voltage / Usage Display Mode" : "ram_volt_usage_display_mode";
-        case RClkConfigValue_CpuGovernorMinimumFreq:
+        case HocClkConfigValue_CpuGovernorMinimumFreq:
             return pretty ? "CPU Governor Minimum Frequency" : "cpu_gov_min_freq";
 
-        case RClkConfigValue_DisplayVoltage:
+        case HocClkConfigValue_DisplayVoltage:
             return pretty ? "Display Voltage" : "display_voltage";
 
-        case RClkConfigValue_MemoryFrequencyMeasurementMode:
+        case HocClkConfigValue_MemoryFrequencyMeasurementMode:
             return pretty ? "RAM Frequency Measurement Mode" : "mem_freq_measurement_mode";
 
-        case RClkConfigValue_RamDisplayUnit:
+        case HocClkConfigValue_RamDisplayUnit:
             return pretty ? "RAM Frequency Display Unit" : "RAM_display_unit";
-        case RClkConfigValue_AulaDisplayColorPreset:
+        case HocClkConfigValue_AulaDisplayColorPreset:
             return pretty ? "Aula Display Color Preset" : "aula_color_preset";
-        case RClkConfigValue_MarikoMiddleFreqs:
-            return pretty ? "Mariko Middle Clocks" : "mariko_middle_freqs";
+
         // KIP config values
         case KipConfigValue_custRev:
             return pretty ? "Custom Revision" : "kip_cust_rev";
@@ -479,92 +477,90 @@ static inline const char* rclkFormatConfigValue(RClkConfigValue val, bool pretty
         case KipConfigValue_t7_tWTR_fine_tune: return pretty ? "t7 - tWTR Fine Tune" : "t7_tWTR_fine_tune";
         case KipCrc32:
             return pretty ? "CRC32" : "crc32";
-        case RClkConfigValue_IsFirstLoad:
+        case HocClkConfigValue_IsFirstLoad:
             return pretty ? "Is First Load" : "is_first_load";
         default:
             return pretty ? "[cfg] no enum format string" : "err_no_format_string";
     }
 }
 
-static inline uint64_t rclkDefaultConfigValue(RClkConfigValue val)
+static inline uint64_t rclkDefaultConfigValue(HocClkConfigValue val)
 {
     switch(val)
     {
-        case RClkConfigValue_PollingIntervalMs:
+        case HocClkConfigValue_PollingIntervalMs:
             return 300ULL;
-        case RClkConfigValue_TempLogIntervalMs:
-        case RClkConfigValue_FreqLogIntervalMs:
-        case RClkConfigValue_PowerLogIntervalMs:
-        case RClkConfigValue_CsvWriteIntervalMs:
-        case RClkConfigValue_UncappedClocks:
-        case RClkConfigValue_OverwriteBoostMode:
-        case RClkConfigValue_BatteryChargeCurrent:
-        case RClkConfigValue_OverwriteRefreshRate:
-        case RClkConfigValue_GPUScheduling:
-        case RClkConfigValue_LiveCpuUv:
-        case RClkConfigValue_GPUSchedulingMethod:
-        case RClkConfigValue_MemoryFrequencyMeasurementMode:
-        case RClkConfigValue_MarikoMiddleFreqs:
+        case HocClkConfigValue_TempLogIntervalMs:
+        case HocClkConfigValue_FreqLogIntervalMs:
+        case HocClkConfigValue_PowerLogIntervalMs:
+        case HocClkConfigValue_CsvWriteIntervalMs:
+        case HocClkConfigValue_UncappedClocks:
+        case HocClkConfigValue_OverwriteBoostMode:
+        case HocClkConfigValue_BatteryChargeCurrent:
+        case HocClkConfigValue_OverwriteRefreshRate:
+        case HocClkConfigValue_GPUScheduling:
+        case HocClkConfigValue_LiveCpuUv:
+        case HocClkConfigValue_GPUSchedulingMethod:
+        case HocClkConfigValue_MemoryFrequencyMeasurementMode:
             return 0ULL;
-        case RClkConfigValue_RamDisplayUnit:
+        case HocClkConfigValue_RamDisplayUnit:
             return (uint64_t)RamDisplayUnit_MHz;
-        case RClkConfigValue_EristaMaxCpuClock:
+        case HocClkConfigValue_EristaMaxCpuClock:
             return 1785ULL;
 
-        case RClkConfigValue_MarikoMaxCpuClock:
+        case HocClkConfigValue_MarikoMaxCpuClock:
             return 1963ULL;
 
-        case RClkConfigValue_ThermalThrottle:
-        case RClkConfigValue_HandheldTDP:
-        case RClkConfigValue_IsFirstLoad:
-        case RClkConfigValue_DVFSMode:
+        case HocClkConfigValue_ThermalThrottle:
+        case HocClkConfigValue_HandheldTDP:
+        case HocClkConfigValue_IsFirstLoad:
+        case HocClkConfigValue_DVFSMode:
             return 1ULL;
-        case RClkConfigValue_ThermalThrottleThreshold:
+        case HocClkConfigValue_ThermalThrottleThreshold:
             return 70ULL;
-        case RClkConfigValue_HandheldTDPLimit:
+        case HocClkConfigValue_HandheldTDPLimit:
             return 9600ULL; // 8600mW will trigger on erista stock, so raise it a bit
-        case RClkConfigValue_LiteTDPLimit:
+        case HocClkConfigValue_LiteTDPLimit:
             return 6400ULL; // 0.5C
-        case RClkConfigValue_CpuGovernorMinimumFreq:
+        case HocClkConfigValue_CpuGovernorMinimumFreq:
             return 612000000ULL; // 612MHz
-        case RClkConfigValue_MaxDisplayClockH:
+        case HocClkConfigValue_MaxDisplayClockH:
             return 60ULL;
-        case RClkConfigValue_DisplayVoltage:
+        case HocClkConfigValue_DisplayVoltage:
             return 1200ULL; // Auto
-        case RClkConfigValue_AulaDisplayColorPreset:
+        case HocClkConfigValue_AulaDisplayColorPreset:
             return AulaDisplayColorMode_DoNotOverride;
         default:
             return 0ULL;
     }
 }
 
-static inline uint64_t rclkValidConfigValue(RClkConfigValue val, uint64_t input)
+static inline uint64_t rclkValidConfigValue(HocClkConfigValue val, uint64_t input)
 {
     switch(val)
     {
-        case RClkConfigValue_EristaMaxCpuClock:
-        case RClkConfigValue_MarikoMaxCpuClock:
-        case RClkConfigValue_ThermalThrottleThreshold:
-        case RClkConfigValue_HandheldTDPLimit:
-        case RClkConfigValue_LiteTDPLimit:
-        case RClkConfigValue_PollingIntervalMs:
-        case RClkConfigValue_MaxDisplayClockH:
+        case HocClkConfigValue_EristaMaxCpuClock:
+        case HocClkConfigValue_MarikoMaxCpuClock:
+        case HocClkConfigValue_ThermalThrottleThreshold:
+        case HocClkConfigValue_HandheldTDPLimit:
+        case HocClkConfigValue_LiteTDPLimit:
+        case HocClkConfigValue_PollingIntervalMs:
+        case HocClkConfigValue_MaxDisplayClockH:
             return input > 0;
 
-        case RClkConfigValue_TempLogIntervalMs:
-        case RClkConfigValue_FreqLogIntervalMs:
-        case RClkConfigValue_PowerLogIntervalMs:
-        case RClkConfigValue_CsvWriteIntervalMs:
-        case RClkConfigValue_UncappedClocks:
-        case RClkConfigValue_OverwriteBoostMode:
-        case RClkConfigValue_ThermalThrottle:
-        case RClkConfigValue_HandheldTDP:
-        case RClkConfigValue_OverwriteRefreshRate:
-        case RClkConfigValue_IsFirstLoad:
-        case RClkConfigValue_EnableExperimentalSettings:
-        case RClkConfigValue_LiveCpuUv:
-        case RClkConfigValue_GPUSchedulingMethod:
-        case RClkConfigValue_MarikoMiddleFreqs:
+        case HocClkConfigValue_TempLogIntervalMs:
+        case HocClkConfigValue_FreqLogIntervalMs:
+        case HocClkConfigValue_PowerLogIntervalMs:
+        case HocClkConfigValue_CsvWriteIntervalMs:
+        case HocClkConfigValue_UncappedClocks:
+        case HocClkConfigValue_OverwriteBoostMode:
+        case HocClkConfigValue_ThermalThrottle:
+        case HocClkConfigValue_HandheldTDP:
+        case HocClkConfigValue_OverwriteRefreshRate:
+        case HocClkConfigValue_IsFirstLoad:
+        case HocClkConfigValue_EnableExperimentalSettings:
+        case HocClkConfigValue_LiveCpuUv:
+        case HocClkConfigValue_GPUSchedulingMethod:
             return (input & 0x1) == input;
 
         case KipConfigValue_custRev:
@@ -675,18 +671,18 @@ static inline uint64_t rclkValidConfigValue(RClkConfigValue val, uint64_t input)
         case KipConfigValue_t6_tRTW_fine_tune:
         case KipConfigValue_t7_tWTR_fine_tune:
         case KipCrc32:
-        case RClkConfigValue_DVFSMode:
-        case RClkConfigValue_DVFSOffset:
-        case RClkConfigValue_GPUScheduling:
-        case RClkConfigValue_RAMVoltDisplayMode:
-        case RClkConfigValue_CpuGovernorMinimumFreq:
-        case RClkConfigValue_MemoryFrequencyMeasurementMode:
-        case RClkConfigValue_RamDisplayUnit:
-        case RClkConfigValue_AulaDisplayColorPreset:
+        case HocClkConfigValue_DVFSMode:
+        case HocClkConfigValue_DVFSOffset:
+        case HocClkConfigValue_GPUScheduling:
+        case HocClkConfigValue_RAMVoltDisplayMode:
+        case HocClkConfigValue_CpuGovernorMinimumFreq:
+        case HocClkConfigValue_MemoryFrequencyMeasurementMode:
+        case HocClkConfigValue_RamDisplayUnit:
+        case HocClkConfigValue_AulaDisplayColorPreset:
             return true;
-        case RClkConfigValue_BatteryChargeCurrent:
+        case HocClkConfigValue_BatteryChargeCurrent:
             return ((input >= 1024) && (input <= 3072)) || !input;
-        case RClkConfigValue_DisplayVoltage:
+        case HocClkConfigValue_DisplayVoltage:
             return ((input >= 800) && (input <= 1325));
 
         default:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -30,23 +30,23 @@
 
 namespace board {
 
-    const char *GetModuleName(RClkModule module, bool pretty) {
-        ASSERT_ENUM_VALID(RClkModule, module);
+    const char *GetModuleName(HocClkModule module, bool pretty) {
+        ASSERT_ENUM_VALID(HocClkModule, module);
         return rclkFormatModule(module, pretty);
     }
 
-    const char *GetProfileName(RClkProfile profile, bool pretty) {
-        ASSERT_ENUM_VALID(RClkProfile, profile);
+    const char *GetProfileName(HocClkProfile profile, bool pretty) {
+        ASSERT_ENUM_VALID(HocClkProfile, profile);
         return rclkFormatProfile(profile, pretty);
     }
 
-    const char *GetThermalSensorName(RClkThermalSensor sensor, bool pretty) {
-        ASSERT_ENUM_VALID(RClkThermalSensor, sensor);
+    const char *GetThermalSensorName(HocClkThermalSensor sensor, bool pretty) {
+        ASSERT_ENUM_VALID(HocClkThermalSensor, sensor);
         return rclkFormatThermalSensor(sensor, pretty);
     }
 
-    const char *GetPowerSensorName(RClkPowerSensor sensor, bool pretty) {
-        ASSERT_ENUM_VALID(RClkPowerSensor, sensor);
+    const char *GetPowerSensorName(HocClkPowerSensor sensor, bool pretty) {
+        ASSERT_ENUM_VALID(HocClkPowerSensor, sensor);
         return rclkFormatPowerSensor(sensor, pretty);
     }
 

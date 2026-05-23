@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -29,8 +29,6 @@
 #include <tesla.hpp>
 #include "ui/gui/fatal_gui.h"
 #include "ui/gui/main_gui.h"
-#include "rgltr_services.h"  // for extern Service g_rgltrSrv, etc.
-#include "i18n.hpp"
 
 class AppOverlay : public tsl::Overlay
 {
@@ -43,16 +41,11 @@ class AppOverlay : public tsl::Overlay
         //}
 
         virtual void exitServices() override {
-            rgltrExit();
             rclkIpcExit();
         }
 
         virtual std::unique_ptr<tsl::Gui> loadInitialGui() override
         {
-            // Load translation table early so all GUIs render in the user's
-            // language. Idempotent; cheap if already loaded.
-            i18n::Initialize();
-
             uint32_t apiVersion;
             smInitialize();
 
@@ -61,7 +54,7 @@ class AppOverlay : public tsl::Overlay
             if(!rclkIpcRunning())
             {
                 return initially<FatalGui>(
-                    "ryazha-clk is not running.\n\n"
+                    "ryazha-clk-clk is not running.\n\n"
                     "\n"
                     "Please make sure it is correctly\n\n"
                     "installed and enabled.",
@@ -72,7 +65,7 @@ class AppOverlay : public tsl::Overlay
             if(R_FAILED(rclkIpcInitialize()) || R_FAILED(rclkIpcGetAPIVersion(&apiVersion)))
             {
                 return initially<FatalGui>(
-                    "Could not connect to ryazha-clk.\n\n"
+                    "Could not connect to ryazha-clk-clk.\n\n"
                     "\n"
                     "Please make sure it is correctly\n\n"
                     "installed and enabled.",
@@ -84,7 +77,7 @@ class AppOverlay : public tsl::Overlay
             {
                 return initially<FatalGui>(
                     "Overlay not compatible with\n\n"
-                    "the running ryazha-clk version.\n\n"
+                    "the running ryazha-clk-clk version.\n\n"
                     "\n"
                     "Please make sure everything is\n\n"
                     "installed and up to date.",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -30,7 +30,7 @@
 
 namespace board {
 
-    s32 GetTemperatureMilli(RClkThermalSensor sensor);
-    s32 GetPowerMw(RClkPowerSensor sensor);
+    s32 GetTemperatureMilli(HocClkThermalSensor sensor);
+    s32 GetPowerMw(HocClkPowerSensor sensor);
 
 }

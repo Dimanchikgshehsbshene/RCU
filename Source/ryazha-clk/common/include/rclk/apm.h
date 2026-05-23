@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -34,6 +34,6 @@ typedef struct {
     uint32_t cpu_hz;
     uint32_t gpu_hz;
     uint32_t mem_hz;
-} RClkApmConfiguration;
+} HocClkApmConfiguration;
 
-extern RClkApmConfiguration rclk_g_apm_configurations[];
+extern HocClkApmConfiguration hocclk_g_apm_configurations[];

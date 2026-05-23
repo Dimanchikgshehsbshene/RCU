@@ -17,20 +17,24 @@ include $(DEVKITPRO)/libnx/switch_rules
 # INCLUDES is a list of directories containing header files
 # EXEFS_SRC is the optional input directory containing data copied into exefs, if anything this normally should only contain "main.npdm".
 #---------------------------------------------------------------------------------
-TARGET		:=	ryazha-clk
+TARGET		:=	ryazha-clk-clk
 CONFIG_DIR	:=	ryazha-clk
 BUILD		:=	build
 OUTDIR		:=	out
 RESOURCES	:=	res
-SOURCES		:=	src src/board src/display ../common/src ../common/src/client
+SOURCES		:=	src src/hos src/i2c src/ipc src/board src/display src/tsensor src/mgr src/file src/soc src/mapping src/pwr src/util
 DATA		:=	data
-INCLUDES	:=	../common/include
+INCLUDES	:=	../common/include src/hos src/soc src/i2c src/util src/pwr src/ipc
 EXEFS_SRC	:=	exefs_src
-LIBNAMES	:=	minIni nxExt
+LIBNAMES	:=	minIni
 # major minor patch
-TARGET_VERSION	:= 3.0.0
-KIP_VERSION :=  300
-CUST_REV    :=  3
+KIP_VERSION :=  220
+CUST_REV    :=  2
+
+#---------------------------------------------------------------------------------
+# version control constants
+#---------------------------------------------------------------------------------
+TARGET_VERSION	:= $(shell git describe --dirty --always --tags)
 
 #---------------------------------------------------------------------------------
 # options for code generation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  * 
  * Copyright (c) B3711
  * 
@@ -27,7 +27,7 @@
 #include "board.hpp"
 #include "board_freq.hpp"
 #include "board_volt.hpp"
-#include "../file_utils.hpp"
+#include "../file/file_utils.hpp"
 
 namespace board {
 
@@ -93,11 +93,11 @@ namespace board {
         Result rc = QueryMemoryMapping(&cldvfs, CLDVFS_REGION_BASE, CLDVFS_REGION_SIZE);
         ASSERT_RESULT_OK(rc, "QueryMemoryMapping (cldvfs)");
 
-        if (GetSocType() == RClkSocType_Erista) {
+        if (GetSocType() == HocClkSocType_Erista) {
             cachedTune.tune0Low = *reinterpret_cast<u32 *>(cldvfs + CL_DVFS_TUNE0_0);
             cachedTune.tune1Low = *reinterpret_cast<u32 *>(cldvfs + CL_DVFS_TUNE1_0);
         } else {
-            SetHz(RClkModule_CPU, 1785000000);
+            SetHz(HocClkModule_CPU, 1785000000);
             cachedTune.tune0High = *reinterpret_cast<u32 *>(cldvfs + CL_DVFS_TUNE0_0);
             ResetToStockCpu();
         }
@@ -107,8 +107,8 @@ namespace board {
     void SetDfllTunings(u32 levelLow, u32 levelHigh, u32 tbreakPoint) {
         u32* tune0_ptr = reinterpret_cast<u32 *>(cldvfs + CL_DVFS_TUNE0_0);
         u32* tune1_ptr = reinterpret_cast<u32 *>(cldvfs + CL_DVFS_TUNE1_0);
-        if (GetSocType() == RClkSocType_Mariko) {
-            if (GetHz(RClkModule_CPU) < tbreakPoint && (levelLow || levelHigh)) {
+        if (GetSocType() == HocClkSocType_Mariko) {
+            if (GetHz(HocClkModule_CPU) < tbreakPoint && (levelLow || levelHigh)) {
                 if (levelLow) {
                     *tune0_ptr = marikoCpuUvLow[levelLow-1].tune0_low;
                     *tune1_ptr = marikoCpuUvLow[levelLow-1].tune1_low;
@@ -125,17 +125,17 @@ namespace board {
                 }
                 return;
             }
-            if (GetHz(RClkModule_CPU) < tbreakPoint || (!levelLow)) { // account for tbreak
+            if (GetHz(HocClkModule_CPU) < tbreakPoint || (!levelLow)) { // account for tbreak
                 *tune0_ptr = 0xCFFF;
                 *tune1_ptr = 0xFF072201;
                 return;
-            } else if (GetHz(RClkModule_CPU) >= tbreakPoint || (!levelHigh)) {
+            } else if (GetHz(HocClkModule_CPU) >= tbreakPoint || (!levelHigh)) {
                 *tune0_ptr = cachedTune.tune0High; // per console?
                 *tune1_ptr = 0xFFF7FF3F;
                 return;
             }
         } else {
-            if (GetHz(RClkModule_CPU) < tbreakPoint || (!levelLow)) { // account for tbreak
+            if (GetHz(HocClkModule_CPU) < tbreakPoint || (!levelLow)) { // account for tbreak
                 *tune0_ptr = cachedTune.tune0Low; // I think each erista has a different tune0/tune1?
                 *tune1_ptr = cachedTune.tune1Low;
                 return;
@@ -160,7 +160,7 @@ namespace board {
     };
     */
     u32 CalculateTbreak(u32 table) {
-        if (GetSocType() == RClkSocType_Erista) {
+        if (GetSocType() == HocClkSocType_Erista) {
             return 1581000000;
         } else {
             switch (table) {
@@ -214,27 +214,27 @@ namespace board {
         PcvPowerDomainId_Max77812_Dram = 0x3A000005, // vddq
     } PowerDomainId;
     */
-    u32 GetVoltage(RClkVoltage voltage) {
+    u32 GetVoltage(HocClkVoltage voltage) {
         RgltrSession session;
         Result rc = 0;
         u32 out = 0;
         BatteryChargeInfo info;
 
         switch (voltage) {
-            case RClkVoltage_SOC:
+            case HocClkVoltage_SOC:
                 rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77620_Sd0);
                 ASSERT_RESULT_OK(rc, "rgltrOpenSession")
                 rgltrGetVoltage(&session, &out);
                 rgltrCloseSession(&session);
                 break;
-            case RClkVoltage_EMCVDD2:
+            case HocClkVoltage_EMCVDD2:
                 rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77620_Sd1);
                 ASSERT_RESULT_OK(rc, "rgltrOpenSession")
                 rgltrGetVoltage(&session, &out);
                 rgltrCloseSession(&session);
                 break;
-            case RClkVoltage_CPU:
-                if (GetSocType() == RClkSocType_Mariko) {
+            case HocClkVoltage_CPU:
+                if (GetSocType() == HocClkSocType_Mariko) {
                     rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77621_Cpu);
                 } else {
                     rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77812_Cpu);
@@ -243,8 +243,8 @@ namespace board {
                 rgltrGetVoltage(&session, &out);
                 rgltrCloseSession(&session);
                 break;
-            case RClkVoltage_GPU:
-                if (GetSocType() == RClkSocType_Mariko) {
+            case HocClkVoltage_GPU:
+                if (GetSocType() == HocClkSocType_Mariko) {
                     rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77621_Gpu);
                 } else {
                     rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77812_Gpu);
@@ -253,28 +253,28 @@ namespace board {
                 rgltrGetVoltage(&session, &out);
                 rgltrCloseSession(&session);
                 break;
-            case RClkVoltage_EMCVDDQ:
-                if (GetSocType() == RClkSocType_Mariko) {
+            case HocClkVoltage_EMCVDDQ:
+                if (GetSocType() == HocClkSocType_Mariko) {
                     rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77812_Dram);
                     ASSERT_RESULT_OK(rc, "rgltrOpenSession")
                     rgltrGetVoltage(&session, &out);
                     rgltrCloseSession(&session);
                 } else {
-                    out = GetVoltage(RClkVoltage_EMCVDD2);
+                    out = GetVoltage(HocClkVoltage_EMCVDD2); // VDD2 and VDDQ are always connected to the same rail on Erista
                 }
                 break;
-            case RClkVoltage_Display:
+            case HocClkVoltage_Display:
                 rc = rgltrOpenSession(&session, PcvPowerDomainId_Max77620_Ldo0);
                 ASSERT_RESULT_OK(rc, "rgltrOpenSession")
                 rgltrGetVoltage(&session, &out);
                 rgltrCloseSession(&session);
                 break;
-            case RClkVoltage_Battery:
+            case HocClkVoltage_Battery:
                 batteryInfoGetChargeInfo(&info);
                 out = info.VoltageAvg;
                 break;
             default:
-                ASSERT_ENUM_VALID(RClkVoltage, voltage);
+                ASSERT_ENUM_VALID(HocClkVoltage, voltage);
         }
 
         return out > 0 ? out : 0;
@@ -321,6 +321,7 @@ namespace board {
     }
 
     void CacheGpuVoltTable() {
+        // Likely CPU regulator?
         UnkRegulator reg = {
             .voltageMin  = 600000,
             .voltageStep = 12500,
@@ -386,6 +387,7 @@ namespace board {
                 svcCloseHandle(handle);
                 handle = INVALID_HANDLE;
 
+                // Print info AFTER we exit the handle to avoid hangs
                 for(int i = 0; i < (int)std::size(cpuVoltTable); ++i) {
                     fileUtils::LogLine("[dvfs] cpu volt %d: %u mV", i, cpuVoltTable[i]);
                 }
@@ -435,21 +437,21 @@ namespace board {
 
     u32 GetMinimumGpuVmin(u32 freqMhz, u32 bracket) {
         static const u32 ramTable[][22] = {
-            { 2133, 2200, 2266, 2300, 2366, 2400, 2433, 2466, 2533, 2566, 2600, 2633, 2700, 2733, 2766, 2833, 2866, 2900, 2933, 3033, 3066, 3100, },
-            { 2300, 2366, 2433, 2466, 2533, 2566, 2633, 2700, 2733, 2800, 2833, 2900, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3266, },
-            { 2433, 2466, 2533, 2600, 2666, 2733, 2766, 2800, 2833, 2866, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3300, 3333, 3366, },
-            { 2500, 2533, 2600, 2633, 2666, 2733, 2800, 2866, 2900, 2966, 3033, 3100, 3166, 3200, 3233, 3266, 3300, 3333, 3366, 3400, 3400, 3400, },
+            { 2133, 2200, 2266, 2300, 2366, 2400, 2433, 2466, 2533, 2566, 2600, 2633, 2700, 2733, 2766, 2833, 2866, 2900, 2933, 3033, 3066, 3100, }, // Bracket 0
+            { 2300, 2366, 2433, 2466, 2533, 2566, 2633, 2700, 2733, 2800, 2833, 2900, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3266, }, // Bracket 1
+            { 2433, 2466, 2533, 2566, 2600, 2666, 2766, 2800, 2833, 2866, 2933, 2966, 3033, 3066, 3100, 3133, 3166, 3200, 3233, 3300, 3333, 3366, }, // Bracket 2
+            { 2500, 2533, 2600, 2633, 2666, 2733, 2800, 2866, 2900, 2966, 3033, 3100, 3166, 3200, 3233, 3266, 3300, 3333, 3366, 3400, 3400, 3400, }, // Bracket 3
         };
 
         static const u32 gpuVoltArray[] = { 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750, 760, 770, 780, 790, 800, };
 
-        if (freqMhz <= 1600) return 0;
+        if (freqMhz <= 1600) return 0; // DVFS doesnt work below 1600MHz, it will just use vMin
         if (bracket >= std::size(ramTable)) bracket = 0;
 
         u32 bracketStart = ramTable[bracket][0];
         
     
-        u32 rampStartVolt = (bracket == 0) ? 535 : 525;
+        u32 rampStartVolt = (bracket == 0) ? 535 : 525; // Do not touch!
         u32 rampSpan = 590 - rampStartVolt; 
 
 

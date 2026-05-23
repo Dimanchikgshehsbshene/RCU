@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -32,10 +32,10 @@ class AppProfileGui : public BaseMenuGui
 {
     protected:
         std::uint64_t applicationId;
-        RClkTitleProfileList* profileList;
-        void openFreqChoiceGui(tsl::elm::ListItem* listItem, RClkProfile profile, RClkModule module);
-        void addModuleListItem(RClkProfile profile, RClkModule module);
-        void addModuleListItemToggle(RClkProfile profile, RClkModule module);
+        HocClkTitleProfileList* profileList;
+        void openFreqChoiceGui(tsl::elm::ListItem* listItem, HocClkProfile profile, HocClkModule module);
+        void addModuleListItem(HocClkProfile profile, HocClkModule module);
+        void addModuleListItemToggle(HocClkProfile profile, HocClkModule module);
         void openValueChoiceGui(
             tsl::elm::ListItem* listItem,
             std::uint32_t currentValue,
@@ -56,8 +56,8 @@ class AppProfileGui : public BaseMenuGui
             int decimalPlaces
         );
         void addModuleListItemValue(
-            RClkProfile profile,
-            RClkModule module,
+            HocClkProfile profile,
+            HocClkModule module,
             const std::string& categoryName,
             std::uint32_t min,
             std::uint32_t max,
@@ -69,10 +69,10 @@ class AppProfileGui : public BaseMenuGui
             std::vector<NamedValue> namedValues = {},
             bool showDefaultValue = true
         );
-        void addGovernorSection(RClkProfile profile);
-        void addProfileUI(RClkProfile profile);
+        void addGovernorSection(HocClkProfile profile);
+        void addProfileUI(HocClkProfile profile);
     public:
-        AppProfileGui(std::uint64_t applicationId, RClkTitleProfileList* profileList);
+        AppProfileGui(std::uint64_t applicationId, HocClkTitleProfileList* profileList);
         ~AppProfileGui();
         void listUI() override;
         static void changeTo(std::uint64_t applicationId);

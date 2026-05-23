@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -35,16 +35,22 @@
 #include "board_sensor.hpp"
 #include "board_volt.hpp"
 #include "board_profile.hpp"
-#include "../mem_map.hpp"
+#include "../mapping/mem_map.hpp"
 #define HOSSVC_HAS_CLKRST (hosversionAtLeast(8,0,0))
 #define HOSSVC_HAS_TC (hosversionAtLeast(5,0,0))
 
 namespace board {
-    extern u64 clkVirtAddr, dsiVirtAddr;
+    extern u64 clkVirtAddr, dsiVirtAddr, apbVirtAddr, fuseVirtAddr;
+    extern HocClkSocType gSocType;
+    extern u8 gDramID;
+    extern HocClkConsoleType gConsoleType;
+    extern FuseData fuseData;
+    extern u8 speedoBracket;
+    
     void Initialize();
     void Exit();
-    RClkSocType GetSocType();
-    RClkConsoleType GetConsoleType();
+    HocClkSocType GetSocType();
+    HocClkConsoleType GetConsoleType();
     u8 GetDramID();
     u8 GetGpuSpeedoBracket();
     bool IsDram8GB();

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -33,14 +33,13 @@
 class GlobalOverrideGui : public BaseMenuGui
 {
     protected:
-        std::map<RClkModule, std::tuple<std::string, std::uint32_t, int>> customFormatModules;
-        tsl::elm::ListItem* listItems[RClkModule_EnumMax];
-        tsl::elm::NamedStepTrackBar* displayTrackbar = nullptr;
-        std::uint32_t listHz[RClkModule_EnumMax];
-        void openFreqChoiceGui(RClkModule module);
+        std::map<HocClkModule, std::tuple<std::string, std::uint32_t, int>> customFormatModules;
+        tsl::elm::ListItem* listItems[HocClkModule_EnumMax];
+        std::uint32_t listHz[HocClkModule_EnumMax];
+        void openFreqChoiceGui(HocClkModule module);
         void addGovernorSection();
-        void addModuleListItem(RClkModule module);
-        void addModuleToggleItem(RClkModule module);
+        void addModuleListItem(HocClkModule module);
+        void addModuleToggleItem(HocClkModule module);
         void openValueChoiceGui(
             tsl::elm::ListItem* listItem,
             std::uint32_t currentValue,
@@ -54,7 +53,7 @@ class GlobalOverrideGui : public BaseMenuGui
             bool showDefaultValue
         );
         void addModuleListItemValue(
-            RClkModule module,
+            HocClkModule module,
             const std::string& categoryName,
             std::uint32_t min,
             std::uint32_t max,
@@ -71,5 +70,5 @@ class GlobalOverrideGui : public BaseMenuGui
         ~GlobalOverrideGui() {}
         void listUI() override;
         void refresh() override;
-        void setModuleCustomFormat(RClkModule module, const std::string& suffix, std::uint32_t divisor, int decimalPlaces);
+        void setModuleCustomFormat(HocClkModule module, const std::string& suffix, std::uint32_t divisor, int decimalPlaces);
 };

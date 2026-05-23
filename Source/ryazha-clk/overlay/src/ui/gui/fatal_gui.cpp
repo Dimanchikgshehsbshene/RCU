@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -40,7 +40,7 @@ void FatalGui::openWithResultCode(std::string tag, Result rc)
     info.append(rcStr, snprintf(rcStr, sizeof(rcStr), "\n\n[0x%x] %04d-%04d", rc, R_MODULE(rc), R_DESCRIPTION(rc)));
 
     tsl::changeTo<FatalGui>(
-        "Could not connect to ryazha-clk sysmodule.\n\n"
+        "Could not connect to ryazha-clk-clk sysmodule.\n\n"
         "\n"
         "Please make sure everything is\n\n"
         "correctly installed and enabled.",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -30,16 +30,15 @@
 
 #include <switch.h>
 
-#include "errors.hpp"
-#include "file_utils.hpp"
+#include "file/errors.hpp"
+#include "file/file_utils.hpp"
 #include "board/board.hpp"
-#include "process_management.hpp"
-#include "clock_manager.hpp"
-#include "ipc_service.hpp"
-#include "config.hpp"
-#include "auto_ryazha.hpp"
+#include "hos/process_management.hpp"
+#include "mgr/clock_manager.hpp"
+#include "ipc/ipc_service.hpp"
+#include "file/config.hpp"
 
-#define INNER_HEAP_SIZE 0x4A000
+#define INNER_HEAP_SIZE 0x3A000
 
 extern "C"
 {
@@ -144,14 +143,16 @@ int main(int argc, char** argv)
 
     clockManager::Initialize();
     ipcService::Initialize();
-    autoRyazha::Initialize();
 
     fileUtils::LogLine("Ready");
 
     clockManager::SetRunning(true);
     config::SetEnabled(true);
     ipcService::SetRunning(true);
-    autoRyazha::Start();
+    // TemperaturePoint *table;
+    // ReadConfigFile(&table);
+    // InitFanController(table);
+    // StartFanControllerThread();
 
     while (clockManager::Running())
     {
@@ -159,7 +160,6 @@ int main(int argc, char** argv)
         clockManager::WaitForNextTick();
     }
 
-    autoRyazha::Exit();
     ipcService::SetRunning(false);
     ipcService::Exit();
     clockManager::Exit();

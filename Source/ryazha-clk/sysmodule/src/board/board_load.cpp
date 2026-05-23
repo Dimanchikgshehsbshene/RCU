@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -26,7 +26,13 @@
 
 #include <switch.h>
 #include <rclk.h>
-#include <nxExt.h>
+#include "../hos/apm_ext.h"
+#include <i2c.h>
+#include <t210.h>
+#include <max17050.h>
+#include <tmp451.h>
+#include <ipc_server.h>
+#include <lockable_mutex.h>
 #include <algorithm>
 #include <math.h>
 #include <numeric>
@@ -104,32 +110,32 @@ namespace board {
         return std::round(std::max({cpuUsage0, cpuUsage1, cpuUsage2}));
     }
 
-    u32 GetPartLoad(RClkPartLoad loadSource) {
+    u32 GetPartLoad(HocClkPartLoad loadSource) {
         switch(loadSource) {
-            case RClkPartLoad_EMC:
+            case HocClkPartLoad_EMC:
                 return t210EmcLoadAll();
-            case RClkPartLoad_EMCCpu:
+            case HocClkPartLoad_EMCCpu:
                 return t210EmcLoadCpu();
-            case RClkPartLoad_GPU:
+            case HocClkPartLoad_GPU:
                 return gpuLoad;
-            case RClkPartLoad_CPUMax:
+            case HocClkPartLoad_CPUMax:
                 return GetMaxCpuLoad();
-            case RClkPartLoad_BAT:
+            case HocClkPartLoad_BAT:
                 BatteryChargeInfo info;
                 batteryInfoGetChargeInfo(&info);
                 return info.RawBatteryCharge;
-            case RClkPartLoad_FAN:
+            case HocClkPartLoad_FAN:
                 return GetFanLevel();
-            case RClkPartLoad_RamBWAll:
+            case HocClkPartLoad_RamBWAll:
                 return t210EmcBwAll();
-            case RClkPartLoad_RamBWCpu:
+            case HocClkPartLoad_RamBWCpu:
                 return t210EmcBwCpu();
-            case RClkPartLoad_RamBWGpu:
+            case HocClkPartLoad_RamBWGpu:
                 return t210EmcBwGpu();
-            case RClkPartLoad_RamBWPeak:
+            case HocClkPartLoad_RamBWPeak:
                 return t210EmcBwPeak();
             default:
-                ASSERT_ENUM_VALID(RClkPartLoad, loadSource);
+                ASSERT_ENUM_VALID(HocClkPartLoad, loadSource);
         }
         return 0;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -32,43 +32,41 @@
 #include "clock_manager.h"
 
 #define RCLK_IPC_API_VERSION 2
-#define RCLK_IPC_SERVICE_NAME "hoc:clk"
+#define RCLK_IPC_SERVICE_NAME "ryazha-clk:clk"
 
-enum RClkIpcCmd
+enum HocClkIpcCmd
 {
-    RClkIpcCmd_GetApiVersion = 0,
-    RClkIpcCmd_GetVersionString = 1,
-    RClkIpcCmd_GetCurrentContext = 2,
-    RClkIpcCmd_Exit = 3,
-    RClkIpcCmd_GetProfileCount = 4,
-    RClkIpcCmd_GetProfiles = 5,
-    RClkIpcCmd_SetProfiles = 6,
-    RClkIpcCmd_SetEnabled = 7,
-    RClkIpcCmd_SetOverride = 8,
-    RClkIpcCmd_GetConfigValues = 9,
-    RClkIpcCmd_SetConfigValues = 10,
-    RClkIpcCmd_GetFreqList = 11,
-    RClkIpcCmd_SetKipData = 12,
-    RClkIpcCmd_GetKipData = 13,
-    RClkIpcCmd_GetLadderConfig = 14,
-    RClkIpcCmd_SetLadderConfig = 15,
+    HocClkIpcCmd_GetApiVersion = 0,
+    HocClkIpcCmd_GetVersionString = 1,
+    HocClkIpcCmd_GetCurrentContext = 2,
+    HocClkIpcCmd_Exit = 3,
+    HocClkIpcCmd_GetProfileCount = 4,
+    HocClkIpcCmd_GetProfiles = 5,
+    HocClkIpcCmd_SetProfiles = 6,
+    HocClkIpcCmd_SetEnabled = 7,
+    HocClkIpcCmd_SetOverride = 8,
+    HocClkIpcCmd_GetConfigValues = 9,
+    HocClkIpcCmd_SetConfigValues = 10,
+    HocClkIpcCmd_GetFreqList = 11,
+    HocClkIpcCmd_SetKipData = 12,
+    HocClkIpcCmd_GetKipData = 13,
 };
 
 
 typedef struct
 {
     uint64_t tid;
-    RClkTitleProfileList profiles;
-} RClkIpc_SetProfiles_Args;
+    HocClkTitleProfileList profiles;
+} HocClkIpc_SetProfiles_Args;
 
 typedef struct
 {
-    RClkModule module;
+    HocClkModule module;
     uint32_t hz;
-} RClkIpc_SetOverride_Args;
+} HocClkIpc_SetOverride_Args;
 
 typedef struct
 {
-    RClkModule module;
+    HocClkModule module;
     uint32_t maxCount;
-} RClkIpc_GetFreqList_Args;
+} HocClkIpc_GetFreqList_Args;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -26,32 +26,42 @@
 
 #include <rclk.h>
 #include <switch.h>
-#include <nxExt.h>
+#include "../hos/apm_ext.h"
+#include <i2c.h>
+#include "../i2c/i2cDrv.h"
+#include <t210.h>
+#include <max17050.h>
+#include <tmp451.h>
+#include <ipc_server.h>
+#include <lockable_mutex.h>
 #include <cmath>
 #include <battery.h>
 #include <pwm.h>
 #include "board.hpp"
-#include "../soctherm.hpp"
-#include "bq24193.hpp"
+#include "../tsensor/soctherm.hpp"
+#include "../tsensor/aotag.hpp"
+#include "../tsensor/bq24193.hpp"
+#include "../file/config.hpp"
+
 namespace board {
 
-    s32 GetTemperatureMilli(RClkThermalSensor sensor) {
+    s32 GetTemperatureMilli(HocClkThermalSensor sensor) {
         s32 millis = 0;
         BatteryChargeInfo info;
 
-        soctherm::TSensorTemps temps = {};
-        soctherm::ReadSensors(temps);
+        tsensor::TSensorTemps temps = {};
+        tsensor::ReadTSensors(temps);
 
         switch(sensor) {
-            case RClkThermalSensor_SOC: {
+            case HocClkThermalSensor_SOC: {
                 millis = tmp451TempSoc();
                 break;
             }
-            case RClkThermalSensor_PCB: {
+            case HocClkThermalSensor_PCB: {
                 millis = tmp451TempPcb();
                 break;
             }
-            case RClkThermalSensor_Skin: {
+            case HocClkThermalSensor_Skin: {
                 if (HOSSVC_HAS_TC) {
                     Result rc;
                     rc = tcGetSkinTemperatureMilliC(&millis);
@@ -59,51 +69,59 @@ namespace board {
                 }
                 break;
             }
-            case RClkThermalSensor_Battery: {
+            case HocClkThermalSensor_Battery: {
                 batteryInfoGetChargeInfo(&info);
                 millis = batteryInfoGetTemperatureMiliCelsius(&info);
                 break;
             }
-            case RClkThermalSensor_PMIC: {
+            case HocClkThermalSensor_PMIC: {
                 millis = 50000;
                 break;
             }
-            case RClkThermalSensor_CPU: {
+            case HocClkThermalSensor_CPU: {
                 millis = temps.cpu;
                 break;
             }
-            case RClkThermalSensor_GPU: {
+            case HocClkThermalSensor_GPU: {
                 millis = temps.gpu;
                 break;
             }
-            case RClkThermalSensor_MEM: {
-                millis = board::GetSocType() == RClkSocType_Mariko ? temps.pllx : temps.mem;
+            case HocClkThermalSensor_MEM: {
+                if (board::GetSocType() == HocClkSocType_Mariko && tsensor::IsInitialized() && tsensor::ReadAotag() > 0) {
+                    millis = (temps.pllx * 0.10f) + (tsensor::ReadAotag() * 0.90f);
+                } else {
+                    millis = board::GetSocType() == HocClkSocType_Mariko ? temps.pllx : temps.mem;
+                }
                 break;
             }
-            case RClkThermalSensor_PLLX: {
+            case HocClkThermalSensor_PLLX: {
                 millis = temps.pllx;
                 break;
             }
-            case RClkThermalSensor_BQ24193: {
+            case HocClkThermalSensor_BQ24193: {
                 millis = bq24193::getBQTemp();
                 break;
             }
+            case HocClkThermalSensor_AO: {
+                millis = tsensor::ReadAotag();
+                break;
+            }
             default: {
-                ASSERT_ENUM_VALID(RClkThermalSensor, sensor);
+                ASSERT_ENUM_VALID(HocClkThermalSensor, sensor);
             }
         }
 
         return std::max(0, millis);
     }
 
-    s32 GetPowerMw(RClkPowerSensor sensor) {
+    s32 GetPowerMw(HocClkPowerSensor sensor) {
         switch (sensor) {
-            case RClkPowerSensor_Now:
+            case HocClkPowerSensor_Now:
                 return max17050PowerNow();
-            case RClkPowerSensor_Avg:
+            case HocClkPowerSensor_Avg:
                 return max17050PowerAvg();
             default:
-                ASSERT_ENUM_VALID(RClkPowerSensor, sensor);
+                ASSERT_ENUM_VALID(HocClkPowerSensor, sensor);
         }
 
         return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -32,7 +32,7 @@ namespace board {
 
     void StartLoad(Result nvCheck, u32 fd);
     void ExitLoad();
-    u32 GetPartLoad(RClkPartLoad loadSource);
+    u32 GetPartLoad(HocClkPartLoad loadSource);
     void SetGpuSchedulingMode(GpuSchedulingMode mode, GpuSchedulingOverrideMethod method);
     void SchedSetFD2(u32 fd2);
     void NvSchedSucceed(Result nvSched);

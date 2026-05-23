@@ -1,6 +1,5 @@
-#include "../../i18n.hpp"
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -32,11 +31,11 @@
 #include "app_profile_gui.h"
 #include "global_override_gui.h"
 #include "misc_gui.h"
-#include "living_ladder_gui.h"
+#include "about_gui.h"
 
 void MainGui::listUI()
 {
-    // this->enabledToggle = new tsl::elm::ToggleListItem(i18n::t("Enable"), false);
+    // this->enabledToggle = new tsl::elm::ToggleListItem("Enable", false);
     // enabledToggle->setStateChangedListener([this](bool state) {
     //     Result rc = rclkIpcSetEnabled(state);
     //     if(R_FAILED(rc))
@@ -49,7 +48,7 @@ void MainGui::listUI()
     // });
     // this->listElement->addItem(this->enabledToggle);
 
-    tsl::elm::ListItem* appProfileItem = new tsl::elm::ListItem(i18n::t("Профиль приложения"));
+    tsl::elm::ListItem* appProfileItem = new tsl::elm::ListItem("Edit App Profile");
     appProfileItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -62,7 +61,7 @@ void MainGui::listUI()
     this->listElement->addItem(appProfileItem);
 
 
-    tsl::elm::ListItem* globalProfileItem = new tsl::elm::ListItem(i18n::t("Глобальный профиль"));
+    tsl::elm::ListItem* globalProfileItem = new tsl::elm::ListItem("Edit Global Profile");
     globalProfileItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -74,7 +73,7 @@ void MainGui::listUI()
     });
     this->listElement->addItem(globalProfileItem);
 
-    tsl::elm::ListItem* globalOverrideItem = new tsl::elm::ListItem(i18n::t("Временный профиль"));
+    tsl::elm::ListItem* globalOverrideItem = new tsl::elm::ListItem("Temporary Overrides");
     globalOverrideItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -86,11 +85,9 @@ void MainGui::listUI()
     });
     this->listElement->addItem(globalOverrideItem);
 
-    // Пункт Ryazha-Авто специально скрыт из списка — открывается только кнопкой X (см. handleInput).
+    //this->listElement->addItem(new tsl::elm::CategoryHeader("Misc"));
 
-    //this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Misc")));
-
-    tsl::elm::ListItem* miscItem = new tsl::elm::ListItem(i18n::t("Настройки"));
+    tsl::elm::ListItem* miscItem = new tsl::elm::ListItem("Settings");
     miscItem->setClickListener([this](u64 keys) {
         if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
         {
@@ -102,6 +99,18 @@ void MainGui::listUI()
     });
     this->listElement->addItem(miscItem);
 
+    tsl::elm::ListItem* aboutItem = new tsl::elm::ListItem("About");
+    aboutItem->setClickListener([this](u64 keys) {
+        if((keys & HidNpadButton_A) == HidNpadButton_A && this->context)
+        {
+            tsl::changeTo<AboutGui>();
+            return true;
+        }
+
+        return false;
+    });
+    this->listElement->addItem(aboutItem);
+
 }
 
 void MainGui::refresh()
@@ -111,16 +120,4 @@ void MainGui::refresh()
     //{
     //    this->enabledToggle->setState(this->context->enabled);
     //}
-}
-
-bool MainGui::handleInput(u64 keysDown, u64 keysHeld, const HidTouchState &touchPos, HidAnalogStickState leftJoyStick, HidAnalogStickState rightJoyStick)
-{
-    (void)keysHeld; (void)touchPos; (void)leftJoyStick; (void)rightJoyStick;
-
-    if ((keysDown & HidNpadButton_X) == HidNpadButton_X)
-    {
-        tsl::changeTo<LivingLadderGui>();
-        return true;
-    }
-    return false;
 }

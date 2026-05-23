@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -26,18 +26,24 @@
 
 #include <switch.h>
 #include <rclk.h>
-#include <nxExt.h>
+#include "../hos/apm_ext.h"
+#include <i2c.h>
+#include <t210.h>
+#include <max17050.h>
+#include <tmp451.h>
+#include <ipc_server.h>
+#include <lockable_mutex.h>
 #include "board.hpp"
 
 namespace board {
 
-    RClkProfile GetProfile() {
+    HocClkProfile GetProfile() {
         u32 mode = 0;
         Result rc = apmExtGetPerformanceMode(&mode);
         ASSERT_RESULT_OK(rc, "apmExtGetPerformanceMode");
 
         if (mode) {
-            return RClkProfile_Docked;
+            return HocClkProfile_Docked;
         }
 
         PsmChargerType chargerType;
@@ -46,12 +52,12 @@ namespace board {
         ASSERT_RESULT_OK(rc, "psmGetChargerType");
 
         if (chargerType == PsmChargerType_EnoughPower) {
-            return RClkProfile_HandheldChargingOfficial;
+            return HocClkProfile_HandheldChargingOfficial;
         } else if (chargerType == PsmChargerType_LowPower) {
-            return RClkProfile_HandheldChargingUSB;
+            return HocClkProfile_HandheldChargingUSB;
         }
 
-        return RClkProfile_Handheld;
+        return HocClkProfile_Handheld;
     }
 
 }

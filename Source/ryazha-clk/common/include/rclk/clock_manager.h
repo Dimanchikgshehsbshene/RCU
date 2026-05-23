@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -34,35 +34,35 @@ typedef struct {
 
     /*
      * This "stable struct" must never be modified. It provides a fixed memory layout so external clients can safely read the expected fields even
-     * if RClkContext changes in newer versions and the client is not recompiled.
+     * if HocClkContext changes in newer versions and the client is not recompiled.
      */
     struct {
-        #define RClkModuleStable_EnumMax 5
-        #define RClkThermalSensorStable_EnumMax 11
-        #define RClkPowerSensorStable_EnumMax 2
-        #define RClkPartLoadStable_EnumMax 10
-        #define RClkVoltageStable_EnumMax 7
+        #define HocClkModuleStable_EnumMax 5
+        #define HocClkThermalSensorStable_EnumMax 11
+        #define HocClkPowerSensorStable_EnumMax 2
+        #define HocClkPartLoadStable_EnumMax 10
+        #define HocClkVoltageStable_EnumMax 7
 
-        u32 freqs[RClkModuleStable_EnumMax];
-        u32 realFreqs[RClkModuleStable_EnumMax];
-        u32 overrideFreqs[RClkModuleStable_EnumMax];
-        s32 temps[RClkThermalSensorStable_EnumMax];
-        s32 power[RClkPowerSensorStable_EnumMax];
-        u32 partLoad[RClkPartLoadStable_EnumMax];
-        u32 voltages[RClkVoltageStable_EnumMax];
+        u32 freqs[HocClkModuleStable_EnumMax];
+        u32 realFreqs[HocClkModuleStable_EnumMax];
+        u32 overrideFreqs[HocClkModuleStable_EnumMax];
+        s32 temps[HocClkThermalSensorStable_EnumMax];
+        s32 power[HocClkPowerSensorStable_EnumMax];
+        u32 partLoad[HocClkPartLoadStable_EnumMax];
+        u32 voltages[HocClkVoltageStable_EnumMax];
     } stable;
 
     uint64_t applicationId;
-    RClkProfile profile;
-    uint32_t freqs[RClkModule_EnumMax];
-    uint32_t realFreqs[RClkModule_EnumMax];
-    uint32_t overrideFreqs[RClkModule_EnumMax];
-    int32_t temps[RClkThermalSensor_EnumMax];
-    int32_t power[RClkPowerSensor_EnumMax];
-    uint32_t partLoad[RClkPartLoad_EnumMax];
-    uint32_t voltages[RClkVoltage_EnumMax];
-    u16 speedos[RClkSpeedo_EnumMax];
-    u16 iddq[RClkSpeedo_EnumMax];
+    HocClkProfile profile;
+    uint32_t freqs[HocClkModule_EnumMax];
+    uint32_t realFreqs[HocClkModule_EnumMax];
+    uint32_t overrideFreqs[HocClkModule_EnumMax];
+    int32_t temps[HocClkThermalSensor_EnumMax];
+    int32_t power[HocClkPowerSensor_EnumMax];
+    uint32_t partLoad[HocClkPartLoad_EnumMax];
+    uint32_t voltages[HocClkVoltage_EnumMax];
+    u16 speedos[HocClkSpeedo_EnumMax];
+    u16 iddq[HocClkSpeedo_EnumMax];
     s16 waferX;
     s16 waferY;
 
@@ -74,7 +74,7 @@ typedef struct {
     u8 maxDisplayFreq;
     u8 dramID;
     bool isDram8GB;
-    RClkConsoleType consoleType;
+    HocClkConsoleType consoleType;
 
     // FPS / Resolution
     u8 fps;
@@ -84,18 +84,18 @@ typedef struct {
 
     // Reserved for future use
     u8 reserved[0x35B];
-} RClkContext;
+} HocClkContext;
 
 typedef struct
 {
     union {
-        uint32_t mhz[+RClkProfile_EnumMax * +RClkModule_EnumMax];
-        uint32_t mhzMap[+RClkProfile_EnumMax][+RClkModule_EnumMax];
+        uint32_t mhz[+HocClkProfile_EnumMax * +HocClkModule_EnumMax];
+        uint32_t mhzMap[+HocClkProfile_EnumMax][+HocClkModule_EnumMax];
     };
-} RClkTitleProfileList;
+} HocClkTitleProfileList;
 
-#define RCLK_FREQ_LIST_MAX 48
+#define RCLK_FREQ_LIST_MAX 32
 
 #define RCLK_GLOBAL_PROFILE_TID 0xA111111111111111
 
-static_assert(sizeof(RClkContext) == 0x500);
+static_assert(sizeof(HocClkContext) == 0x500);

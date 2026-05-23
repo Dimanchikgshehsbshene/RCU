@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -30,9 +30,9 @@
 
 namespace board {
 
-    const char *GetModuleName(RClkModule module, bool pretty);
-    const char *GetProfileName(RClkProfile profile, bool pretty);
-    const char *GetThermalSensorName(RClkThermalSensor sensor, bool pretty);
-    const char *GetPowerSensorName(RClkPowerSensor sensor, bool pretty);
+    const char *GetModuleName(HocClkModule module, bool pretty);
+    const char *GetProfileName(HocClkProfile profile, bool pretty);
+    const char *GetThermalSensorName(HocClkThermalSensor sensor, bool pretty);
+    const char *GetPowerSensorName(HocClkPowerSensor sensor, bool pretty);
 
 }

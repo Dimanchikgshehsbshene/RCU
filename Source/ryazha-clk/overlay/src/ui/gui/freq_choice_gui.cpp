@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -30,19 +30,10 @@
 #include "../format.h"
 #include "fatal_gui.h"
 
-static const char* moduleNameRu(RClkModule module) {
-    switch (module) {
-        case RClkModule_CPU: return "ЦП";
-        case RClkModule_GPU: return "ГП";
-        case RClkModule_MEM: return "ОЗУ";
-        default: return rclkFormatModule(module, false);
-    }
-}
-
 FreqChoiceGui::FreqChoiceGui(std::uint32_t selectedHz,
                              std::uint32_t* hzList,
                              std::uint32_t hzCount,
-                             RClkModule module,
+                             HocClkModule module,
                              FreqChoiceListener listener,
                              bool checkMax,
                              std::map<uint32_t, std::string> labels)
@@ -54,7 +45,7 @@ FreqChoiceGui::FreqChoiceGui(std::uint32_t selectedHz,
     this->listener = listener;
     this->checkMax = checkMax;
     this->labels = labels;
-    this->configList = new RClkConfigValueList {};
+    this->configList = new HocClkConfigValueList {};
 }
 
 FreqChoiceGui::~FreqChoiceGui()
@@ -65,8 +56,8 @@ FreqChoiceGui::~FreqChoiceGui()
 tsl::elm::ListItem* FreqChoiceGui::createFreqListItem(std::uint32_t hz, bool selected, int safety)
 {
     std::string text;
-    if(module == RClkModule_MEM)
-        text = formatListFreqHzMem(hz, (RamDisplayUnit)this->configList->values[RClkConfigValue_RamDisplayUnit]);
+    if(module == HocClkModule_MEM)
+        text = formatListFreqHzMem(hz, (RamDisplayUnit)this->configList->values[HocClkConfigValue_RamDisplayUnit]);
     else
         text = formatListFreqHz(hz);
 
@@ -123,7 +114,7 @@ void FreqChoiceGui::listUI()
 
     // Header based on CPU/GPU/MEM module
     std::string moduleName = rclkFormatModule(this->module, false);
-    this->listElement->addItem(new tsl::elm::CategoryHeader(moduleNameRu(this->module)));
+    this->listElement->addItem(new tsl::elm::CategoryHeader(moduleName));
 
     // Default option
     this->listElement->addItem(
@@ -136,27 +127,27 @@ void FreqChoiceGui::listUI()
 
         // if (checkMax && IsMariko()) {
         //     if (moduleName == "cpu" &&
-        //         this->configList->values[RClkConfigValue_MarikoMaxCpuClock] < mhz)
+        //         this->configList->values[HocClkConfigValue_MarikoMaxCpuClock] < mhz)
         //         continue;
 
         //     // if (moduleName == "gpu" &&
-        //     //     this->configList->values[RClkConfigValue_MarikoMaxGpuClock] < mhz)
+        //     //     this->configList->values[HocClkConfigValue_MarikoMaxGpuClock] < mhz)
         //     //     continue;
 
         //     // if (moduleName == "mem" &&
-        //     //     this->configList->values[RClkConfigValue_MarikoMaxMemClock] < mhz)
+        //     //     this->configList->values[HocClkConfigValue_MarikoMaxMemClock] < mhz)
         //     //     continue;
 
         if (checkMax && IsErista())
-            if (moduleName == "cpu" && this->configList->values[RClkConfigValue_EristaMaxCpuClock] < mhz)
+            if (moduleName == "cpu" && this->configList->values[HocClkConfigValue_EristaMaxCpuClock] < mhz)
                 continue;
 
         //     // if (moduleName == "gpu" &&
-        //     //     this->configList->values[RClkConfigValue_EristaMaxGpuClock] < mhz)
+        //     //     this->configList->values[HocClkConfigValue_EristaMaxGpuClock] < mhz)
         //     //     continue;
 
         //     // if (moduleName == "mem" &&
-        //     //     this->configList->values[RClkConfigValue_EristaMaxMemClock] < mhz)
+        //     //     this->configList->values[HocClkConfigValue_EristaMaxMemClock] < mhz)
         //     //     continue;
         // }
 
@@ -222,7 +213,7 @@ void FreqChoiceGui::listUI()
         this->listElement->addItem(
             this->createFreqListItem(
                 hz,
-                (hz == this->selectedHz),
+                (mhz == this->selectedHz / 1000000),
                 safety
             )
         );

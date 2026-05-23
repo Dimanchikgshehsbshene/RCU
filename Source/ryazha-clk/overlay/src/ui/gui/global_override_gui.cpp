@@ -1,7 +1,6 @@
-#include "../../i18n.hpp"
 /*
  *
- * Copyright (c) Souldbminer and Horizon OC Contributors
+ * Copyright (c) Souldbminer and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -22,28 +21,16 @@
 #include "global_override_gui.h"
 #include "value_choice_gui.h"
 #include "labels.h"
-#include "living_ladder.h"
-#include "display_hz_trackbar.hpp"
-
-static const char* moduleNameRu(RClkModule module) {
-    switch (module) {
-        case RClkModule_CPU: return "ЦП";
-        case RClkModule_GPU: return "ГП";
-        case RClkModule_MEM: return "ОЗУ";
-        default: return rclkFormatModule(module, true);
-    }
-}
 
 GlobalOverrideGui::GlobalOverrideGui()
 {
-    for (std::uint16_t m = 0; m < RClkModule_EnumMax; m++) {
+    for (std::uint16_t m = 0; m < HocClkModule_EnumMax; m++) {
         this->listItems[m] = nullptr;
         this->listHz[m] = 0;
     }
-    this->displayTrackbar = nullptr;
 }
 
-void GlobalOverrideGui::openFreqChoiceGui(RClkModule module)
+void GlobalOverrideGui::openFreqChoiceGui(HocClkModule module)
 {
     std::uint32_t hzList[RCLK_FREQ_LIST_MAX];
     std::uint32_t hzCount;
@@ -56,10 +43,10 @@ void GlobalOverrideGui::openFreqChoiceGui(RClkModule module)
     
     std::map<uint32_t, std::string> labels = {};
 
-    if (module == RClkModule_CPU) {
+    if (module == HocClkModule_CPU) {
         bool isUsingUv = IsMariko() ? configList.values[KipConfigValue_marikoCpuUVHigh] : configList.values[KipConfigValue_eristaCpuUV];
         labels = IsMariko() ? (isUsingUv ? cpu_freq_label_m_uv : cpu_freq_label_m) : (isUsingUv ? cpu_freq_label_e_uv : cpu_freq_label_e);
-    } else if (module == RClkModule_GPU) {
+    } else if (module == HocClkModule_GPU) {
         labels = IsMariko() ? *(marikoUV[configList.values[KipConfigValue_marikoGpuUV]]) : *(eristaUV[configList.values[KipConfigValue_eristaGpuUV]]);
     }
     tsl::changeTo<FreqChoiceGui>(
@@ -108,7 +95,7 @@ void GlobalOverrideGui::openValueChoiceGui(
 }
 
 void GlobalOverrideGui::addModuleListItemValue(
-    RClkModule module,
+    HocClkModule module,
     const std::string& categoryName,
     std::uint32_t min,
     std::uint32_t max,
@@ -128,7 +115,7 @@ void GlobalOverrideGui::addModuleListItemValue(
     }
 
     tsl::elm::ListItem* listItem =
-        new tsl::elm::ListItem(moduleNameRu(module));
+        new tsl::elm::ListItem(rclkFormatModule(module, true));
     
     listItem->setValue(FREQ_DEFAULT_TEXT);
     
@@ -255,12 +242,12 @@ void GlobalOverrideGui::addModuleListItemValue(
     this->listItems[module] = listItem;
 }
 
-void GlobalOverrideGui::addModuleListItem(RClkModule module)
+void GlobalOverrideGui::addModuleListItem(HocClkModule module)
 {
     tsl::elm::ListItem *listItem =
-    new tsl::elm::ListItem(moduleNameRu(module));
-    RamDisplayUnit memUnit = (RamDisplayUnit)configList.values[RClkConfigValue_RamDisplayUnit];
-    listItem->setValue(module == RClkModule_MEM ? formatListFreqMem(0, memUnit) : formatListFreqMHz(0));
+    new tsl::elm::ListItem(rclkFormatModule(module, true));
+    RamDisplayUnit memUnit = (RamDisplayUnit)configList.values[HocClkConfigValue_RamDisplayUnit];
+    listItem->setValue(module == HocClkModule_MEM ? formatListFreqMem(0, memUnit) : formatListFreqMHz(0));
     listItem->setClickListener([this, module](u64 keys) {
         if ((keys & HidNpadButton_A) == HidNpadButton_A) {
             this->openFreqChoiceGui(module);
@@ -276,7 +263,7 @@ void GlobalOverrideGui::addModuleListItem(RClkModule module)
             this->context->overrideFreqs[module] = 0;
             this->listHz[module] = 0;
 
-            this->listItems[module]->setValue(module == RClkModule_MEM ? formatListFreqMem(0, (RamDisplayUnit)configList.values[RClkConfigValue_RamDisplayUnit]) : formatListFreqHz(0));
+            this->listItems[module]->setValue(module == HocClkModule_MEM ? formatListFreqMem(0, (RamDisplayUnit)configList.values[HocClkConfigValue_RamDisplayUnit]) : formatListFreqHz(0));
 
             return true;
         }
@@ -287,9 +274,9 @@ void GlobalOverrideGui::addModuleListItem(RClkModule module)
     this->listItems[module] = listItem;
 }
 
-void GlobalOverrideGui::addModuleToggleItem(RClkModule module)
+void GlobalOverrideGui::addModuleToggleItem(HocClkModule module)
 {
-    const char *moduleName = moduleNameRu(module);
+    const char *moduleName = rclkFormatModule(module, true);
     bool isOn = this->listHz[module];
 
     tsl::elm::ToggleListItem *toggle =
@@ -322,63 +309,24 @@ public:
             FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
-        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Говернер")));
+        this->listElement->addItem(new tsl::elm::CategoryHeader("Governor"));
 
         static constexpr struct { const char* label; int shift; } kAll[] = {
-            {"ЦП", 0}, {"ГП", 8}, {"VRR", 16}
+            {"CPU", 0}, {"GPU", 8}, {"VRR", 16}
         };
-        int count = configList.values[RClkConfigValue_OverwriteRefreshRate] || this->context->isUsingRetroSuper ? 3 : 2;
+        int count = configList.values[HocClkConfigValue_OverwriteRefreshRate] || this->context->isUsingRetroSuper ? 3 : 2;
 
         for (int i = 0; i < count; i++) {
-            const bool isVrr = (kAll[i].shift == 16);
             u8 cur = (this->packed >> kAll[i].shift) & 0xFF;
-
-            // Для VRR добавляем 4-й пункт "Ryazha-Авто".
-            // Если пользователь уже включил VRR-Авто в Ryazha-Авто меню —
-            // показываем бар на 4-й позиции, даже если в packed сейчас 1 (Disabled).
-            tsl::elm::NamedStepTrackBar* bar;
-            if (isVrr) {
-                bar = new tsl::elm::NamedStepTrackBar(
-                    "", {"Не определять", "Отключено", "Включено", "Ryazha-Авто"},
-                    true, kAll[i].label
-                );
-                const auto vm = livingLadder().config().vrrMode;
-                if (vm == LadderVrr_Auto || vm == LadderVrr_Smart || vm == LadderVrr_SuperPro) {
-                    cur = 3;
-                }
-            } else {
-                bar = new tsl::elm::NamedStepTrackBar(
-                    "", {"Не определять", "Отключено", "Включено"},
-                    true, kAll[i].label
-                );
-            }
+            auto* bar = new tsl::elm::NamedStepTrackBar(
+                "", {"Do Not Override", "Disabled", "Enabled"},
+                true, kAll[i].label
+            );
             bar->setProgress(cur);
-
-            const int shift = kAll[i].shift;
-            const bool vrrCaptured = isVrr;
-            bar->setValueChangedListener([this, shift, vrrCaptured](u8 value) {
-                u8 sysValue = value;
-                if (vrrCaptured) {
-                    auto& c = livingLadder().config();
-                    const bool coreHad = (c.vrrMode == LadderVrr_Auto ||
-                                          c.vrrMode == LadderVrr_Smart ||
-                                          c.vrrMode == LadderVrr_SuperPro);
-                    if (value == 3) {
-                        // Sysmodule про "3" не знает: отдадим Disabled (сервис не трогает VRR),
-                        // а ядро Ryazha-Авто включим в Auto (или сохраним уже выбранный Smart/SuperPro).
-                        sysValue = 1;
-                        if (!coreHad) {
-                            c.vrrMode = LadderVrr_Auto;
-                            livingLadder().push();
-                        }
-                    } else if (coreHad) {
-                        // Ушли с 4-й позиции — выключаем VRR-ядро.
-                        c.vrrMode = LadderVrr_Off;
-                        livingLadder().push();
-                    }
-                }
-                this->packed = (this->packed & ~(0xFFu << shift)) | ((u32)sysValue << shift);
-                Result rc = rclkIpcSetOverride(RClkModule_Governor, this->packed);
+            int shift = kAll[i].shift;
+            bar->setValueChangedListener([this, shift](u8 value) {
+                this->packed = (this->packed & ~(0xFFu << shift)) | ((u32)value << shift);
+                Result rc = rclkIpcSetOverride(HocClkModule_Governor, this->packed);
                 if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetOverride", rc);
                 this->lastContextUpdate = armGetSystemTick();
             });
@@ -388,11 +336,11 @@ public:
 };
 
 void GlobalOverrideGui::addGovernorSection() {
-    auto* item = new tsl::elm::ListItem(i18n::t("Говернер"));
+    auto* item = new tsl::elm::ListItem("Governor");
     item->setValue("\u2192"); // right arrow
     item->setClickListener([this](u64 keys) {
         if (keys & HidNpadButton_A) {
-            u32 packed = this->context ? this->context->overrideFreqs[RClkModule_Governor] : 0;
+            u32 packed = this->context ? this->context->overrideFreqs[HocClkModule_Governor] : 0;
             tsl::changeTo<GovernorOverrideSubMenuGui>(packed);
             return true;
         }
@@ -414,37 +362,14 @@ void GlobalOverrideGui::listUI()
     }
 
     this->listElement->addItem(new tsl::elm::CategoryHeader(
-    "Временный профиль " + ult::DIVIDER_SYMBOL + " \ue0e3 Сброс"));
-    this->addModuleListItem(RClkModule_CPU);
-    this->addModuleListItem(RClkModule_GPU);
-    this->addModuleListItem(RClkModule_MEM);
+    "Temporary Overrides " + ult::DIVIDER_SYMBOL + " \ue0e3 Reset"));
+    this->addModuleListItem(HocClkModule_CPU);
+    this->addModuleListItem(HocClkModule_GPU);
+    this->addModuleListItem(HocClkModule_MEM);
     #if IS_MINIMAL == 0
-        if(configList.values[RClkConfigValue_OverwriteRefreshRate]) {
-            const u32 minHz = IsAula() ? 45u : 40u;
-            u32 maxHz = (u32)configList.values[RClkConfigValue_MaxDisplayClockH];
-            maxHz = ryazha_ui::displayHzOrDefault(maxHz);
-            const u32 stepHz = this->context->isUsingRetroSuper ? 5u : 1u;
-
-            this->displayTrackbar = new ryazha_ui::DisplayHzTrackBar(minHz, maxHz, stepHz, "Дисплей");
-            auto* b = static_cast<ryazha_ui::DisplayHzTrackBar*>(this->displayTrackbar);
-            u32 currentHz = ryazha_ui::displayHzOrDefault(this->context->overrideFreqs[RClkModule_Display]);
-            currentHz = std::clamp(currentHz, b->minHz(), b->maxHz());
-            b->setProgress(ryazha_ui::displayHzToProgress(currentHz, b->minHz(), b->maxHz(), b->stepHz()));
-            this->displayTrackbar->setValueChangedListener([this](u16 value) {
-                auto* bar = static_cast<ryazha_ui::DisplayHzTrackBar*>(this->displayTrackbar);
-                const u32 hz = std::min(bar->maxHz(), bar->minHz() + (u32)value * bar->stepHz());
-                Result rc = rclkIpcSetOverride(RClkModule_Display, hz);
-                if (R_FAILED(rc)) {
-                    FatalGui::openWithResultCode("rclkIpcSetOverride", rc);
-                    return;
-                }
-                ryazha_ui::syncLadderVrrMaxToPanelHz(hz);
-                this->lastContextUpdate = armGetSystemTick();
-                this->context->overrideFreqs[RClkModule_Display] = hz;
-                this->listHz[RClkModule_Display] = hz;
-            });
-            this->listElement->addItem(this->displayTrackbar);
-        }
+        ValueThresholds lcdThresholds(60, 65);
+        if(configList.values[HocClkConfigValue_OverwriteRefreshRate])
+            this->addModuleListItemValue(HocClkModule_Display, "Display", IsAula() ? 45 : 40, configList.values[HocClkConfigValue_MaxDisplayClockH], this->context->isUsingRetroSuper ? 5 : 1, " Hz", 1, 0, lcdThresholds);
     #endif
 
     this->addGovernorSection();
@@ -457,23 +382,8 @@ void GlobalOverrideGui::refresh()
     if (!this->context)
         return;
 
-    for (std::uint16_t m = 0; m < RClkModule_EnumMax; m++) {
-        if (m == RClkModule_Display && this->displayTrackbar != nullptr && configList.values[RClkConfigValue_OverwriteRefreshRate]) {
-            if (this->displayTrackbar->hasFocus()) {
-                this->listHz[m] = ryazha_ui::displayHzOrDefault(this->context->overrideFreqs[m]);
-                continue;
-            }
-            auto* bar = static_cast<ryazha_ui::DisplayHzTrackBar*>(this->displayTrackbar);
-            const u32 minHz = bar->minHz();
-            const u32 maxHz = bar->maxHz();
-            const u32 stepHz = bar->stepHz();
-            u32 curHz = ryazha_ui::displayHzOrDefault(this->context->overrideFreqs[m]);
-            curHz = ryazha_ui::quantizeDisplayHz(curHz, minHz, maxHz, stepHz);
-            this->displayTrackbar->setProgress(ryazha_ui::displayHzToProgress(curHz, minHz, maxHz, stepHz));
-            this->listHz[m] = curHz;
-            continue;
-        }
-        if (m == RClkModule_Governor) {
+    for (std::uint16_t m = 0; m < HocClkModule_EnumMax; m++) {
+        if (m == HocClkModule_Governor) {
             this->listHz[m] = this->context->overrideFreqs[m];
             continue;
         }
@@ -481,7 +391,7 @@ void GlobalOverrideGui::refresh()
         if (this->listItems[m] != nullptr &&
             this->listHz[m] != this->context->overrideFreqs[m]) {
             
-            auto it = this->customFormatModules.find((RClkModule)m);
+            auto it = this->customFormatModules.find((HocClkModule)m);
             if (it != this->customFormatModules.end()) {
                 std::string suffix = std::get<0>(it->second);
                 std::uint32_t divisor = std::get<1>(it->second);
@@ -503,8 +413,8 @@ void GlobalOverrideGui::refresh()
                 }
             } else {
                 this->listItems[m]->setValue(
-                    m == RClkModule_MEM
-                        ? formatListFreqHzMem(this->context->overrideFreqs[m], (RamDisplayUnit)configList.values[RClkConfigValue_RamDisplayUnit])
+                    m == HocClkModule_MEM
+                        ? formatListFreqHzMem(this->context->overrideFreqs[m], (RamDisplayUnit)configList.values[HocClkConfigValue_RamDisplayUnit])
                         : formatListFreqHz(this->context->overrideFreqs[m]));
             }
             

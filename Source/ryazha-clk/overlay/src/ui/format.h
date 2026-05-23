@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Souldbminer, Lightos_ and Horizon OC Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -32,13 +32,7 @@
 #include <cstdint>
 #include <rclk/board.h>
 
-#define FREQ_DEFAULT_TEXT "Не определять"
-
-static inline void splitHzToMhzTenth(std::uint32_t hz, std::uint32_t& mhz, std::uint32_t& tenth)
-{
-    mhz = hz / 1000000U;
-    tenth = (hz / 100000U) % 10U;
-}
+#define FREQ_DEFAULT_TEXT "Do not override"
 
 static inline std::string formatListFreqMHz(std::uint32_t mhz)
 {
@@ -48,23 +42,10 @@ static inline std::string formatListFreqMHz(std::uint32_t mhz)
     }
 
     char buf[10];
-    return std::string(buf, snprintf(buf, sizeof(buf), "%u МГц", mhz));
+    return std::string(buf, snprintf(buf, sizeof(buf), "%u MHz", mhz));
 }
 
-static inline std::string formatListFreqHz(uint32_t hz)
-{
-    if(hz == 0)
-    {
-        return FREQ_DEFAULT_TEXT;
-    }
-
-    std::uint32_t mhz = 0;
-    std::uint32_t tenth = 0;
-    splitHzToMhzTenth(hz, mhz, tenth);
-
-    char buf[16];
-    return std::string(buf, snprintf(buf, sizeof(buf), "%u.%u МГц", mhz, tenth));
-}
+static inline std::string formatListFreqHz(uint32_t hz) { return formatListFreqMHz(hz / 1000000); }
 
 static inline std::string formatListFreqMem(uint32_t mhz, RamDisplayUnit unit)
 {
@@ -76,14 +57,14 @@ static inline std::string formatListFreqMem(uint32_t mhz, RamDisplayUnit unit)
     switch(unit)
     {
         case RamDisplayUnit_MHz:
-            snprintf(buf, sizeof(buf), "%u МГц", mhz);
+            snprintf(buf, sizeof(buf), "%u MHz", mhz);
             break;
         case RamDisplayUnit_MHzMTs:
-            snprintf(buf, sizeof(buf), "%u МГц (%u МТ/с)", mhz, mts);
+            snprintf(buf, sizeof(buf), "%u MHz (%u MT/s)", mhz, mts);
             break;
         case RamDisplayUnit_MTs:
         default:
-            snprintf(buf, sizeof(buf), "%u МТ/с", mts);
+            snprintf(buf, sizeof(buf), "%u MT/s", mts);
             break;
     }
     return buf;
@@ -91,28 +72,7 @@ static inline std::string formatListFreqMem(uint32_t mhz, RamDisplayUnit unit)
 
 static inline std::string formatListFreqHzMem(uint32_t hz, RamDisplayUnit unit)
 {
-    if(hz == 0)
-        return FREQ_DEFAULT_TEXT;
-
-    std::uint32_t mhz = 0;
-    std::uint32_t tenth = 0;
-    splitHzToMhzTenth(hz, mhz, tenth);
-    std::uint32_t mts = hz / 500000U;
-    char buf[32];
-    switch(unit)
-    {
-        case RamDisplayUnit_MHz:
-            snprintf(buf, sizeof(buf), "%u.%u МГц", mhz, tenth);
-            break;
-        case RamDisplayUnit_MHzMTs:
-            snprintf(buf, sizeof(buf), "%u.%u МГц (%u МТ/с)", mhz, tenth, mts);
-            break;
-        case RamDisplayUnit_MTs:
-        default:
-            snprintf(buf, sizeof(buf), "%u МТ/с", mts);
-            break;
-    }
-    return buf;
+    return formatListFreqMem(hz / 1000000, unit);
 }
 
 static inline std::string formatMemClockKhzLabel(uint32_t khz, RamDisplayUnit unit)
@@ -123,14 +83,14 @@ static inline std::string formatMemClockKhzLabel(uint32_t khz, RamDisplayUnit un
     switch(unit)
     {
         case RamDisplayUnit_MHz:
-            snprintf(buf, sizeof(buf), "%u МГц", mhz);
+            snprintf(buf, sizeof(buf), "%u MHz", mhz);
             break;
         case RamDisplayUnit_MHzMTs:
-            snprintf(buf, sizeof(buf), "%u МГц (%u МТ/с)", mhz, mts);
+            snprintf(buf, sizeof(buf), "%u MHz (%u MT/s)", mhz, mts);
             break;
         case RamDisplayUnit_MTs:
         default:
-            snprintf(buf, sizeof(buf), "%u МТ/с", mts);
+            snprintf(buf, sizeof(buf), "%u MT/s", mts);
             break;
     }
     return buf;
