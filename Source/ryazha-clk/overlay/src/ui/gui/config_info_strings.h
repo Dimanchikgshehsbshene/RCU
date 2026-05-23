@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
+ * Copyright (c) Souldbminer, Lightos_ and Ryazha CLK Contributors
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -20,4 +20,4 @@
 #include <vector>
 #include <string>
 
-std::vector<std::string> ConfigInfoStrings(RClkConfigValue val, bool isMariko, bool isHoag);
+std::vector<std::string> ConfigInfoStrings(HocClkConfigValue val, bool isMariko, bool isHoag);
