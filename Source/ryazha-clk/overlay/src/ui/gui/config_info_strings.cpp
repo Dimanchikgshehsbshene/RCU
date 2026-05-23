@@ -35,6 +35,7 @@ std::vector<std::string> ConfigInfoStrings(HocClkConfigValue val, bool isMariko,
                 "Options:",
                 "- MHz: Megahertz (e.g. 1600 MHz)",
                 "- MT/s: MegaTransfers per second (e.g. 3200 MT/s)",
+                "- MHz and MT/s: Display in both MHz and MT/s",
                 "Default: MHz"
             };
 
@@ -110,7 +111,9 @@ std::vector<std::string> ConfigInfoStrings(HocClkConfigValue val, bool isMariko,
         case HocClkConfigValue_OverwriteRefreshRate:
             return {
                 "Controls the availability of display refresh rate features.",
-                "When enabled, allows changing the display refresh rate and using display refresh rate related features."
+                "When enabled, allows changing the display refresh rate and using display refresh rate related features.",
+                "This feature conflicts with FPSLocker's feature that does the same thing.",
+                "Default: OFF"
             };
 
         case HocClkConfigValue_MaxDisplayClockH:
