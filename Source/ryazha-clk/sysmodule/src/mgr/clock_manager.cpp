@@ -267,6 +267,9 @@ namespace clockManager {
 
             if(board::GetConsoleType() == HocClkConsoleType_Aula)
                 AulaDisplay::SetDisplayColorMode((AulaColorMode)config::GetConfigValue(HocClkConfigValue_AulaDisplayColorPreset));
+            if(config::GetConfigValue(HocClkConfigValue_LiveCpuUv)) {
+                board::HandleCpuUv();
+            }
         }
     }
 
