@@ -675,6 +675,6 @@ static inline uint64_t rclkValidConfigValue(HocClkConfigValue val, uint64_t inpu
             return ((input >= 800) && (input <= 1325));
 
         default:
-            return false;
+            return true;
     }
 }
