@@ -601,6 +601,7 @@ static inline uint64_t rclkValidConfigValue(HocClkConfigValue val, uint64_t inpu
         case KipConfigValue_eristaGpuVmin:
         case KipConfigValue_marikoGpuUV:
         case KipConfigValue_marikoGpuVmin:
+        case KipConfigValue_marikoGpuBootVolt:
         case KipConfigValue_marikoGpuVmax:
         case KipConfigValue_commonGpuVoltOffset:
         case KipConfigValue_g_volt_76800:
