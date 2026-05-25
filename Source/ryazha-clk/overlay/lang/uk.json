@@ -179,6 +179,7 @@
   "Ram Max Clock": "Годинник Ram Max",
   "Rating": "Рейтинг",
   "Read Latency": "Прочитати затримку",
+  "Reset": "Скинути",
   "RetroNX - sys-clk": "RetroNX - sys-clk",
   "Ryazha-Auto": "Ryazha-Авто",
   "Ryazha-Авто / VRR": "Ryazha-Auto / VRR",
@@ -255,6 +256,8 @@
   "tWTR Fine Tune": "Точна настройка tWTR",
   "tetetete-ctrl": "tetetete-ctrl",
   "while editing was going on.": "поки йшло редагування.",
+  "Макс. Гц": "Макс. Гц",
+  "Мин. Гц": "Мін. Гц",
   " Setting GPU Clocks past": " Встановлення частоти ГП вище",
   " Usage of unsafe display": " Використання небезпечного дисплея"
 }

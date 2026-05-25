@@ -179,6 +179,7 @@
   "Ram Max Clock": "Ram Max Uhr",
   "Rating": "Bewertung",
   "Read Latency": "Leselatenz",
+  "Reset": "Zurücksetzen",
   "RetroNX - sys-clk": "RetroNX - sys-clk",
   "Ryazha-Auto": "Ryazha-Auto",
   "Ryazha-Авто / VRR": "Ryazha-Auto / VRR",
@@ -255,6 +256,8 @@
   "tWTR Fine Tune": "tWTR-Feinabstimmung",
   "tetetete-ctrl": "tetetete-ctrl",
   "while editing was going on.": "während die Bearbeitung im Gange war.",
+  "Макс. Гц": "Max Hz",
+  "Мин. Гц": "Min Hz",
   " Setting GPU Clocks past": " Setting GPU Clocks past",
   " Usage of unsafe display": " Usage of unsafe display"
 }

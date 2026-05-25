@@ -179,6 +179,7 @@
   "Ram Max Clock": "記憶體最大時鐘",
   "Rating": "評級",
   "Read Latency": "讀取延遲",
+  "Reset": "重置",
   "RetroNX - sys-clk": "RetroNX - sys-clk",
   "Ryazha-Auto": "Ryazha-Auto",
   "Ryazha-Авто / VRR": "Ryazha-Auto / VRR",
@@ -255,6 +256,8 @@
   "tWTR Fine Tune": "tWTR 微調",
   "tetetete-ctrl": "tetetete-ctrl",
   "while editing was going on.": "當編輯正在進行時。",
+  "Макс. Гц": "最大 Hz",
+  "Мин. Гц": "最小 Hz",
   " Setting GPU Clocks past": " Setting GPU Clocks past",
   " Usage of unsafe display": " Usage of unsafe display"
 }

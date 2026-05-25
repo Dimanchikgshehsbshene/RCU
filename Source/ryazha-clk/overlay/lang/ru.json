@@ -179,6 +179,7 @@
   "Ram Max Clock": "Макс. частота ОЗУ",
   "Rating": "Рейтинг",
   "Read Latency": "Задержка чтения",
+  "Reset": "Сброс",
   "RetroNX - sys-clk": "RetroNX - sys-clk",
   "Ryazha-Auto": "Ryazha-Авто",
   "Ryazha-Авто / VRR": "Ryazha-Авто / VRR",
@@ -255,6 +256,8 @@
   "tWTR Fine Tune": "tWTR Тонкая настройка",
   "tetetete-ctrl": "tetetete-ctrl",
   "while editing was going on.": "пока шло редактирование.",
+  "Макс. Гц": "Макс. Гц",
+  "Мин. Гц": "Мин. Гц",
   " Setting GPU Clocks past": " Установка частоты ГП выше",
   " Usage of unsafe display": " Использование небезопасного дисплея"
 }

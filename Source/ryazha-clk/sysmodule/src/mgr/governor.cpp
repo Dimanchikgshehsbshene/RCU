@@ -17,6 +17,7 @@
 
 #include "governor.hpp"
 #include "../hos/process_management.hpp"
+#include "../auto_ryazha.hpp"
 #include <rclk/clock_manager.h>
 namespace governor {
 
@@ -55,14 +56,30 @@ namespace governor {
 
         bool newCpuGovernorState = (effectiveCpu == ComponentGovernor_Enabled);
         bool newGpuGovernorState = (effectiveGpu == ComponentGovernor_Enabled);
-        // VRR-Auto (3) = "включить VRR overlay для приложения" -- семантически
-        // эквивалентно Enabled (overlay активен), но дополнительно ниже мы
-        // поднимем auto-ladder через autoRyazha:: если slot == VrrAuto.
+        // VRR-Auto (3) = "включить VRR overlay для приложения".
+        // Семантически: VRR governor активен + auto-ladder режим Smart.
         bool newVrrGovernorState = (effectiveVrr == ComponentGovernor_Enabled ||
                                     effectiveVrr == ComponentGovernor_VrrAuto);
-        bool vrrAutoLadder = (effectiveVrr == ComponentGovernor_VrrAuto);
-        (void)vrrAutoLadder;  // hook -- ladder включится сам через config update;
-                              // здесь оставляем для будущего snapshot/restore.
+        bool wantVrrAutoLadder   = (effectiveVrr == ComponentGovernor_VrrAuto);
+
+        // Edge-trigger переключение auto-ladder режима. Делаем только при
+        // смене состояния, чтобы не bомбить SetConfig() каждый tick'а.
+        static bool s_lastWantVrrAuto = false;
+        if (wantVrrAutoLadder != s_lastWantVrrAuto) {
+            RClkLadderConfig cfg{};
+            autoRyazha::GetConfig(&cfg);
+            if (wantVrrAutoLadder) {
+                cfg.vrrMode = RClkLadderVrr_Smart;
+                cfg.enabled = 1;
+            } else {
+                // Возврат: оставляем enabled как есть, отключаем только
+                // VRR-mode чтобы ladder не дёргал refresh rate без явного
+                // запроса юзера.
+                cfg.vrrMode = RClkLadderVrr_Off;
+            }
+            autoRyazha::SetConfig(&cfg);
+            s_lastWantVrrAuto = wantVrrAutoLadder;
+        }
 
         isCpuGovernorEnabled = newCpuGovernorState;
         isGpuGovernorEnabled = newGpuGovernorState;
