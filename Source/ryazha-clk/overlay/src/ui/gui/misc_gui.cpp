@@ -1,4 +1,5 @@
 #include "../../i18n.hpp"
+#include "display_hz_trackbar.hpp"
 /*
  *
  * Copyright (c) Souldbminer, Lightos_ and Ryazha-CLK Contributors
@@ -923,17 +924,27 @@ protected:
 
             warningText->setBoundaries(0, 0, tsl::cfg::FramebufferWidth, 110);
             this->listElement->addItem(warningText);
-            ValueThresholds displayThresholds(60, 65);
-            addConfigButton(
-                RClkConfigValue_MaxDisplayClockH,
-                "Max Handheld Display Hz",
-                ValueRange(60, IsAula() ? 65 : 75, 1, " Hz", 1),
-                "Display Clock",
-                &displayThresholds,
-                {},
-                {},
-                false
-            );
+            // Inline Hz slider для MaxDisplayClockH (global cap). Юзер
+            // хочет ползунок вместо table picker и здесь тоже. Apply через
+            // rclkIpcSetConfigValues -- этот config влияет на ladder VRR cap,
+            // так что попутно sync ladder.
+            {
+                u32 minHz = 60;
+                u32 maxHz = IsAula() ? 65u : 75u;
+                u32 cur = this->configList->values[RClkConfigValue_MaxDisplayClockH];
+                auto* bar = new ryazha_ui::DisplayHzTrackBar(minHz, maxHz, 1, i18n::t("Max Handheld Display Hz"));
+                bar->setProgress(ryazha_ui::displayHzToProgress(
+                    ryazha_ui::displayHzOrDefault(cur),
+                    bar->minHz(), bar->maxHz(), bar->stepHz()));
+                bar->setValueChangedListener([this, bar](u16 progress) {
+                    u32 hz = bar->minHz() + (u32)progress * bar->stepHz();
+                    this->configList->values[RClkConfigValue_MaxDisplayClockH] = hz;
+                    Result rc = rclkIpcSetConfigValues(this->configList);
+                    if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
+                    ryazha_ui::syncLadderVrrMaxToHocCap(hz);
+                });
+                this->listElement->addItem(bar);
+            }
         }
         if(!IsAula()) {
             addConfigButton(

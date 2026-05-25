@@ -31,6 +31,7 @@
 #include "../../i18n.hpp"
 #include "fatal_gui.h"
 #include "labels.h"
+#include "display_hz_trackbar.hpp"
 AppProfileGui::AppProfileGui(std::uint64_t applicationId, RClkTitleProfileList* profileList)
 {
     this->applicationId = applicationId;
@@ -325,6 +326,29 @@ public:
     }
 };
 
+void AppProfileGui::addDisplayHzTrackBar(RClkProfile profile,
+                                         std::uint32_t minHz,
+                                         std::uint32_t maxHz,
+                                         std::uint32_t stepHz)
+{
+    std::string label = rclkFormatModule(RClkModule_Display, true);
+    auto* bar = new ryazha_ui::DisplayHzTrackBar(minHz, maxHz, stepHz, label);
+    u32 curHz = ryazha_ui::displayHzOrDefault(
+        this->profileList->mhzMap[profile][RClkModule_Display]);
+    bar->setProgress(ryazha_ui::displayHzToProgress(
+        curHz, bar->minHz(), bar->maxHz(), bar->stepHz()));
+    bar->setValueChangedListener([this, profile, bar](u16 progress) {
+        u32 hz = bar->minHz() + (u32)progress * bar->stepHz();
+        this->profileList->mhzMap[profile][RClkModule_Display] = hz;
+        Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
+        if (R_FAILED(rc)) {
+            FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
+        }
+        ryazha_ui::syncLadderVrrMaxToPanelHz(hz);
+    });
+    this->listElement->addItem(bar);
+}
+
 void AppProfileGui::addGovernorSection(RClkProfile profile) {
     auto* item = new tsl::elm::ListItem(i18n::t("Governor"));
     item->setValue("\u2192"); // Right arrow
@@ -357,78 +381,22 @@ void AppProfileGui::addProfileUI(RClkProfile profile)
     this->addModuleListItem(profile, RClkModule_GPU);
     this->addModuleListItem(profile, RClkModule_MEM);
     #if IS_MINIMAL == 0
-        ValueThresholds lcdThresholds(60, 65);
-        ValueThresholds DThresholdsOLED(120, 500); // nothing is dangerous, past 120hz you can get applet crashes
-
+        // Inline Hz slider вместо табличного picker'а. Юзер сказал
+        // "верни ползунок" -- DisplayHzTrackBar поддерживает Y=reset 60,
+        // динамически адаптирует step под 101 шаг StepTrackBar лимит.
         if(configList.values[RClkConfigValue_OverwriteRefreshRate]) {
             if(profile != RClkProfile_Docked) {
-                this->addModuleListItemValue(profile, RClkModule_Display, "Display", IsAula() ? 45 : 40, configList.values[RClkConfigValue_MaxDisplayClockH], this->context->isUsingRetroSuper ? 5 : 1, " Hz", 1, 0, lcdThresholds);
+                u32 minHz  = IsAula() ? 45u : 40u;
+                u32 maxHz  = configList.values[RClkConfigValue_MaxDisplayClockH];
+                u32 stepHz = this->context->isUsingRetroSuper ? 5u : 1u;
+                this->addDisplayHzTrackBar(profile, minHz, maxHz, stepHz);
             } else {
                 if(IsAula() && this->context->isSysDockInstalled) {
-                    std::vector<NamedValue> dockedFreqs = {
-                        NamedValue("40 Hz", 40),
-                        NamedValue("45 Hz", 45),
-                        NamedValue("50 Hz", 50),
-                        NamedValue("55 Hz", 55),
-                        NamedValue("60 Hz", 60),
-                        NamedValue("70 Hz", 70),
-                        NamedValue("72 Hz", 72),
-                        NamedValue("75 Hz", 75),
-                        NamedValue("80 Hz", 80),
-                        NamedValue("90 Hz", 90),
-                        NamedValue("95 Hz", 95),
-                        NamedValue("100 Hz", 100),
-                        NamedValue("110 Hz", 110),
-                        NamedValue("120 Hz", 120),
-                        NamedValue("130 Hz", 130),
-                        NamedValue("140 Hz", 140),
-                        NamedValue("144 Hz", 144),
-                        NamedValue("150 Hz", 150),
-                        NamedValue("160 Hz", 160),
-                        NamedValue("165 Hz", 165),
-                        NamedValue("170 Hz", 170),
-                        NamedValue("180 Hz", 180),
-                        NamedValue("190 Hz", 190),
-                        NamedValue("200 Hz", 200),
-                        NamedValue("210 Hz", 210),
-                        NamedValue("220 Hz", 220),
-                        NamedValue("230 Hz", 230),
-                        NamedValue("240 Hz", 240)
-                    };
-                    
-                    this->addModuleListItemValue(profile, RClkModule_Display, "Display", 40, 240, 1, " Hz", 1, 0, DThresholdsOLED, dockedFreqs);
+                    this->addDisplayHzTrackBar(profile, 40, 240, 1);
                 } else if (IsAula() && !this->context->isSysDockInstalled) {
-                    std::vector<NamedValue> dockedFreqsLimited = {
-                        NamedValue("50 Hz", 50),
-                        NamedValue("55 Hz", 55),
-                        NamedValue("60 Hz", 60),
-                        NamedValue("65 Hz", 65),
-                        NamedValue("70 Hz", 70),
-                        NamedValue("72 Hz", 72),
-                        NamedValue("75 Hz", 75)
-                    };
-                    
-                    this->addModuleListItemValue(profile, RClkModule_Display, "Display", 50, 75, 1, " Hz", 1, 0, DThresholdsOLED, dockedFreqsLimited);
+                    this->addDisplayHzTrackBar(profile, 50, 75, 1);
                 } else {
-                    std::vector<NamedValue> dockedFreqsStandard = {
-                        NamedValue("50 Hz", 50),
-                        NamedValue("55 Hz", 55),
-                        NamedValue("60 Hz", 60),
-                        NamedValue("65 Hz", 65),
-                        NamedValue("70 Hz", 70),
-                        NamedValue("72 Hz", 72),
-                        NamedValue("75 Hz", 75),
-                        NamedValue("80 Hz", 80),
-                        NamedValue("85 Hz", 85),
-                        NamedValue("90 Hz", 90),
-                        NamedValue("95 Hz", 95),
-                        NamedValue("100 Hz", 100),
-                        NamedValue("105 Hz", 105),
-                        NamedValue("110 Hz", 110),
-                        NamedValue("115 Hz", 115),
-                        NamedValue("120 Hz", 120)
-                    };
-                    this->addModuleListItemValue(profile, RClkModule_Display, "Display", 50, 120, 1, " Hz", 1, 0, ValueThresholds(), dockedFreqsStandard);
+                    this->addDisplayHzTrackBar(profile, 50, 120, 1);
                 }
             }
         }

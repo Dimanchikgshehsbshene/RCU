@@ -20,6 +20,7 @@
 #include <map>
 #include "base_menu_gui.h"
 #include "living_ladder.h"
+#include "display_hz_trackbar.hpp"
 
 class LivingLadderGui : public BaseMenuGui
 {
@@ -49,8 +50,8 @@ private:
 
     // VRR.
     tsl::elm::NamedStepTrackBar* vrrModeItem = nullptr;
-    tsl::elm::ListItem*       vrrMinItem     = nullptr;
-    tsl::elm::ListItem*       vrrMaxItem     = nullptr;
+    ryazha_ui::DisplayHzTrackBar* vrrMinItem  = nullptr;
+    ryazha_ui::DisplayHzTrackBar* vrrMaxItem  = nullptr;
     tsl::elm::ToggleListItem* predictorToggle = nullptr;
     tsl::elm::ListItem*       predictorWindowItem = nullptr;
     tsl::elm::NamedStepTrackBar* predictorAggrItem = nullptr;

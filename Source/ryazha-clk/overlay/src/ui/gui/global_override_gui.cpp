@@ -370,8 +370,9 @@ void GlobalOverrideGui::listUI()
     this->addModuleListItem(RClkModule_MEM);
     #if IS_MINIMAL == 0
         if(configList.values[RClkConfigValue_OverwriteRefreshRate]) {
-            // Inline Hz trackbar (старый ползунок, который юзер просил вернуть).
-            // 0 в overrideFreqs трактуется как "панель по умолчанию" = 60 Гц.
+            // Inline Hz trackbar. listItems[Display] остаётся nullptr
+            // (bar -- не ListItem), но refresh() будет двигать
+            // displayHzBar->setProgress() через side-table lastDisplayHz.
             u32 minHz  = IsAula() ? 45u : 40u;
             u32 maxHz  = configList.values[RClkConfigValue_MaxDisplayClockH];
             u32 stepHz = this->context->isUsingRetroSuper ? 5u : 1u;
@@ -382,9 +383,11 @@ void GlobalOverrideGui::listUI()
                 u32 hz = bar->minHz() + (u32)progress * bar->stepHz();
                 rclkIpcSetOverride(RClkModule_Display, hz);
                 ryazha_ui::syncLadderVrrMaxToPanelHz(hz);
+                this->lastDisplayHz = hz;
             });
             this->listElement->addItem(bar);
-            // listItems[Display] остаётся nullptr -- bar держит свой UI state.
+            this->displayHzBar = bar;
+            this->lastDisplayHz = curHz;
         }
     #endif
 
@@ -435,6 +438,20 @@ void GlobalOverrideGui::refresh()
             }
             
             this->listHz[m] = this->context->overrideFreqs[m];
+        }
+    }
+
+    // DisplayHzTrackBar (если есть) не лежит в listItems[] -- синкаем через
+    // side-table. Если sysmodule сам обновил overrideFreqs[Display] (например
+    // через VRR auto-adjust), bar тоже двинется.
+    if (this->displayHzBar) {
+        u32 cur = this->context->overrideFreqs[RClkModule_Display];
+        if (cur != this->lastDisplayHz) {
+            u32 disp = ryazha_ui::displayHzOrDefault(cur);
+            this->displayHzBar->setProgress(ryazha_ui::displayHzToProgress(
+                disp, this->displayHzBar->minHz(),
+                this->displayHzBar->maxHz(), this->displayHzBar->stepHz()));
+            this->lastDisplayHz = cur;
         }
     }
 }

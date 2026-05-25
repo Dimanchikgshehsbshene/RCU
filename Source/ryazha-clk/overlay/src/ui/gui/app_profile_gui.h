@@ -70,6 +70,13 @@ class AppProfileGui : public BaseMenuGui
             bool showDefaultValue = true
         );
         void addGovernorSection(RClkProfile profile);
+        // Inline Hz slider для Display частоты (per-profile). Заменяет
+        // табличный pick через ValueChoiceGui -- юзер просил "верни
+        // ползунок". Storage: profileList->mhzMap[profile][Display].
+        void addDisplayHzTrackBar(RClkProfile profile,
+                                  std::uint32_t minHz,
+                                  std::uint32_t maxHz,
+                                  std::uint32_t stepHz);
         void addProfileUI(RClkProfile profile);
     public:
         AppProfileGui(std::uint64_t applicationId, RClkTitleProfileList* profileList);

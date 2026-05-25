@@ -30,12 +30,17 @@
 #include "freq_choice_gui.h"
 #include <string>
 #include "value_choice_gui.h"
+#include "display_hz_trackbar.hpp"
 class GlobalOverrideGui : public BaseMenuGui
 {
     protected:
         std::map<RClkModule, std::tuple<std::string, std::uint32_t, int>> customFormatModules;
         tsl::elm::ListItem* listItems[RClkModule_EnumMax];
         std::uint32_t listHz[RClkModule_EnumMax];
+        // Side-table для DisplayHzTrackBar -- live, не ListItem, поэтому
+        // не лезет в listItems[]. refresh() синкает его отдельно.
+        ryazha_ui::DisplayHzTrackBar* displayHzBar = nullptr;
+        std::uint32_t lastDisplayHz = 0;
         void openFreqChoiceGui(RClkModule module);
         void addGovernorSection();
         void addModuleListItem(RClkModule module);

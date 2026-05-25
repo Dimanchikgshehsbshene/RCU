@@ -287,29 +287,34 @@ void LivingLadderGui::listUI()
     });
     this->listElement->addItem(this->vrrModeItem);
 
-    auto makeHzItem = [](const char* title, u8& store, u8 lo, u8 hi, const char* cat) {
-        auto* item = new tsl::elm::ListItem(title);
-        item->setClickListener([&store, lo, hi, cat](u64 keys) {
-            if ((keys & HidNpadButton_A) == 0) return false;
-            ValueRange range(lo, hi, 1, " Гц", 1, 0);
-            tsl::changeTo<ValueChoiceGui>(
-                (std::uint32_t)store, range, cat,
-                [&store](std::uint32_t v) -> bool {
-                    store = (u8)v;
-                    saveAndAck();
-                    return true;
-                },
-                ValueThresholds(), false, std::map<std::uint32_t, std::string>(),
-                std::vector<NamedValue>(), false, false);
-            return true;
+    // Inline Hz sliders для VRR Min/Max. Раньше открывали ValueChoiceGui
+    // (табличный picker) -- юзер просил единый ползунок. DisplayHzTrackBar
+    // сам обрабатывает Y=reset 60 и dynamic step. Значение mutate'ит cfg
+    // напрямую (livingLadder().config()) + push() через saveAndAck().
+    {
+        auto* minBar = new ryazha_ui::DisplayHzTrackBar(vrrMinCap, vrrMaxCap, 1, i18n::t("Мин. Гц"));
+        minBar->setProgress(ryazha_ui::displayHzToProgress(
+            cfg.vrrMinHz, minBar->minHz(), minBar->maxHz(), minBar->stepHz()));
+        minBar->setValueChangedListener([minBar](u16 progress) {
+            u32 hz = minBar->minHz() + (u32)progress * minBar->stepHz();
+            livingLadder().config().vrrMinHz = (u8)hz;
+            saveAndAck();
         });
-        return item;
-    };
-
-    this->vrrMinItem = makeHzItem("Мин. Гц", cfg.vrrMinHz, vrrMinCap, vrrMaxCap, "Мин. Гц");
-    this->listElement->addItem(this->vrrMinItem);
-    this->vrrMaxItem = makeHzItem("Макс. Гц", cfg.vrrMaxHz, vrrMinCap, vrrMaxCap, "Макс. Гц");
-    this->listElement->addItem(this->vrrMaxItem);
+        this->vrrMinItem = minBar;
+        this->listElement->addItem(minBar);
+    }
+    {
+        auto* maxBar = new ryazha_ui::DisplayHzTrackBar(vrrMinCap, vrrMaxCap, 1, i18n::t("Макс. Гц"));
+        maxBar->setProgress(ryazha_ui::displayHzToProgress(
+            cfg.vrrMaxHz, maxBar->minHz(), maxBar->maxHz(), maxBar->stepHz()));
+        maxBar->setValueChangedListener([maxBar](u16 progress) {
+            u32 hz = maxBar->minHz() + (u32)progress * maxBar->stepHz();
+            livingLadder().config().vrrMaxHz = (u8)hz;
+            saveAndAck();
+        });
+        this->vrrMaxItem = maxBar;
+        this->listElement->addItem(maxBar);
+    }
 
     this->predictorToggle = new tsl::elm::ToggleListItem(i18n::t("Предиктор"), cfg.predictorEnable);
     this->predictorToggle->setStateChangedListener([](bool state) {
@@ -415,13 +420,16 @@ void LivingLadderGui::refreshControlLabels()
     setMhz(this->userGpuMaxItem, cfg.userMaxGpuHz);
 
     if (this->vrrModeItem) this->vrrModeItem->setProgress(vrrModeToSliderIndex(cfg.vrrMode));
-    auto setHz = [&](tsl::elm::ListItem* it, u8 hz) {
-        if (!it) return;
-        std::snprintf(buf, sizeof(buf), "%u Гц", (unsigned)hz);
-        it->setValue(buf);
+    // VRR Min/Max теперь DisplayHzTrackBar -- синхим через setProgress,
+    // а не ->setValue() (ListItem API). Refresh нужен только если cfg
+    // изменился со стороны sysmodule (например VRR auto-adjust).
+    auto syncHz = [&](ryazha_ui::DisplayHzTrackBar* bar, u8 hz) {
+        if (!bar) return;
+        bar->setProgress(ryazha_ui::displayHzToProgress(
+            (u32)hz, bar->minHz(), bar->maxHz(), bar->stepHz()));
     };
-    setHz(this->vrrMinItem, cfg.vrrMinHz);
-    setHz(this->vrrMaxItem, cfg.vrrMaxHz);
+    syncHz(this->vrrMinItem, cfg.vrrMinHz);
+    syncHz(this->vrrMaxItem, cfg.vrrMaxHz);
 
     if (this->predictorToggle)    this->predictorToggle->setState(cfg.predictorEnable);
     if (this->predictorWindowItem) {
