@@ -351,14 +351,17 @@ void AppProfileGui::addDisplayHzTrackBar(RClkProfile profile,
         this->profileList->mhzMap[profile][RClkModule_Display]);
     bar->setProgress(ryazha_ui::displayHzToProgress(
         curHz, bar->minHz(), bar->maxHz(), bar->stepHz()));
-    bar->setValueChangedListener([this, profile, bar](u16 progress) {
-        u32 hz = bar->minHz() + (u32)progress * bar->stepHz();
+    // Throttle apply -- иначе rapid slider drag шлёт rclkIpcSetProfiles
+    // каждый кадр (~60/сек), сериализация RClkTitleProfileList тяжёлая,
+    // UI зависает. Throttle 50ms = ~20 IPC/сек, плавно и без задержек.
+    auto apply = ryazha_ui::throttleApply([this, profile](u32 hz) {
         this->profileList->mhzMap[profile][RClkModule_Display] = hz;
         Result rc = rclkIpcSetProfiles(this->applicationId, this->profileList);
-        if (R_FAILED(rc)) {
-            FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
-        }
+        if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetProfiles", rc);
         ryazha_ui::syncLadderVrrMaxToPanelHz(hz);
+    });
+    bar->setValueChangedListener([bar, apply = std::move(apply)](u16 progress) mutable {
+        apply(bar->minHz() + (u32)progress * bar->stepHz());
     });
     this->listElement->addItem(bar);
 }

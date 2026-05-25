@@ -390,11 +390,13 @@ void GlobalOverrideGui::listUI()
             auto* bar = new ryazha_ui::DisplayHzTrackBar(minHz, maxHz, stepHz, "Display");
             u32 curHz = ryazha_ui::displayHzOrDefault(this->context->overrideFreqs[RClkModule_Display]);
             bar->setProgress(ryazha_ui::displayHzToProgress(curHz, bar->minHz(), bar->maxHz(), bar->stepHz()));
-            bar->setValueChangedListener([this, bar](u16 progress) {
-                u32 hz = bar->minHz() + (u32)progress * bar->stepHz();
+            auto apply = ryazha_ui::throttleApply([this](u32 hz) {
                 rclkIpcSetOverride(RClkModule_Display, hz);
                 ryazha_ui::syncLadderVrrMaxToPanelHz(hz);
                 this->lastDisplayHz = hz;
+            });
+            bar->setValueChangedListener([bar, apply = std::move(apply)](u16 progress) mutable {
+                apply(bar->minHz() + (u32)progress * bar->stepHz());
             });
             this->listElement->addItem(bar);
             this->displayHzBar = bar;

@@ -295,10 +295,12 @@ void LivingLadderGui::listUI()
         auto* minBar = new ryazha_ui::DisplayHzTrackBar(vrrMinCap, vrrMaxCap, 1, i18n::t("Мин. Гц"));
         minBar->setProgress(ryazha_ui::displayHzToProgress(
             cfg.vrrMinHz, minBar->minHz(), minBar->maxHz(), minBar->stepHz()));
-        minBar->setValueChangedListener([minBar](u16 progress) {
-            u32 hz = minBar->minHz() + (u32)progress * minBar->stepHz();
+        auto applyMin = ryazha_ui::throttleApply([](u32 hz) {
             livingLadder().config().vrrMinHz = (u8)hz;
             saveAndAck();
+        });
+        minBar->setValueChangedListener([minBar, applyMin = std::move(applyMin)](u16 progress) mutable {
+            applyMin(minBar->minHz() + (u32)progress * minBar->stepHz());
         });
         this->vrrMinItem = minBar;
         this->listElement->addItem(minBar);
@@ -307,10 +309,12 @@ void LivingLadderGui::listUI()
         auto* maxBar = new ryazha_ui::DisplayHzTrackBar(vrrMinCap, vrrMaxCap, 1, i18n::t("Макс. Гц"));
         maxBar->setProgress(ryazha_ui::displayHzToProgress(
             cfg.vrrMaxHz, maxBar->minHz(), maxBar->maxHz(), maxBar->stepHz()));
-        maxBar->setValueChangedListener([maxBar](u16 progress) {
-            u32 hz = maxBar->minHz() + (u32)progress * maxBar->stepHz();
+        auto applyMax = ryazha_ui::throttleApply([](u32 hz) {
             livingLadder().config().vrrMaxHz = (u8)hz;
             saveAndAck();
+        });
+        maxBar->setValueChangedListener([maxBar, applyMax = std::move(applyMax)](u16 progress) mutable {
+            applyMax(maxBar->minHz() + (u32)progress * maxBar->stepHz());
         });
         this->vrrMaxItem = maxBar;
         this->listElement->addItem(maxBar);

@@ -17,6 +17,26 @@ namespace ryazha_ui {
 
 inline constexpr u32 kDefaultPanelDisplayHz = 60;
 
+// ── Slider throttle ────────────────────────────────────────────────────
+// Юзер: "не работает если быстро двигать ползунок". DisplayHzTrackBar
+// fires ValueChangedListener на каждом интегральном step'е. Если IPC
+// rclkIpcSetProfiles / SetOverride / SetConfigValues тяжёлый, очередь
+// блокирует UI thread на 50-200ms каждый event.
+//
+// Решение: возвращаем lambda которая throttle'ит apply до 1 IPC / 50ms.
+// Поскольку StepTrackBar не fire'ит "stop" event, мы рискуем потерять
+// trailing-edge. Но в refresh() циклe (200ms) sysmodule sync'нет
+// финальное значение -- бар встанет на правильное.
+template <typename ApplyFn>
+inline auto throttleApply(ApplyFn apply, u64 minIntervalMs = 50) {
+    return [apply, last = u64(0), minIntervalMs](u32 hz) mutable {
+        u64 nowMs = armTicksToNs(armGetSystemTick()) / 1000000ULL;
+        if (nowMs - last < minIntervalMs) return;
+        last = nowMs;
+        apply(hz);
+    };
+}
+
 /** 0 в конфиге / профиле / оверрайде трактуем как «по умолчанию панель» — 60 Гц. */
 inline u32 displayHzOrDefault(u32 hz) {
     return hz == 0 ? kDefaultPanelDisplayHz : hz;

@@ -617,13 +617,28 @@ void Initialize() {
     s32 priority = 0x2C;
     (void)svcGetThreadPriority(&priority, CUR_THREAD_HANDLE);
     Result rc = threadCreate(&g.gThread, &ThreadFunc, nullptr, nullptr, 0x4000, priority, -2);
-    if (R_FAILED(rc)) fileUtils::LogLine("[auto_ryazha] threadCreate failed: 0x%x", rc);
+    if (R_FAILED(rc)) {
+        fileUtils::LogLine("[auto_ryazha] threadCreate FAILED: 0x%x", rc);
+    } else {
+        fileUtils::LogLine("[auto_ryazha] Initialize OK: cfg.enabled=%u vrrMode=%u algo=%u",
+                           (unsigned)g.cfg.enabled, (unsigned)g.cfg.vrrMode,
+                           (unsigned)g.cfg.algo);
+    }
 }
 
 void Start() {
-    if (g.gRunning.exchange(true)) return;
+    if (g.gRunning.exchange(true)) {
+        fileUtils::LogLine("[auto_ryazha] Start: already running");
+        return;
+    }
     Result rc = threadStart(&g.gThread);
-    if (R_FAILED(rc)) fileUtils::LogLine("[auto_ryazha] threadStart failed: 0x%x", rc);
+    if (R_FAILED(rc)) {
+        fileUtils::LogLine("[auto_ryazha] threadStart FAILED: 0x%x", rc);
+        g.gRunning.store(false);
+    } else {
+        fileUtils::LogLine("[auto_ryazha] Thread started, tick=%llu ns",
+                           (unsigned long long)kTickIntervalNs);
+    }
 }
 
 void Exit() {

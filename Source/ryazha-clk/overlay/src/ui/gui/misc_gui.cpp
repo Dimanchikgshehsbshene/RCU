@@ -936,12 +936,14 @@ protected:
                 bar->setProgress(ryazha_ui::displayHzToProgress(
                     ryazha_ui::displayHzOrDefault(cur),
                     bar->minHz(), bar->maxHz(), bar->stepHz()));
-                bar->setValueChangedListener([this, bar](u16 progress) {
-                    u32 hz = bar->minHz() + (u32)progress * bar->stepHz();
+                auto apply = ryazha_ui::throttleApply([this](u32 hz) {
                     this->configList->values[RClkConfigValue_MaxDisplayClockH] = hz;
                     Result rc = rclkIpcSetConfigValues(this->configList);
                     if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
                     ryazha_ui::syncLadderVrrMaxToHocCap(hz);
+                });
+                bar->setValueChangedListener([bar, apply = std::move(apply)](u16 progress) mutable {
+                    apply(bar->minHz() + (u32)progress * bar->stepHz());
                 });
                 this->listElement->addItem(bar);
             }

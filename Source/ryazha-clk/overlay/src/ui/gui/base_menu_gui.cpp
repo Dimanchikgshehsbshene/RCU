@@ -28,6 +28,18 @@
 #include "base_menu_gui.h"
 #include "fatal_gui.h"
 #include "../format.h"
+#include "../../i18n.hpp"
+
+// Cached unit suffixes -- грузим один раз при первом вызове, чтобы
+// sprintf не дёргал mutex i18n::t() по 30 раз каждый refresh.
+namespace {
+    const std::string& UNIT_MHZ() { static std::string s = i18n::t("MHz"); return s; }
+    const std::string& UNIT_MTS() { static std::string s = i18n::t("MT/s"); return s; }
+    const std::string& UNIT_HZ()  { static std::string s = i18n::t("Hz");  return s; }
+    const std::string& UNIT_MV()  { static std::string s = i18n::t("mV");  return s; }
+    const std::string& UNIT_MW()  { static std::string s = i18n::t("mW");  return s; }
+    const std::string& UNIT_NA()  { static std::string s = i18n::t("N/A"); return s; }
+}
 
 // Cache hardware model to avoid repeated syscalls
 
@@ -57,10 +69,20 @@ void BaseMenuGui::preDraw(tsl::gfx::Renderer* renderer) {
     BaseGui::preDraw(renderer);
     if(!this->context) [[unlikely]] return;
 
-    // All constants pre-calculated and cached
-    const char* labels[] = {
-        "ID", "Profile", "CPU", "GPU", "MEM", "SoC", "Board", "Skin", "Now", "Avg", "BAT", "PMIC", "Fan", IsAula() ? "OLED" : "LCD", "FPS", "RES"
+    // Labels через i18n -- юзер хочет видеть ЦП/ГП/РАМ/БАТ/КУЛ. Грузим
+    // один раз и кешируем как static std::string, чтобы getTextDimensions
+    // получал const char*.
+    static const std::string s_lbl[] = {
+        i18n::t("ID"), i18n::t("Profile"),
+        i18n::t("CPU"), i18n::t("GPU"), i18n::t("MEM"),
+        i18n::t("SoC"), i18n::t("Board"), i18n::t("Skin"),
+        i18n::t("Now"), i18n::t("Avg"),
+        i18n::t("BAT"), i18n::t("PMIC"), i18n::t("Fan"),
+        IsAula() ? i18n::t("OLED") : i18n::t("LCD"),
+        i18n::t("FPS"), i18n::t("RES"),
     };
+    const char* labels[16];
+    for (int i = 0; i < 16; i++) labels[i] = s_lbl[i].c_str();
 
     static constexpr u32 dataPositions[6] = {63-3+3, 200-1, 344-1-3, 200-1, 342-1, 321-1};
 
@@ -225,10 +247,10 @@ void BaseMenuGui::refresh()
 
     // Current frequencies
     u32 hz = context->freqs[RClkModule_CPU]; // CPU
-    sprintf(displayStrings[2], "%u.%u MHz", hz / 1000000U, (hz / 100000U) % 10U);
+    sprintf(displayStrings[2], "%u.%u %s", hz / 1000000U, (hz / 100000U) % 10U, UNIT_MHZ().c_str());
 
     hz = context->freqs[RClkModule_GPU]; // GPU
-    sprintf(displayStrings[3], "%u.%u MHz", hz / 1000000U, (hz / 100000U) % 10U);
+    sprintf(displayStrings[3], "%u.%u %s", hz / 1000000U, (hz / 100000U) % 10U, UNIT_MHZ().c_str());
 
     hz = context->freqs[RClkModule_MEM]; // MEM
     std::uint32_t unit = configList.values[RClkConfigValue_RamDisplayUnit];
@@ -236,9 +258,9 @@ void BaseMenuGui::refresh()
     std::uint32_t mts = mhz * 2;
     std::uint32_t tenth = (hz / 100000U) % 10U;
     if(unit == RamDisplayUnit_MTs)
-        sprintf(displayStrings[4], "%u MT/s", mts);
+        sprintf(displayStrings[4], "%u %s", mts, UNIT_MTS().c_str());
     else if(unit == RamDisplayUnit_MHz)
-        sprintf(displayStrings[4], "%u.%u MHz", mhz, tenth);
+        sprintf(displayStrings[4], "%u.%u %s", mhz, tenth, UNIT_MHZ().c_str());
     else if(unit == RamDisplayUnit_MHzMTs) {
         hz = context->realFreqs[RClkModule_MEM];
         mhz = hz / 1000000U;
@@ -248,10 +270,10 @@ void BaseMenuGui::refresh()
 
     // Real frequencies
     hz = context->realFreqs[RClkModule_CPU]; // CPU
-    sprintf(displayStrings[5], "%u.%u MHz", hz / 1000000U, (hz / 100000U) % 10U);
+    sprintf(displayStrings[5], "%u.%u %s", hz / 1000000U, (hz / 100000U) % 10U, UNIT_MHZ().c_str());
 
     hz = context->realFreqs[RClkModule_GPU]; // GPU
-    sprintf(displayStrings[6], "%u.%u MHz", hz / 1000000U, (hz / 100000U) % 10U);
+    sprintf(displayStrings[6], "%u.%u %s", hz / 1000000U, (hz / 100000U) % 10U, UNIT_MHZ().c_str());
 
     hz = context->realFreqs[RClkModule_MEM]; // MEM
     unit = configList.values[RClkConfigValue_RamDisplayUnit];
@@ -259,23 +281,23 @@ void BaseMenuGui::refresh()
     mts = mhz * 2;
     tenth = (hz / 100000U) % 10U;
     if(unit == RamDisplayUnit_MTs || unit == RamDisplayUnit_MHzMTs)
-        sprintf(displayStrings[7], "%u MT/s", mts);
+        sprintf(displayStrings[7], "%u %s", mts, UNIT_MTS().c_str());
     else
-        sprintf(displayStrings[7], "%u.%u MHz", mhz, tenth);
+        sprintf(displayStrings[7], "%u.%u %s", mhz, tenth, UNIT_MHZ().c_str());
 
     // Voltages
-    sprintf(displayStrings[8], "%.1f mV", context->voltages[RClkVoltage_CPU] / 1000.0);
-    sprintf(displayStrings[9], "%.1f mV", context->voltages[RClkVoltage_GPU] / 1000.0);
+    sprintf(displayStrings[8], "%.1f %s", context->voltages[RClkVoltage_CPU] / 1000.0, UNIT_MV().c_str());
+    sprintf(displayStrings[9], "%.1f %s", context->voltages[RClkVoltage_GPU] / 1000.0, UNIT_MV().c_str());
 
     switch(configList.values[RClkConfigValue_RAMVoltDisplayMode]) {
         case RamDisplayMode_VDD2:
-            sprintf(displayStrings[10], "%u.%u mV", context->voltages[RClkVoltage_EMCVDD2] / 1000U, (context->voltages[RClkVoltage_EMCVDD2] % 1000U) / 100U);
+            sprintf(displayStrings[10], "%u.%u %s", context->voltages[RClkVoltage_EMCVDD2] / 1000U, (context->voltages[RClkVoltage_EMCVDD2] % 1000U) / 100U, UNIT_MV().c_str());
             break;
         case RamDisplayMode_VDDQ:
-            sprintf(displayStrings[10], "%u.%u mV", context->voltages[RClkVoltage_EMCVDDQ] / 1000U, (context->voltages[RClkVoltage_EMCVDDQ] % 1000U) / 100U);
+            sprintf(displayStrings[10], "%u.%u %s", context->voltages[RClkVoltage_EMCVDDQ] / 1000U, (context->voltages[RClkVoltage_EMCVDDQ] % 1000U) / 100U, UNIT_MV().c_str());
             break;
         default:
-            strcpy(displayStrings[10], "N/A");
+            strcpy(displayStrings[10], UNIT_NA().c_str());
             break;
     }
 
@@ -293,11 +315,11 @@ void BaseMenuGui::refresh()
     tempColors[RClkThermalSensor_Skin] = tsl::GradientColor(millis * 0.001f);
 
     // SOC voltage (if available)
-    sprintf(displayStrings[14], "%u mV", context->voltages[RClkVoltage_SOC] / 1000U);
+    sprintf(displayStrings[14], "%u %s", context->voltages[RClkVoltage_SOC] / 1000U, UNIT_MV().c_str());
 
     // Power
-    sprintf(displayStrings[15], "%d mW", context->power[0]); // Now
-    sprintf(displayStrings[16], "%d mW", context->power[1]); // Avg
+    sprintf(displayStrings[15], "%d %s", context->power[0], UNIT_MW().c_str()); // Now
+    sprintf(displayStrings[16], "%d %s", context->power[1], UNIT_MW().c_str()); // Avg
 
     sprintf(displayStrings[17], "%u%%", context->partLoad[RClkPartLoad_GPU] / 10);
     sprintf(displayStrings[18], "%u%%", context->partLoad[RClkPartLoad_EMC] / 10);
@@ -307,16 +329,16 @@ void BaseMenuGui::refresh()
     sprintf(displayStrings[20], "%u.%u °C", millis / 1000U, (millis % 1000U) / 100U);
     tempColors[RClkThermalSensor_Battery] = tsl::GradientColor(millis * 0.001f);
 
-    sprintf(displayStrings[21], "%d mV", context->voltages[RClkVoltage_Battery]); // BAT AVG
+    sprintf(displayStrings[21], "%d %s", context->voltages[RClkVoltage_Battery], UNIT_MV().c_str()); // BAT AVG
 
     sprintf(displayStrings[23], "%u%%", context->partLoad[RClkPartLoad_BAT] / 1000);
 
     sprintf(displayStrings[24], "%u%%", context->partLoad[RClkPartLoad_FAN]);
 
-    sprintf(displayStrings[25], "%u Hz", context->realFreqs[RClkModule_Display]);
+    sprintf(displayStrings[25], "%u %s", context->realFreqs[RClkModule_Display], UNIT_HZ().c_str());
     if(this->context->isSaltyNXInstalled) {
         if(context->fps == 254) {
-            strcpy(displayStrings[26], "N/A");
+            strcpy(displayStrings[26], UNIT_NA().c_str());
         } else {
             memset(displayStrings[26], 0, sizeof(displayStrings[26]));
             sprintf(displayStrings[26], "%u", context->fps);
@@ -325,7 +347,7 @@ void BaseMenuGui::refresh()
 
     if(this->context->isSaltyNXInstalled) {
         if(context->resolutionHeight == 0) {
-            strcpy(displayStrings[27], "N/A");
+            strcpy(displayStrings[27], UNIT_NA().c_str());
         } else {
             memset(displayStrings[27], 0, sizeof(displayStrings[27]));
             sprintf(displayStrings[27], "%up", context->resolutionHeight);
