@@ -256,7 +256,10 @@ bool ParseJsonObject(const char* data, size_t size,
         ++p;
         SkipWhitespace(p, end);
         if (!ParseString(p, end, value)) return false;
-        if (!key.empty()) out.emplace(std::move(key), std::move(value));
+        // operator[]= вместо emplace -- если в JSON встречается дубль,
+        // последнее значение wins (логично: автор переписывал перевод).
+        // Раньше emplace игнорировал дубль -> непредсказуемо.
+        if (!key.empty()) out[std::move(key)] = std::move(value);
         SkipWhitespace(p, end);
         if (p < end && *p == ',') { ++p; SkipWhitespace(p, end); }
     }

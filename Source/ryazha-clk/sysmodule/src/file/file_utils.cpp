@@ -192,7 +192,7 @@ namespace fileUtils {
             RefreshFlags(true);
             g_has_initialized = true;
             LogLine("=== ryazha-clk " TARGET_VERSION " ===");
-            LogLine("by m4xw, natinusala, p-sam, Souldbminer, Lightos_ and Dominatorul");
+            LogLine("by m4xw, natinusala, p-sam, Souldbminer, Lightos_, Dominatorul and Dimasick-git");
         }
 
         return rc;
