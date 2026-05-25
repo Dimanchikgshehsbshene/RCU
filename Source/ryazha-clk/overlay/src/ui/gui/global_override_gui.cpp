@@ -17,6 +17,7 @@
  */
 
 #include "../format.h"
+#include "../../i18n.hpp"
 #include "fatal_gui.h"
 #include "global_override_gui.h"
 #include "value_choice_gui.h"
@@ -310,7 +311,7 @@ public:
             FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Governor"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Governor")));
 
         static constexpr struct { const char* label; int shift; } kAll[] = {
             {"CPU", 0}, {"GPU", 8}, {"VRR", 16}
@@ -337,7 +338,7 @@ public:
 };
 
 void GlobalOverrideGui::addGovernorSection() {
-    auto* item = new tsl::elm::ListItem("Governor");
+    auto* item = new tsl::elm::ListItem(i18n::t("Governor"));
     item->setValue("\u2192"); // right arrow
     item->setClickListener([this](u64 keys) {
         if (keys & HidNpadButton_A) {
@@ -363,7 +364,7 @@ void GlobalOverrideGui::listUI()
     }
 
     this->listElement->addItem(new tsl::elm::CategoryHeader(
-    "Temporary Overrides " + ult::DIVIDER_SYMBOL + " \ue0e3 Reset"));
+    i18n::t("Temporary Overrides") + " " + ult::DIVIDER_SYMBOL + " \ue0e3 " + i18n::t("Reset")));
     this->addModuleListItem(RClkModule_CPU);
     this->addModuleListItem(RClkModule_GPU);
     this->addModuleListItem(RClkModule_MEM);

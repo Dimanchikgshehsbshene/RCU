@@ -28,6 +28,7 @@
 #include "app_profile_gui.h"
 
 #include "../format.h"
+#include "../../i18n.hpp"
 #include "fatal_gui.h"
 #include "labels.h"
 AppProfileGui::AppProfileGui(std::uint64_t applicationId, RClkTitleProfileList* profileList)
@@ -298,7 +299,7 @@ public:
             FatalGui::openWithResultCode("rclkIpcGetConfigValues", rc);
             return;
         }
-        this->listElement->addItem(new tsl::elm::CategoryHeader("Governor"));
+        this->listElement->addItem(new tsl::elm::CategoryHeader(i18n::t("Governor")));
 
         static constexpr struct { const char* label; int shift; } kAll[] = {
             {"CPU", 0}, {"GPU", 8}, {"VRR", 16}
@@ -325,7 +326,7 @@ public:
 };
 
 void AppProfileGui::addGovernorSection(RClkProfile profile) {
-    auto* item = new tsl::elm::ListItem("Governor");
+    auto* item = new tsl::elm::ListItem(i18n::t("Governor"));
     item->setValue("\u2192"); // Right arrow
     item->setClickListener([this, profile](u64 keys) {
         if (keys & HidNpadButton_A) {
