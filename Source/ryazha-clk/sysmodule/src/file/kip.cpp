@@ -21,9 +21,43 @@
 #include "file_utils.hpp"
 #include "../mgr/clock_manager.hpp"
 
+#include <cstdio>
+#include <cstring>
+
 namespace kip {
 
     bool kipAvailable = false;
+
+    // Auto-probe пути к KIP. Старые пакеты (Switchcraft, hoc-clk) ставили
+    // loader.kip / hoc.kip. RCU собирает rcu.kip. Если юзер обновился с
+    // legacy установки, на boot Atmosphere грузит loader.kip, а мы писали
+    // только в rcu.kip -- настройки "не применялись". Теперь пишем в тот
+    // файл, который реально лежит на SD (и существенно -- который Atmosphere
+    // загрузит при следующем boot).
+    static const char* ProbeKipPath()
+    {
+        static const char* cached = nullptr;
+        if (cached) return cached;
+        // Order matters: rcu.kip (наш канонический) первый, потом legacy.
+        static constexpr const char* kCandidates[] = {
+            "sdmc:/atmosphere/kips/rcu.kip",
+            "sdmc:/atmosphere/kips/hoc.kip",
+            "sdmc:/atmosphere/kips/loader.kip",
+        };
+        for (const char* p : kCandidates) {
+            FILE* fp = fopen(p, "r");
+            if (fp) {
+                fclose(fp);
+                cached = p;
+                fileUtils::LogLine("[kip] Using KIP path: %s", p);
+                return cached;
+            }
+        }
+        // Ничего не нашли -- по умолчанию rcu.kip (для записи нового файла).
+        cached = kCandidates[0];
+        fileUtils::LogLine("[kip] No KIP found, defaulting to: %s", cached);
+        return cached;
+    }
     void SetKipData()
     {
         // TODO: figure out if this REALLY causes issues (i doubt it)
@@ -35,7 +69,7 @@ namespace kip {
         // }
         CustomizeTable table;
         FILE* fp;
-        fp = fopen("sdmc:/atmosphere/kips/rcu.kip", "r");
+        fp = fopen(ProbeKipPath(), "r");
 
         if (fp == NULL) {
             notification::writeNotification("Ryazha CLK\nKip opening failed");
@@ -46,7 +80,7 @@ namespace kip {
             fclose(fp);
         }
 
-        if (!cust_read_and_cache("sdmc:/atmosphere/kips/rcu.kip", &table)) {
+        if (!cust_read_and_cache(ProbeKipPath(), &table)) {
             fileUtils::LogLine("[kip] Failed to read KIP file");
             notification::writeNotification("Ryazha CLK\nKip read failed");
             return;
@@ -138,7 +172,7 @@ namespace kip {
         CUST_WRITE_FIELD_BATCH(&table, t6_tRTW_fine_tune, config::GetConfigValue(KipConfigValue_t6_tRTW_fine_tune));
         CUST_WRITE_FIELD_BATCH(&table, t7_tWTR_fine_tune, config::GetConfigValue(KipConfigValue_t7_tWTR_fine_tune));
 
-        if (!cust_write_table("sdmc:/atmosphere/kips/rcu.kip", &table)) {
+        if (!cust_write_table(ProbeKipPath(), &table)) {
             fileUtils::LogLine("[kip] Failed to write KIP file");
             notification::writeNotification("Ryazha CLK\nKip write failed");
         }
@@ -146,7 +180,7 @@ namespace kip {
         RClkConfigValueList configValues;
         config::GetConfigValues(&configValues);
 
-        configValues.values[KipCrc32] = (u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip"); // write checksum
+        configValues.values[KipCrc32] = (u64)crc32::checksum_file(ProbeKipPath()); // write checksum
 
         if (config::SetConfigValues(&configValues, false)) {
             fileUtils::LogLine("[kip] KIP data set. CRC32: %ld (Cust Rev %ld)", configValues.values[KipCrc32], configValues.values[KipConfigValue_custRev]);
@@ -164,7 +198,7 @@ namespace kip {
     void GetKipData()
     {
         FILE* fp;
-        fp = fopen("sdmc:/atmosphere/kips/rcu.kip", "r");
+        fp = fopen(ProbeKipPath(), "r");
 
         if (fp == NULL) {
             notification::writeNotification("Ryazha CLK\nKip opening failed");
@@ -179,7 +213,7 @@ namespace kip {
         config::GetConfigValues(&configValues);
 
         CustomizeTable table;
-        if (!cust_read_and_cache("sdmc:/atmosphere/kips/rcu.kip", &table)) {
+        if (!cust_read_and_cache(ProbeKipPath(), &table)) {
             fileUtils::LogLine("[kip] Failed to read KIP file for GetKipData");
             notification::writeNotification("Ryazha CLK\nKip read failed");
             return;
@@ -190,7 +224,7 @@ namespace kip {
         //     return;
         // }
 
-        if ((u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip") != config::GetConfigValue(KipCrc32) && !config::GetConfigValue(RClkConfigValue_IsFirstLoad)) {
+        if ((u64)crc32::checksum_file(ProbeKipPath()) != config::GetConfigValue(KipCrc32) && !config::GetConfigValue(RClkConfigValue_IsFirstLoad)) {
             MigrateKipData(cust_get_cust_rev(&table), cust_get_kip_version(&table));
             SetKipData();
             notification::writeNotification("Ryazha CLK\nKIP has been updated\nPlease reboot your console");
@@ -201,7 +235,7 @@ namespace kip {
             notification::writeNotification("Ryazha CLK has been installed");
         }
 
-        configValues.values[KipCrc32] = (u64)crc32::checksum_file("sdmc:/atmosphere/kips/rcu.kip"); // write checksum
+        configValues.values[KipCrc32] = (u64)crc32::checksum_file(ProbeKipPath()); // write checksum
         // configValues.values[KipConfigValue_mtcConf] = cust_get_mtc_conf(&table);
         clockManager::gContext.custRev    = cust_get_cust_rev(&table);
 
