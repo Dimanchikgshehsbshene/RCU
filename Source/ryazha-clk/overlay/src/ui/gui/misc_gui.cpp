@@ -35,6 +35,7 @@ static void kipDataThreadFunc(void*) {
 
 static Thread s_kipThread;
 static bool s_kipThreadPending = false;
+static u64 s_lastKipSaveTick = 0;
 
 static void sendKipData() {
     if (s_kipThreadPending) {
@@ -45,7 +46,24 @@ static void sendKipData() {
     if (R_SUCCEEDED(threadCreate(&s_kipThread, kipDataThreadFunc, nullptr, nullptr, 0x1000, 0x2C, -2))) {
         threadStart(&s_kipThread);
         s_kipThreadPending = true;
+        s_lastKipSaveTick = armGetSystemTick();
     }
+}
+
+// Throttled kip-save: вызывается прямо из listener'ов при изменении
+// настройки. Раньше kip писался только в MiscGui::~MiscGui() при
+// закрытии подменю -- если юзер закрывал overlay БЕЗ выхода через B,
+// destructor не fire'ил, kip оставался прежним, на reboot настройки
+// "не применялись". Теперь -- save inline, throttle 800ms чтобы
+// не bombить IPC при rapid slider-drag'е (флаг shouldSaveKip
+// остаётся в destructor'е как trailing-edge backup).
+static void scheduleKipSaveThrottled() {
+    constexpr u64 throttleNs = 800'000'000ULL;  // 800ms
+    u64 now = armGetSystemTick();
+    if (armTicksToNs(now - s_lastKipSaveTick) >= throttleNs) {
+        sendKipData();
+    }
+    // Если throttle сработал -- destructor подхватит через shouldSaveKip.
 }
 #if IS_MINIMAL == 1
 #pragma message("Compiling with minimal features")
@@ -119,6 +137,7 @@ void MiscGui::addConfigToggle(RClkConfigValue configVal, const char* altName, bo
             FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
         } else if (kip) {
             shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
         }
         this->lastContextUpdate = armGetSystemTick();
     });
@@ -166,6 +185,7 @@ void MiscGui::addConfigTrackbar(RClkConfigValue configVal, const char* altName, 
         Result rc = rclkIpcSetConfigValues(this->configList);
         if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
         if (kip) shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
     });
     this->listElement->addItem(bar);
 }
@@ -205,6 +225,7 @@ void MiscGui::addMappedConfigTrackbar(RClkConfigValue configVal, const char* alt
         Result rc = rclkIpcSetConfigValues(this->configList);
         if (R_FAILED(rc)) FatalGui::openWithResultCode("rclkIpcSetConfigValues", rc);
         if (kip) shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
     });
     this->listElement->addItem(bar);
 }
@@ -288,6 +309,7 @@ void MiscGui::addConfigButton(RClkConfigValue configVal,
                         }
                         if (kip) {
                             shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
                         }
                         this->lastContextUpdate = armGetSystemTick();
                         return true;
@@ -313,6 +335,7 @@ void MiscGui::addConfigButton(RClkConfigValue configVal,
                         }
                         if (kip) {
                             shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
                         }
                         this->lastContextUpdate = armGetSystemTick();
                         return true;
@@ -414,6 +437,7 @@ void MiscGui::addConfigButtonS(RClkConfigValue configVal,
                         }
                         if (kip) {
                             shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
                         }
                         this->lastContextUpdate = armGetSystemTick();
                         return true;
@@ -439,6 +463,7 @@ void MiscGui::addConfigButtonS(RClkConfigValue configVal,
                         }
                         if (kip) {
                             shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
                         }
                         this->lastContextUpdate = armGetSystemTick();
                         return true;
@@ -1503,6 +1528,7 @@ protected:
                                 return false;
                             }
                             shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
                             this->lastContextUpdate = armGetSystemTick();
                             return true;
                         },
@@ -1563,6 +1589,7 @@ protected:
                             return false;
                         }
                         shouldSaveKip = true;
+                            scheduleKipSaveThrottled();
                         this->lastContextUpdate = armGetSystemTick();
                         return true;
                     },

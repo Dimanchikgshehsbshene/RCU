@@ -88,16 +88,20 @@ namespace kip {
 
         u32 custRev    = cust_get_cust_rev(&table);
         u32 kipVersion = cust_get_kip_version(&table);
-        if (custRev < CUST_REV || kipVersion < KIP_VERSION) {
-            notification::writeNotification("Ryazha CLK\nOutdated kip detected!\nPlease update Ryazha CLK");
-            fileUtils::LogLine("Cust revision: %u", custRev);
-            fileUtils::LogLine("Kip version: %u", kipVersion);
-            return;
-        } else if (custRev > CUST_REV || kipVersion > KIP_VERSION) {
-            notification::writeNotification("Ryazha CLK\nOutdated sysmodule detected!\nPlease update Ryazha CLK");
-            fileUtils::LogLine("Cust revision: %u", custRev);
-            fileUtils::LogLine("Kip version: %u", kipVersion);
-            return;
+        // Раньше mismatch версий kip/sysmodule вызывал hard-return
+        // (no write), и юзер видел только всплывающую нотификацию --
+        // легко пропустить. Настройки писались в config.ini, но НЕ
+        // в kip, поэтому на reboot Atmosphere грузил старые значения.
+        // Теперь: только warn + лог, пишем что можем. cust_write_table
+        // сам отфильтрует поля которые в старом layout'е отсутствуют.
+        if (custRev != CUST_REV || kipVersion != KIP_VERSION) {
+            fileUtils::LogLine("[kip] WARN version mismatch: kip cust=%u ver=%u, sysmodule expects cust=%u ver=%u -- writing anyway",
+                               custRev, kipVersion, CUST_REV, KIP_VERSION);
+            if (custRev < CUST_REV || kipVersion < KIP_VERSION) {
+                notification::writeNotification("Ryazha CLK\nKip older than sysmodule\n(written best-effort)");
+            } else {
+                notification::writeNotification("Ryazha CLK\nKip newer than sysmodule\n(written best-effort)");
+            }
         }
 
         // CUST_WRITE_FIELD_BATCH(&table, mtcConf, config::GetConfigValue(KipConfigValue_mtcConf));
@@ -172,24 +176,32 @@ namespace kip {
         CUST_WRITE_FIELD_BATCH(&table, t6_tRTW_fine_tune, config::GetConfigValue(KipConfigValue_t6_tRTW_fine_tune));
         CUST_WRITE_FIELD_BATCH(&table, t7_tWTR_fine_tune, config::GetConfigValue(KipConfigValue_t7_tWTR_fine_tune));
 
-        if (!cust_write_table(ProbeKipPath(), &table)) {
-            fileUtils::LogLine("[kip] Failed to write KIP file");
-            notification::writeNotification("Ryazha CLK\nKip write failed");
+        const char* kipPath = ProbeKipPath();
+        if (!cust_write_table(kipPath, &table)) {
+            fileUtils::LogLine("[kip] FAILED to write KIP file: %s", kipPath);
+            notification::writeNotification("Ryazha CLK\nKip write failed!");
+            return;
         }
 
         RClkConfigValueList configValues;
         config::GetConfigValues(&configValues);
 
-        configValues.values[KipCrc32] = (u64)crc32::checksum_file(ProbeKipPath()); // write checksum
+        u64 newCrc = (u64)crc32::checksum_file(kipPath);
+        u64 oldCrc = configValues.values[KipCrc32];
+        configValues.values[KipCrc32] = newCrc; // write checksum
 
         if (config::SetConfigValues(&configValues, false)) {
-            fileUtils::LogLine("[kip] KIP data set. CRC32: %ld (Cust Rev %ld)", configValues.values[KipCrc32], configValues.values[KipConfigValue_custRev]);
+            fileUtils::LogLine("[kip] OK wrote %s: CRC32 %lu -> %lu (cust=%lu)",
+                               kipPath, oldCrc, newCrc, configValues.values[KipConfigValue_custRev]);
             for (u64 i = KipConfigValue_hpMode; i < RClkConfigValue_EnumMax; i++) {
-                fileUtils::LogLine("%s: %ld", rclkFormatConfigValue((RClkConfigValue)i, false), configValues.values[i]);
+                fileUtils::LogLine("  %s: %ld", rclkFormatConfigValue((RClkConfigValue)i, false), configValues.values[i]);
             }
+            // Подтверждение для юзера -- без этого было непонятно
+            // действительно ли запись прошла, или провалилась тихо.
+            notification::writeNotification("Ryazha CLK\nKIP saved (reboot)");
         } else {
-            fileUtils::LogLine("[kip] Warning: Failed to set config values from KIP");
-            notification::writeNotification("Ryazha CLK\nKip config set failed");
+            fileUtils::LogLine("[kip] WARN failed to update config CRC after kip write");
+            notification::writeNotification("Ryazha CLK\nKip saved\nbut CRC not updated");
         }
     }
 
